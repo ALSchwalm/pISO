@@ -2,7 +2,7 @@
 
 set -e
 
-USER_PARTITION=/dev/mmcblk0p2
+USER_PARTITION=/dev/mmcblk0p3 #/dev/mmcblk0p2
 USER_PARTITION_MNT=/mnt
 CONFIGFS_HOME=/sys/kernel/config/
 GADGET_ROOT=$CONFIGFS_HOME/usb_gadget/g1
@@ -15,27 +15,47 @@ mount_user_partition()
     mount $USER_PARTITION $USER_PARTITION_MNT
 }
 
-add_entries_for_isos()
+add_entry()
 {
-    #TODO: test whether ISOS exists
+    ID=$1
+    FILE=$2
+    CD=$3
+    mkdir -p $GADGET_ROOT/functions/mass_storage.$ID/lun.0/
 
-    local ISOS=$USER_PARTITION_MNT/ISOS/*
+    echo 1 > $GADGET_ROOT/functions/mass_storage.$ID/stall
+    echo $CD > $GADGET_ROOT/functions/mass_storage.$ID/lun.0/cdrom
+    echo $CD > $GADGET_ROOT/functions/mass_storage.$ID/lun.0/ro
+    echo "$FILE" > $GADGET_ROOT/functions/mass_storage.$ID/lun.0/file
+
+    ln -s $GADGET_ROOT/functions/mass_storage.$ID $GADGET_ROOT/configs/c.1/
+}
+
+add_entry_for_user_partition()
+{
+    echo "Adding function for user partition"
+    add_entry "user" $USER_PARTITION 0
+}
+
+add_entries_for_folder()
+{
+    FOLDER=$1
+    PREFIX=$2
+    CD=$3
+    if [ ! -d $USER_PARTITION_MNT/$FOLDER ]; then
+        echo "No $FOLDER folder, skipping."
+        return
+    fi
+
+    local ITEMS=$USER_PARTITION_MNT/$FOLDER/*
     local ID=0
-    for iso in $ISOS
+    for item in $ITEMS
     do
         # Work around idiotic sh nonsense
-        [ -e "$iso" ] || continue
+        [ -e "$item" ] || continue
 
-        echo "Adding function for '$iso'"
+        echo "Adding function for '$item'"
 
-        mkdir -p $GADGET_ROOT/functions/mass_storage.usb$ID/lun.0/
-
-        echo 1 > $GADGET_ROOT/functions/mass_storage.usb$ID/stall
-        echo 1 > $GADGET_ROOT/functions/mass_storage.usb$ID/lun.0/cdrom
-        echo 1 > $GADGET_ROOT/functions/mass_storage.usb$ID/lun.0/ro
-        echo "$iso" > $GADGET_ROOT/functions/mass_storage.usb$ID/lun.0/file
-
-        ln -s $GADGET_ROOT/functions/mass_storage.usb$ID $GADGET_ROOT/configs/c.1/
+        add_entry "$PREFIX$ID" $item $CD
 
         let ID=++ID
     done
@@ -74,12 +94,19 @@ init_configfs()
     echo $CONFIGURATION > $GADGET_ROOT/configs/c.1/strings/0x409/configuration
 }
 
-load_libcomposite()
+create_device()
 {
     echo "Starting device"
 
     ls /sys/class/udc > $GADGET_ROOT/UDC
 }
+
+# Load the necessary modules
+modprobe dwc2
+modprobe libcomposite
+
+# Then get configfs up and running
+mount none /sys/kernel/config -t configfs
 
 mount_user_partition
 
@@ -87,7 +114,8 @@ mkdir -p $GADGET_ROOT
 
 init_configfs
 
-add_entry_for_user_partition
-add_entries_for_isos
+# add_entry_for_user_partition
+add_entries_for_folder "ISOS" "iso" 1
+add_entries_for_folder "HDS" "hd" 0
 
-load_libcomposite
+create_device
