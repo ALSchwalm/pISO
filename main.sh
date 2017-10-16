@@ -102,6 +102,7 @@ create_device()
 }
 
 # Load the necessary modules
+modprobe dm_thin_pool # for the lvm thin pool
 modprobe dwc2
 modprobe libcomposite
 
