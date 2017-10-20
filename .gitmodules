@@ -1,0 +1,3 @@
+[submodule "CppGPIO"]
+	path = CppGPIO
+	url = https://github.com/JoachimSchurig/CppGPIO
