@@ -21,11 +21,15 @@ mount_vdrive()
 
     LOOPBACK_PATH=$(losetup -f)
 
-    verbose_echo "Creating loopback devices"
+    verbose_echo "Creating loopback devices for $VOLUME_PATH"
     losetup -fP $VOLUME_PATH
+
+    verbose_echo "Scanning partitions of $LOOPBACK_PATH"
 
     # Force (for real) a scan for partitions
     partprobe $LOOPBACK_PATH
+
+    verbose_echo "Locating loopback devices for partitions"
 
     LOOPBACK_SUFFIX="p"
     PARTITIONS=$(find /dev -wholename "$LOOPBACK_PATH$LOOPBACK_SUFFIX*")
@@ -39,7 +43,9 @@ mount_vdrive()
         mkdir -p $PART_MOUNT
         mount $PARTITION $PART_MOUNT > /dev/null 2>&1
 
-        #TODO scan for ISOs
+        if [ -d "$PART_MOUNT/ISOS" ]; then
+            find "$PART_MOUNT/ISOS/" -type f
+        fi
     done
 }
 

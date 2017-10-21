@@ -6,7 +6,7 @@
 static constexpr char VOLUME_GROUP_NAME[] = "VolGroup00";
 static constexpr char THINPOOL_NAME[] = "thinpool";
 
-Multitool::Multitool() {
+Multitool::Multitool() : m_selection{m_list_items.end()} {
   m_lvm = lvm_init(NULL);
   if (m_lvm == NULL) {
     multitool_error("lvm_init()", lvm_errmsg(m_lvm));
@@ -34,6 +34,18 @@ Multitool::~Multitool() {
   lvm_quit(m_lvm);
 }
 
+bool Multitool::has_selection() const {
+  return m_selection != m_list_items.end();
+}
+
+void Multitool::update_list_items() {
+  m_list_items.clear();
+  for (auto &drive : m_drives) {
+    m_list_items.push_back(&drive);
+  }
+  m_selection = m_list_items.begin();
+}
+
 void Multitool::rescan_drives() {
   m_drives.clear();
 
@@ -50,6 +62,8 @@ void Multitool::rescan_drives() {
       m_drives.push_back(VirtualDrive(lv));
     }
   }
+
+  update_list_items();
 }
 
 const VirtualDrive &Multitool::add_drive(uint64_t size) {
@@ -89,4 +103,38 @@ float Multitool::percent_used() const {
     multitool_error("data_percent is not a valid property");
   }
   return lvm_percent_to_float(prop.value.integer);
+}
+
+bool Multitool::on_select() {
+  if (has_selection()) {
+    return (*m_selection)->on_select();
+  } else {
+    return false;
+  }
+}
+
+bool Multitool::on_next() {
+  if (has_selection()) {
+    if (!(*m_selection)->on_next()) {
+      m_selection++;
+    }
+    return true;
+  } else {
+    return false;
+  }
+}
+
+bool Multitool::on_prev() {
+  if (has_selection()) {
+    if (!(*m_selection)->on_prev()) {
+      if (m_selection != m_list_items.begin()) {
+        m_selection--;
+      } else {
+        return false;
+      }
+    }
+    return true;
+  } else {
+    return false;
+  }
 }

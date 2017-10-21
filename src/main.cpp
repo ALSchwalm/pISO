@@ -18,19 +18,17 @@ int main() {
   // gen_pbm(bitmap, "out.pbm");
 
   Multitool multi;
-  std::cout << "Whole device: " << multi.percent_used() << std::endl;
-  // std::cout << "Before anything" << std::endl;
+  multi.drives()[0].mount();
 
-  multi.drives().at(3).mount();
-  // for (const auto &drive : multi.drives()) {
-  //   std::cout << drive.name() << ": " << drive.percent_used() << std::endl;
-  // };
+  multi.on_select();
 
   // GPIO::RotaryDial dial(17, 27, GPIO::GPIO_PULL::UP);
   // dial.f_dialed = [&](bool up, long value) {
-  //   std::cout << up << " " << value << std::endl;
+  //   if (up) {
+  //     multi.on_next();
+  //   } else {
+  //     multi.on_prev();
+  //   }
   // };
-  // std::cout << "Starting dial" << std::endl;
   // dial.start();
-  // std::cout << "Started dial" << std::endl;
 }

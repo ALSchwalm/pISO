@@ -1,9 +1,12 @@
 
+#include "virtualdrive.hpp"
 #include "error.hpp"
-#include "multitool.hpp"
 #include <errno.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+
+VirtualDrive::VirtualDrive(lv_t volume)
+    : m_volume{volume}, m_selection{m_list_items.end()} {}
 
 bool VirtualDrive::mount() {
   auto path = "/mnt/" + this->name();
@@ -11,11 +14,19 @@ bool VirtualDrive::mount() {
     multitool_error("Cannot create path: ", path);
   }
 
-  // TODO: handle partitions we can't mount
-  if (system(("sh scripts/vdrive.sh mount " + this->name() + " " + path)
-                 .c_str()) != 0) {
-    multitool_error("vdrive.sh mount failed");
+  FILE *proc = popen(
+      ("sh scripts/vdrive.sh mount " + this->name() + " " + path).c_str(), "r");
+  if (proc == NULL) {
+    multitool_error("popen: vdrive.sh mount failed");
   }
+
+  char buff[1024];
+  while (fgets(buff, sizeof(buff) - 1, proc) != NULL) {
+    m_isos.emplace_back(buff);
+  }
+  pclose(proc);
+
+  update_list_items();
   return true;
 }
 
@@ -25,4 +36,50 @@ bool VirtualDrive::unmount() {
     multitool_error("vdrive.sh unmount failed");
   }
   return true;
+}
+
+bool VirtualDrive::has_selection() const {
+  return m_selection != m_list_items.end();
+}
+
+void VirtualDrive::update_list_items() {
+  m_list_items.clear();
+  for (auto &iso : m_isos) {
+    m_list_items.push_back(&iso);
+  }
+  m_selection = m_list_items.begin();
+}
+
+bool VirtualDrive::on_select() {
+  if (has_selection()) {
+    return (*m_selection)->on_select();
+  } else {
+    return false;
+  }
+}
+
+bool VirtualDrive::on_next() {
+  if (has_selection()) {
+    if (!(*m_selection)->on_next()) {
+      m_selection++;
+    }
+    return true;
+  } else {
+    return false;
+  }
+}
+
+bool VirtualDrive::on_prev() {
+  if (has_selection()) {
+    if (!(*m_selection)->on_prev()) {
+      if (m_selection != m_list_items.begin()) {
+        m_selection--;
+      } else {
+        return false;
+      }
+    }
+    return true;
+  } else {
+    return false;
+  }
 }
