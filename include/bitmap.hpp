@@ -41,6 +41,8 @@ public:
 
   Bitmap() : m_map{} {}
   Bitmap(const std::initializer_list<std::vector<char>> &map) : m_map{map} {}
+  Bitmap(std::size_t width, std::size_t height)
+      : m_map(height, std::vector<char>(width, 0)) {}
 };
 
 std::ostream &operator<<(std::ostream &, const Bitmap &);

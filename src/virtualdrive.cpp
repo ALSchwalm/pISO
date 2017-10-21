@@ -5,8 +5,31 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+bool VirtualDriveHeading::on_select() {
+  if (m_vdrive.is_mounted()) {
+    m_vdrive.unmount();
+  } else {
+    m_vdrive.mount();
+  }
+  return true;
+}
+
 VirtualDrive::VirtualDrive(lv_t volume)
-    : m_volume{volume}, m_selection{m_list_items.end()} {}
+    : m_volume{volume}, m_heading{*this}, m_selection{m_list_items.end()} {}
+
+VirtualDrive::VirtualDrive(VirtualDrive &&other)
+    : m_volume{other.m_volume}, m_isos{other.m_isos},
+      m_mounted{other.m_mounted}, m_heading{*this} {
+  update_list_items();
+}
+
+VirtualDrive &VirtualDrive::operator=(VirtualDrive &&other) {
+  m_volume = std::move(other.m_volume);
+  m_isos = std::move(other.m_isos);
+  m_mounted = std::move(other.m_mounted);
+
+  update_list_items();
+}
 
 bool VirtualDrive::mount() {
   auto path = "/mnt/" + this->name();
@@ -44,6 +67,7 @@ bool VirtualDrive::has_selection() const {
 
 void VirtualDrive::update_list_items() {
   m_list_items.clear();
+  m_list_items.push_back(&m_heading);
   for (auto &iso : m_isos) {
     m_list_items.push_back(&iso);
   }

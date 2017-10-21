@@ -20,10 +20,17 @@ private:
   void update_list_items();
   bool has_selection() const;
 
-public:
   Multitool();
+  Multitool(const Multitool &) = delete;
+  Multitool &operator=(const Multitool &) = delete;
+
+public:
   virtual ~Multitool();
-  Multitool(const Multitool &other) = delete;
+
+  static Multitool &instance() {
+    static Multitool multi;
+    return multi;
+  }
 
   std::vector<VirtualDrive> &drives() { return m_drives; }
   const std::vector<VirtualDrive> &drives() const { return m_drives; }

@@ -17,9 +17,9 @@ int main() {
   // bitmap.blit(bitmap2, {10, 5}, true);
   // gen_pbm(bitmap, "out.pbm");
 
-  Multitool multi;
-  multi.drives()[0].mount();
-
+  auto &multi = Multitool::instance();
+  multi.on_select();
+  multi.on_next();
   multi.on_select();
 
   // GPIO::RotaryDial dial(17, 27, GPIO::GPIO_PULL::UP);

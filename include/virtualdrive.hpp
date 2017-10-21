@@ -20,6 +20,7 @@ public:
     return true;
   }
   bool unmount() { return true; }
+  bool is_mounted() const { return m_mounted; }
 
   virtual bool on_select() override {
     if (m_mounted) {
@@ -33,11 +34,26 @@ public:
   virtual bool on_prev() override { return false; }
 };
 
+class VirtualDrive;
+class VirtualDriveHeading : public GUIItem {
+  VirtualDrive &m_vdrive;
+
+public:
+  VirtualDriveHeading(VirtualDrive &vdrive) : m_vdrive{vdrive} {}
+  virtual ~VirtualDriveHeading() {}
+
+  virtual bool on_select() override;
+  virtual bool on_next() override { return false; }
+  virtual bool on_prev() override { return false; }
+};
+
 class VirtualDrive : public GUIItem {
 private:
   lv_t m_volume;
   std::vector<ISO> m_isos;
+  bool m_mounted = false;
 
+  VirtualDriveHeading m_heading;
   std::vector<GUIItem *> m_list_items;
   std::vector<GUIItem *>::iterator m_selection;
 
@@ -46,7 +62,12 @@ private:
 
 public:
   VirtualDrive(lv_t volume);
+  VirtualDrive(VirtualDrive &&);
+  VirtualDrive &operator=(VirtualDrive &&);
   virtual ~VirtualDrive() {}
+
+  VirtualDrive(const VirtualDrive &) = delete;
+  VirtualDrive &operator=(const VirtualDrive &) = delete;
 
   std::string name() const { return lvm_lv_get_name(m_volume); }
   std::string uuid() const { return lvm_lv_get_uuid(m_volume); }
@@ -62,6 +83,7 @@ public:
 
   bool mount();
   bool unmount();
+  bool is_mounted() const { return m_mounted; }
 
   virtual bool on_select() override;
   virtual bool on_next() override;
