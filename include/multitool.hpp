@@ -44,6 +44,7 @@ public:
   ~Multitool();
   Multitool(const Multitool &other) = delete;
 
+  std::vector<VirtualDrive> &drives() { return m_drives; }
   const std::vector<VirtualDrive> &drives() const { return m_drives; }
   const VirtualDrive &add_drive(uint64_t size);
   void remove_drive(const VirtualDrive &drive);

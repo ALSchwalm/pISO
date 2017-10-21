@@ -20,15 +20,17 @@ int main() {
   Multitool multi;
   std::cout << "Whole device: " << multi.percent_used() << std::endl;
   // std::cout << "Before anything" << std::endl;
-  for (const auto &drive : multi.drives()) {
-    std::cout << drive.name() << ": " << drive.percent_used() << std::endl;
-  };
 
-  GPIO::RotaryDial dial(17, 27, GPIO::GPIO_PULL::UP);
-  dial.f_dialed = [&](bool up, long value) {
-    std::cout << up << " " << value << std::endl;
-  };
-  std::cout << "Starting dial" << std::endl;
-  dial.start();
-  std::cout << "Started dial" << std::endl;
+  multi.drives().at(3).mount();
+  // for (const auto &drive : multi.drives()) {
+  //   std::cout << drive.name() << ": " << drive.percent_used() << std::endl;
+  // };
+
+  // GPIO::RotaryDial dial(17, 27, GPIO::GPIO_PULL::UP);
+  // dial.f_dialed = [&](bool up, long value) {
+  //   std::cout << up << " " << value << std::endl;
+  // };
+  // std::cout << "Starting dial" << std::endl;
+  // dial.start();
+  // std::cout << "Started dial" << std::endl;
 }
