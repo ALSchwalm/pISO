@@ -19,16 +19,17 @@ int main() {
 
   auto &multi = Multitool::instance();
   multi.on_select();
-  multi.on_next();
-  multi.on_select();
 
-  // GPIO::RotaryDial dial(17, 27, GPIO::GPIO_PULL::UP);
-  // dial.f_dialed = [&](bool up, long value) {
-  //   if (up) {
-  //     multi.on_next();
-  //   } else {
-  //     multi.on_prev();
-  //   }
-  // };
-  // dial.start();
+  GPIO::RotaryDial dial(17, 27, GPIO::GPIO_PULL::UP);
+  dial.f_dialed = [&](bool up, long value) {
+    std::cout << up << " " << value << std::endl;
+    if (up) {
+      multi.on_next();
+    } else {
+      multi.on_prev();
+    }
+  };
+  dial.start();
+
+  std::this_thread::sleep_for(std::chrono::hours(1));
 }

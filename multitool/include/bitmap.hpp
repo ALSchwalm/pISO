@@ -27,7 +27,17 @@ public:
   reference operator[](std::size_t pos) { return this->at(pos); }
   const_reference operator[](std::size_t pos) const { return this->at(pos); }
 
-  void resize(std::size_t count) { m_map.resize(count); }
+  void resize_height(std::size_t count) {
+    m_map.resize(count, std::vector<char>(width(), 0));
+  }
+  void resize_width(std::size_t count) {
+    for (auto &row : m_map) {
+      row.resize(count);
+    }
+  }
+
+  void expand_height(std::size_t count);
+  void expand_width(std::size_t count);
 
   std::size_t height() const { return m_map.size(); }
   std::size_t width() const {

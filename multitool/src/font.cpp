@@ -1090,7 +1090,7 @@ bitmap_t render_text(const std::string &str) {
     }
 
     // The bitmap must be at least as tall as the letter
-    bitmap.resize(letter_map.height());
+    bitmap.resize_height(letter_map.height());
 
     for (auto row_iter = letter_map.begin(); row_iter != letter_map.end();
          ++row_iter) {

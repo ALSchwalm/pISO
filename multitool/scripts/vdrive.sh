@@ -22,7 +22,7 @@ mount_vdrive()
     LOOPBACK_PATH=$(losetup -f)
 
     verbose_echo "Creating loopback devices for $VOLUME_PATH"
-    losetup -fP $VOLUME_PATH
+    losetup -fPL $VOLUME_PATH
 
     verbose_echo "Scanning partitions of $LOOPBACK_PATH"
 

@@ -28,3 +28,15 @@ void Bitmap::blit(const Bitmap &other, position_t position, bool transparent) {
     }
   }
 }
+
+void Bitmap::expand_height(std::size_t count) {
+  for (std::size_t i = 0; i < count; ++i) {
+    m_map.push_back(std::vector<char>(width(), 0));
+  }
+}
+
+void Bitmap::expand_width(std::size_t count) {
+  for (auto &row : m_map) {
+    row.insert(row.end(), count, 0);
+  }
+}

@@ -1,5 +1,5 @@
-
 #include "multitool.hpp"
+#include "bitmap.hpp"
 #include <algorithm>
 #include <iostream>
 
@@ -137,4 +137,18 @@ bool Multitool::on_prev() {
   } else {
     return false;
   }
+}
+
+Bitmap Multitool::render() const {
+  Bitmap bitmap;
+  for (const auto &drive : m_drives) {
+    auto drive_bitmap = drive.render();
+    auto old_height = bitmap.height();
+    bitmap.expand_height(drive_bitmap.height());
+    if (drive_bitmap.width() > bitmap.width()) {
+      bitmap.expand_width(drive_bitmap.width() - bitmap.width());
+    }
+    bitmap.blit(drive_bitmap, {0, old_height});
+  }
+  return bitmap;
 }

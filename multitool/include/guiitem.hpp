@@ -13,6 +13,7 @@ public:
   virtual bool on_prev() = 0;
 };
 
+class Bitmap;
 class GUIRenderable {
 public:
   enum RenderMode {
@@ -21,6 +22,7 @@ public:
   };
 
   virtual ~GUIRenderable() {}
+  virtual Bitmap render() const = 0;
 };
 
 class GUIItem : public GUIEventHandler, public GUIRenderable {

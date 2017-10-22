@@ -13,7 +13,6 @@ private:
   vg_t m_volgroup;
   lv_t m_thinpool;
   std::vector<VirtualDrive> m_drives;
-
   std::vector<GUIEventHandler *> m_list_items;
   std::vector<GUIEventHandler *>::iterator m_selection;
 
@@ -43,6 +42,8 @@ public:
   virtual bool on_select() override;
   virtual bool on_next() override;
   virtual bool on_prev() override;
+
+  virtual Bitmap render() const override;
 };
 
 #endif

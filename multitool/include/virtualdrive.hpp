@@ -3,36 +3,10 @@
 
 #include "error.hpp"
 #include "guiitem.hpp"
+#include "iso.hpp"
 #include <iostream> //TODO: remove this
 #include <lvm2app.h>
 #include <vector>
-
-class ISO : public GUIItem {
-  std::string m_path;
-  bool m_mounted = false;
-
-public:
-  ISO(const std::string &path) : m_path{path} {}
-  virtual ~ISO() {}
-
-  bool mount() {
-    std::cout << "Mounted: " << m_path << std::endl;
-    return true;
-  }
-  bool unmount() { return true; }
-  bool is_mounted() const { return m_mounted; }
-
-  virtual bool on_select() override {
-    if (m_mounted) {
-      unmount();
-    } else {
-      mount();
-    }
-    return true;
-  }
-  virtual bool on_next() override { return false; }
-  virtual bool on_prev() override { return false; }
-};
 
 class VirtualDrive;
 class VirtualDriveHeading : public GUIItem {
@@ -45,6 +19,8 @@ public:
   virtual bool on_select() override;
   virtual bool on_next() override { return false; }
   virtual bool on_prev() override { return false; }
+
+  virtual Bitmap render() const override;
 };
 
 class VirtualDrive : public GUIItem {
@@ -88,6 +64,8 @@ public:
   virtual bool on_select() override;
   virtual bool on_next() override;
   virtual bool on_prev() override;
+
+  virtual Bitmap render() const override;
 };
 
 inline bool operator==(const VirtualDrive &left, const VirtualDrive &right) {

@@ -1,6 +1,7 @@
 
 #include "virtualdrive.hpp"
 #include "error.hpp"
+#include "font.hpp"
 #include <errno.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -12,6 +13,10 @@ bool VirtualDriveHeading::on_select() {
     m_vdrive.mount();
   }
   return true;
+}
+
+Bitmap VirtualDriveHeading::render() const {
+  return render_text(m_vdrive.name());
 }
 
 VirtualDrive::VirtualDrive(lv_t volume)
@@ -106,4 +111,18 @@ bool VirtualDrive::on_prev() {
   } else {
     return false;
   }
+}
+
+Bitmap VirtualDrive::render() const {
+  auto bitmap = m_heading.render();
+  for (const auto &iso : m_isos) {
+    auto iso_bitmap = iso.render();
+    auto old_height = bitmap.height();
+    bitmap.expand_height(iso_bitmap.height());
+    if (iso_bitmap.width() > bitmap.width()) {
+      bitmap.expand_width(iso_bitmap.width() - bitmap.width());
+    }
+    bitmap.blit(iso_bitmap, {0, old_height});
+  }
+  return bitmap;
 }

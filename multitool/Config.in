@@ -1,0 +1,6 @@
+config BR2_PACKAGE_MULTITOOL
+	bool "multitool"
+	help
+	  USB-multitool application
+
+	  http://example.com
