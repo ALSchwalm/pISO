@@ -1,6 +1,7 @@
-[submodule "CppGPIO"]
-	path = CppGPIO
-	url = https://github.com/JoachimSchurig/CppGPIO
+
 [submodule "buildroot"]
 	path = buildroot
 	url = https://github.com/ALSchwalm/buildroot
+[submodule "multitool/CppGPIO"]
+	path = multitool/CppGPIO
+	url = https://github.com/JoachimSchurig/CppGPIO
