@@ -60,6 +60,7 @@ bool VirtualDrive::mount() {
 
   char buff[1024];
   while (fgets(buff, sizeof(buff) - 1, proc) != NULL) {
+    buff[strcspn(buff, "\n")] = 0;
     m_isos.emplace_back(buff);
   }
   pclose(proc);
