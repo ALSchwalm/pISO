@@ -41,7 +41,7 @@ bool VirtualDrive::mount() {
   if (base_mount == NULL) {
     multitool_error("getenv: cannot find 'MULTITOOL_BASE_MOUNT'");
   }
-  auto path = base_mount + "/" + this->name();
+  auto path = std::string(base_mount) + "/" + this->name();
   if (mkdir(path.c_str(), 0777) == -1 && errno != EEXIST) {
     multitool_error("Cannot create path: ", path);
   }
