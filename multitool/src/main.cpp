@@ -9,7 +9,7 @@
 //   sudo vgcreate VolGroup00 /dev/sdb1
 //   sudo lvcreate -l 100%FREE -T VolGroup00/thinpool
 //  So we can basically just do:
-//   sudo lvcreate -V 100G -T VolGroup00/thinpool -n thinvolume
+//   sudo lvcreate -V 100G -T VolGroup00/thinpool -n volume0
 
 int main() {
   // auto bitmap = render_text("The swift brown fox jumps over the lazy dog!");

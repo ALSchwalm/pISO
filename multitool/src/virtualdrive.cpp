@@ -37,13 +37,23 @@ VirtualDrive &VirtualDrive::operator=(VirtualDrive &&other) {
 }
 
 bool VirtualDrive::mount() {
-  auto path = "/mnt/" + this->name();
+  auto base_mount = getenv("MULTITOOL_BASE_MOUNT");
+  if (base_mount == NULL) {
+    multitool_error("getenv: cannot find 'MULTITOOL_BASE_MOUNT'");
+  }
+  auto path = base_mount + "/" + this->name();
   if (mkdir(path.c_str(), 0777) == -1 && errno != EEXIST) {
     multitool_error("Cannot create path: ", path);
   }
 
+  auto scripts_path = getenv("MULTITOOL_SCRIPTS_PATH");
+  if (scripts_path == NULL) {
+    multitool_error("getenv: cannot find 'MULTITOOL_SCRIPTS_PATH'");
+  }
+  auto vdrive_script = scripts_path + std::string("/vdrive.sh");
   FILE *proc = popen(
-      ("sh scripts/vdrive.sh mount " + this->name() + " " + path).c_str(), "r");
+      ("sh " + vdrive_script + " mount " + this->name() + " " + path).c_str(),
+      "r");
   if (proc == NULL) {
     multitool_error("popen: vdrive.sh mount failed");
   }
