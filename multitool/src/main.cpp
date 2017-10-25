@@ -23,13 +23,15 @@ int main() {
   GPIO::RotaryDial dial(17, 27, GPIO::GPIO_PULL::UP);
   dial.f_dialed = [&](bool up, long value) {
     std::cout << up << " " << value << std::endl;
-    if (up) {
-      multi.on_next();
-    } else {
-      multi.on_prev();
+
+    if (value > 10) {
+      multi.add_drive(1024 * 1000 * 30);
     }
   };
   dial.start();
+
+  GPIO::PushButton button(22, GPIO::GPIO_PULL::UP);
+  button.f_pushed = [&]() { multi.on_select(); };
 
   std::this_thread::sleep_for(std::chrono::hours(1));
 }

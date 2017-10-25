@@ -26,7 +26,7 @@ Multitool::Multitool() : m_selection{m_list_items.end()} {
     multitool_error("lvm_lv_from_name() could not locate 'thinpool'");
   }
 
-  rescan_drives();
+  rebuild_drives_from_volumes();
 }
 
 Multitool::~Multitool() {
@@ -39,6 +39,7 @@ bool Multitool::has_selection() const {
 }
 
 void Multitool::update_list_items() {
+  multitool_log("Updating menu items");
   m_list_items.clear();
   for (auto &drive : m_drives) {
     m_list_items.push_back(&drive);
@@ -46,7 +47,8 @@ void Multitool::update_list_items() {
   m_selection = m_list_items.begin();
 }
 
-void Multitool::rescan_drives() {
+void Multitool::rebuild_drives_from_volumes() {
+  multitool_log("Rebuilding VirtualDrives from lvm volumes");
   m_drives.clear();
 
   // Create a virtual drive for each logical volume in the group
@@ -58,7 +60,7 @@ void Multitool::rescan_drives() {
 
     // Only if the logical volume is (V)irtual (to ignore metadata, etc)
     if (attr[0] == 'V') {
-
+      multitool_log("Found volume ", lvm_lv_get_name(lv));
       m_drives.push_back(VirtualDrive(lv));
     }
   }
@@ -67,6 +69,8 @@ void Multitool::rescan_drives() {
 }
 
 const VirtualDrive &Multitool::add_drive(uint64_t size) {
+  multitool_log("Adding new drive with size=", size);
+
   auto name = "volume" + std::to_string(m_drives.size());
   auto volume_params =
       lvm_lv_params_create_thin(m_volgroup, THINPOOL_NAME, name.c_str(), size);
@@ -81,13 +85,15 @@ const VirtualDrive &Multitool::add_drive(uint64_t size) {
   }
 
   m_drives.emplace_back(lv);
+  update_list_items();
   return m_drives.back();
 }
 
 void Multitool::remove_drive(const VirtualDrive &drive) {
+  multitool_log("Removing drive ", drive.name());
   auto drive_iter = std::find(m_drives.begin(), m_drives.end(), drive);
   if (drive_iter == m_drives.end()) {
-    std::cerr << "Could not find drive: " << drive.name() << std::endl;
+    multitool_log("Warning: drive not found");
     return;
   }
 
@@ -95,6 +101,7 @@ void Multitool::remove_drive(const VirtualDrive &drive) {
     multitool_error("lvm_vg_remove_lv()", lvm_errmsg(m_lvm));
   }
   m_drives.erase(drive_iter);
+  update_list_items();
 }
 
 float Multitool::percent_used() const {
@@ -106,6 +113,7 @@ float Multitool::percent_used() const {
 }
 
 bool Multitool::on_select() {
+  multitool_log("Multitool::on_select()");
   if (has_selection()) {
     return (*m_selection)->on_select();
   } else {
@@ -114,6 +122,7 @@ bool Multitool::on_select() {
 }
 
 bool Multitool::on_next() {
+  multitool_log("Multitool::on_next()");
   if (has_selection()) {
     if (!(*m_selection)->on_next()) {
       m_selection++;
@@ -125,6 +134,7 @@ bool Multitool::on_next() {
 }
 
 bool Multitool::on_prev() {
+  multitool_log("Multitool::on_prev()");
   if (has_selection()) {
     if (!(*m_selection)->on_prev()) {
       if (m_selection != m_list_items.begin()) {
@@ -140,6 +150,7 @@ bool Multitool::on_prev() {
 }
 
 Bitmap Multitool::render() const {
+  multitool_log("Multitool::render()");
   Bitmap bitmap;
   for (const auto &drive : m_drives) {
     auto drive_bitmap = drive.render();

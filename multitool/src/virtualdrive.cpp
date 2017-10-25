@@ -7,15 +7,17 @@
 #include <sys/types.h>
 
 bool VirtualDriveHeading::on_select() {
-  if (m_vdrive.is_mounted()) {
-    m_vdrive.unmount();
+  multitool_log("VirtualDriveHeading::on_select()");
+  if (m_vdrive.mount_state() == VirtualDrive::MountState::UNMOUNTED) {
+    m_vdrive.mount_internal();
   } else {
-    m_vdrive.mount();
+    m_vdrive.unmount_internal();
   }
   return true;
 }
 
 Bitmap VirtualDriveHeading::render() const {
+  multitool_log("VirtualDriveHeading::render()");
   return render_text(m_vdrive.name());
 }
 
@@ -24,19 +26,21 @@ VirtualDrive::VirtualDrive(lv_t volume)
 
 VirtualDrive::VirtualDrive(VirtualDrive &&other)
     : m_volume{other.m_volume}, m_isos{other.m_isos},
-      m_mounted{other.m_mounted}, m_heading{*this} {
+      m_mount_state{other.m_mount_state}, m_heading{*this} {
   update_list_items();
 }
 
 VirtualDrive &VirtualDrive::operator=(VirtualDrive &&other) {
   m_volume = std::move(other.m_volume);
   m_isos = std::move(other.m_isos);
-  m_mounted = std::move(other.m_mounted);
+  m_mount_state = std::move(other.m_mount_state);
 
   update_list_items();
 }
 
-bool VirtualDrive::mount() {
+bool VirtualDrive::mount_internal() {
+  multitool_log("VirtualDrive::mount_internal()");
+
   auto base_mount = getenv("MULTITOOL_BASE_MOUNT");
   if (base_mount == NULL) {
     multitool_error("getenv: cannot find 'MULTITOOL_BASE_MOUNT'");
@@ -62,6 +66,7 @@ bool VirtualDrive::mount() {
   while (fgets(buff, sizeof(buff) - 1, proc) != NULL) {
     buff[strcspn(buff, "\n")] = 0;
     m_isos.emplace_back(buff);
+    multitool_log("Found iso: ", buff);
   }
   pclose(proc);
 
@@ -69,7 +74,8 @@ bool VirtualDrive::mount() {
   return true;
 }
 
-bool VirtualDrive::unmount() {
+bool VirtualDrive::unmount_internal() {
+  multitool_log("VirtualDrive::unmount_internal()");
   auto path = "/mnt/" + this->name();
   if (system(("sh scripts/vdrive.sh unmount " + path).c_str()) != 0) {
     multitool_error("vdrive.sh unmount failed");
@@ -82,6 +88,7 @@ bool VirtualDrive::has_selection() const {
 }
 
 void VirtualDrive::update_list_items() {
+  multitool_log("Updating menu items");
   m_list_items.clear();
   m_list_items.push_back(&m_heading);
   for (auto &iso : m_isos) {
@@ -91,6 +98,7 @@ void VirtualDrive::update_list_items() {
 }
 
 bool VirtualDrive::on_select() {
+  multitool_log("VirtualDrive::on_select()");
   if (has_selection()) {
     return (*m_selection)->on_select();
   } else {
@@ -99,6 +107,7 @@ bool VirtualDrive::on_select() {
 }
 
 bool VirtualDrive::on_next() {
+  multitool_log("VirtualDrive::on_next()");
   if (has_selection()) {
     if (!(*m_selection)->on_next()) {
       m_selection++;
@@ -110,6 +119,7 @@ bool VirtualDrive::on_next() {
 }
 
 bool VirtualDrive::on_prev() {
+  multitool_log("VirtualDrive::on_prev()");
   if (has_selection()) {
     if (!(*m_selection)->on_prev()) {
       if (m_selection != m_list_items.begin()) {
@@ -125,6 +135,7 @@ bool VirtualDrive::on_prev() {
 }
 
 Bitmap VirtualDrive::render() const {
+  multitool_log("VirtualDrive::render()");
   auto bitmap = m_heading.render();
   for (const auto &iso : m_isos) {
     auto iso_bitmap = iso.render();

@@ -23,6 +23,8 @@ private:
   Multitool(const Multitool &) = delete;
   Multitool &operator=(const Multitool &) = delete;
 
+  void rebuild_drives_from_volumes();
+
 public:
   virtual ~Multitool();
 
@@ -35,7 +37,6 @@ public:
   const std::vector<VirtualDrive> &drives() const { return m_drives; }
   const VirtualDrive &add_drive(uint64_t size);
   void remove_drive(const VirtualDrive &drive);
-  void rescan_drives();
 
   float percent_used() const;
 

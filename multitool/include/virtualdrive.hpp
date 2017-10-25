@@ -24,10 +24,13 @@ public:
 };
 
 class VirtualDrive : public GUIItem {
+public:
+  enum class MountState { UNMOUNTED, INTERNAL, EXTERNAL };
+
 private:
   lv_t m_volume;
   std::vector<ISO> m_isos;
-  bool m_mounted = false;
+  MountState m_mount_state = MountState::UNMOUNTED;
 
   VirtualDriveHeading m_heading;
   std::vector<GUIItem *> m_list_items;
@@ -57,9 +60,11 @@ public:
   }
   lv_t volume() const { return m_volume; }
 
-  bool mount();
-  bool unmount();
-  bool is_mounted() const { return m_mounted; }
+  bool mount_internal();
+  bool unmount_internal();
+  bool mount_external();
+  bool unmount_external();
+  MountState mount_state() const { return m_mount_state; }
 
   virtual bool on_select() override;
   virtual bool on_next() override;
