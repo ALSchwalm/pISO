@@ -41,6 +41,11 @@ VirtualDrive &VirtualDrive::operator=(VirtualDrive &&other) {
 bool VirtualDrive::mount_internal() {
   multitool_log("VirtualDrive::mount_internal()");
 
+  if (m_mount_state != MountState::UNMOUNTED) {
+    multitool_log("Drive is not unmounted");
+    return false;
+  }
+
   auto base_mount = getenv("MULTITOOL_BASE_MOUNT");
   if (base_mount == NULL) {
     multitool_error("getenv: cannot find 'MULTITOOL_BASE_MOUNT'");
@@ -62,6 +67,7 @@ bool VirtualDrive::mount_internal() {
     multitool_error("popen: vdrive.sh mount failed");
   }
 
+  m_mount_state = MountState::INTERNAL;
   char buff[1024];
   while (fgets(buff, sizeof(buff) - 1, proc) != NULL) {
     buff[strcspn(buff, "\n")] = 0;
@@ -76,10 +82,17 @@ bool VirtualDrive::mount_internal() {
 
 bool VirtualDrive::unmount_internal() {
   multitool_log("VirtualDrive::unmount_internal()");
+
+  if (m_mount_state != MountState::INTERNAL) {
+    multitool_log("Drive is not mounted internal");
+    return false;
+  }
+
   auto path = "/mnt/" + this->name();
   if (system(("sh scripts/vdrive.sh unmount " + path).c_str()) != 0) {
     multitool_error("vdrive.sh unmount failed");
   }
+  m_mount_state = MountState::UNMOUNTED;
   return true;
 }
 

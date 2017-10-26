@@ -14,10 +14,15 @@ find_package (Threads)
 file(GLOB CPPGPIO_SRC_FILES ${PROJECT_SOURCE_DIR}/CppGPIO/src/*.cpp)
 add_library(cppgpio STATIC ${CPPGPIO_SRC_FILES})
 
+# json-cpp
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(JSONCPP jsoncpp)
+link_libraries(${JSONCPP_LIBRARIES})
+
 # Build multitool
 file(GLOB SRC_FILES ${PROJECT_SOURCE_DIR}/src/*.cpp)
 add_executable(multitool ${SRC_FILES})
 
-target_link_libraries (multitool lvm2app cppgpio  ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries (multitool lvm2app cppgpio ${JSONCPP_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
 install (TARGETS multitool DESTINATION bin)

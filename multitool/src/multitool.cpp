@@ -84,7 +84,19 @@ const VirtualDrive &Multitool::add_drive(uint64_t size) {
     multitool_error("lvm_lv_create()", lvm_errmsg(m_lvm));
   }
 
+  if (lvm_lv_activate(lv) == -1) {
+    multitool_error("lvm_lv_activate()", lvm_errmsg(m_lvm));
+  }
+
+  // TODO: not sure if I need to do this
+  if (lvm_vg_write(m_volgroup) == -1) {
+    multitool_error("lvm_vg_write()", lvm_errmsg(m_lvm));
+  }
+
   m_drives.emplace_back(lv);
+
+  // TODO: create partition table on new volume
+
   update_list_items();
   return m_drives.back();
 }

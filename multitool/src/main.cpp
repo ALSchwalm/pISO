@@ -5,6 +5,8 @@
 #include "font.hpp"
 #include "multitool.hpp"
 
+#include "lvmwrapper.hpp"
+
 // Setup script sets up:
 //   sudo vgcreate VolGroup00 /dev/sdb1
 //   sudo lvcreate -l 100%FREE -T VolGroup00/thinpool
@@ -17,21 +19,25 @@ int main() {
   // bitmap.blit(bitmap2, {10, 5}, true);
   // gen_pbm(bitmap, "out.pbm");
 
-  auto &multi = Multitool::instance();
-  multi.on_select();
+  // auto &multi = Multitool::instance();
 
-  GPIO::RotaryDial dial(17, 27, GPIO::GPIO_PULL::UP);
-  dial.f_dialed = [&](bool up, long value) {
-    std::cout << up << " " << value << std::endl;
+  // GPIO::RotaryDial dial(17, 27, GPIO::GPIO_PULL::UP);
+  // dial.f_dialed = [&](bool up, long value) {
+  //   std::cout << up << " " << value << std::endl;
 
-    if (value > 10) {
-      multi.add_drive(1024 * 1000 * 30);
-    }
-  };
-  dial.start();
+  //   if (value > 10) {
+  //     multi.add_drive(1024 * 1000 * 30);
+  //   }
+  // };
+  // dial.start();
 
-  GPIO::PushButton button(22, GPIO::GPIO_PULL::UP);
-  button.f_pushed = [&]() { multi.on_select(); };
+  // GPIO::PushButton button(22, GPIO::GPIO_PULL::UP);
+  // button.f_pushed = [&]() { multi.on_select(); };
+  // button.start();
 
-  std::this_thread::sleep_for(std::chrono::hours(1));
+  // multi.add_drive(1024 * 1000 * 100);
+
+  // std::this_thread::sleep_for(std::chrono::hours(1));
+
+  std::cout << lvm_run("lvs") << std::endl;
 }
