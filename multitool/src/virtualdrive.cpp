@@ -2,6 +2,7 @@
 #include "virtualdrive.hpp"
 #include "error.hpp"
 #include "font.hpp"
+#include <cstring> //TODO: remove this
 #include <errno.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -21,21 +22,31 @@ Bitmap VirtualDriveHeading::render() const {
   return render_text(m_vdrive.name());
 }
 
-VirtualDrive::VirtualDrive(lv_t volume)
-    : m_volume{volume}, m_heading{*this}, m_selection{m_list_items.end()} {}
+VirtualDrive::VirtualDrive(const std::string &volume_name)
+    : m_volume_name{volume_name}, m_heading{*this}, m_selection{
+                                                        m_list_items.end()} {
+  m_uuid = lvm_lvs_report("lv_uuid", volume_name)["lv_uuid"].asString();
+  auto sizestr =
+      lvm_lvs_report("lv_size --units B", volume_name)["lv_size"].asString();
+  m_size = std::stoull(sizestr);
+}
 
 VirtualDrive::VirtualDrive(VirtualDrive &&other)
-    : m_volume{other.m_volume}, m_isos{other.m_isos},
+    : m_volume_name{other.m_volume_name}, m_uuid{other.m_uuid},
+      m_size{other.m_size}, m_isos{other.m_isos},
       m_mount_state{other.m_mount_state}, m_heading{*this} {
   update_list_items();
 }
 
 VirtualDrive &VirtualDrive::operator=(VirtualDrive &&other) {
-  m_volume = std::move(other.m_volume);
+  m_volume_name = std::move(other.m_volume_name);
+  m_uuid = std::move(other.m_uuid);
+  m_size = std::move(other.m_size);
   m_isos = std::move(other.m_isos);
   m_mount_state = std::move(other.m_mount_state);
 
   update_list_items();
+  return *this;
 }
 
 bool VirtualDrive::mount_internal() {
@@ -60,21 +71,8 @@ bool VirtualDrive::mount_internal() {
     multitool_error("getenv: cannot find 'MULTITOOL_SCRIPTS_PATH'");
   }
   auto vdrive_script = scripts_path + std::string("/vdrive.sh");
-  FILE *proc = popen(
-      ("sh " + vdrive_script + " mount " + this->name() + " " + path).c_str(),
-      "r");
-  if (proc == NULL) {
-    multitool_error("popen: vdrive.sh mount failed");
-  }
 
-  m_mount_state = MountState::INTERNAL;
-  char buff[1024];
-  while (fgets(buff, sizeof(buff) - 1, proc) != NULL) {
-    buff[strcspn(buff, "\n")] = 0;
-    m_isos.emplace_back(buff);
-    multitool_log("Found iso: ", buff);
-  }
-  pclose(proc);
+  run_command("sh ", vdrive_script, " mount ", name(), " ", path);
 
   update_list_items();
   return true;
@@ -88,10 +86,19 @@ bool VirtualDrive::unmount_internal() {
     return false;
   }
 
-  auto path = "/mnt/" + this->name();
-  if (system(("sh scripts/vdrive.sh unmount " + path).c_str()) != 0) {
-    multitool_error("vdrive.sh unmount failed");
+  auto base_mount = getenv("MULTITOOL_BASE_MOUNT");
+  if (base_mount == NULL) {
+    multitool_error("getenv: cannot find 'MULTITOOL_BASE_MOUNT'");
   }
+  auto path = std::string(base_mount) + "/" + this->name();
+
+  auto scripts_path = getenv("MULTITOOL_SCRIPTS_PATH");
+  if (scripts_path == NULL) {
+    multitool_error("getenv: cannot find 'MULTITOOL_SCRIPTS_PATH'");
+  }
+  auto vdrive_script = scripts_path + std::string("/vdrive.sh");
+
+  run_command("sh ", vdrive_script, " unmount ", path);
   m_mount_state = MountState::UNMOUNTED;
   return true;
 }
@@ -101,13 +108,18 @@ bool VirtualDrive::has_selection() const {
 }
 
 void VirtualDrive::update_list_items() {
-  multitool_log("Updating menu items");
+  multitool_log("VirtualDrive: Updating menu items");
   m_list_items.clear();
   m_list_items.push_back(&m_heading);
   for (auto &iso : m_isos) {
     m_list_items.push_back(&iso);
   }
   m_selection = m_list_items.begin();
+}
+
+float VirtualDrive::percent_used() const {
+  return std::stof(
+      lvm_lvs_report("", m_volume_name)["data_percent"].asString());
 }
 
 bool VirtualDrive::on_select() {

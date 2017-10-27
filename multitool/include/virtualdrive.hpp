@@ -4,8 +4,7 @@
 #include "error.hpp"
 #include "guiitem.hpp"
 #include "iso.hpp"
-#include <iostream> //TODO: remove this
-#include <lvm2app.h>
+#include "lvmwrapper.hpp"
 #include <vector>
 
 class VirtualDrive;
@@ -28,7 +27,10 @@ public:
   enum class MountState { UNMOUNTED, INTERNAL, EXTERNAL };
 
 private:
-  lv_t m_volume;
+  std::string m_volume_name;
+  std::string m_uuid;
+  unsigned long long m_size;
+
   std::vector<ISO> m_isos;
   MountState m_mount_state = MountState::UNMOUNTED;
 
@@ -40,7 +42,7 @@ private:
   bool has_selection() const;
 
 public:
-  VirtualDrive(lv_t volume);
+  VirtualDrive(const std::string &volume_name);
   VirtualDrive(VirtualDrive &&);
   VirtualDrive &operator=(VirtualDrive &&);
   virtual ~VirtualDrive() {}
@@ -48,17 +50,10 @@ public:
   VirtualDrive(const VirtualDrive &) = delete;
   VirtualDrive &operator=(const VirtualDrive &) = delete;
 
-  std::string name() const { return lvm_lv_get_name(m_volume); }
-  std::string uuid() const { return lvm_lv_get_uuid(m_volume); }
-  uint64_t size() const { return lvm_lv_get_size(m_volume); }
-  float percent_used() const {
-    auto prop = lvm_lv_get_property(m_volume, "data_percent");
-    if (!prop.is_valid) {
-      multitool_error("data_percent is not a valid property");
-    }
-    return lvm_percent_to_float(prop.value.integer);
-  }
-  lv_t volume() const { return m_volume; }
+  std::string name() const { return m_volume_name; }
+  std::string uuid() const { return m_uuid; }
+  unsigned long long size() const { return m_size; }
+  float percent_used() const;
 
   bool mount_internal();
   bool unmount_internal();
@@ -74,7 +69,8 @@ public:
 };
 
 inline bool operator==(const VirtualDrive &left, const VirtualDrive &right) {
-  return left.volume() == right.volume();
+  // TODO: this should be based on UUID
+  return left.name() == right.name();
 }
 
 #endif

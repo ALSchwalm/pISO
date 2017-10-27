@@ -4,14 +4,10 @@
 #include "error.hpp"
 #include "guiitem.hpp"
 #include "virtualdrive.hpp"
-#include <lvm2app.h>
 #include <vector>
 
 class Multitool : public GUIItem {
 private:
-  lvm_t m_lvm;
-  vg_t m_volgroup;
-  lv_t m_thinpool;
   std::vector<VirtualDrive> m_drives;
   std::vector<GUIEventHandler *> m_list_items;
   std::vector<GUIEventHandler *>::iterator m_selection;
@@ -26,7 +22,7 @@ private:
   void rebuild_drives_from_volumes();
 
 public:
-  virtual ~Multitool();
+  virtual ~Multitool(){};
 
   static Multitool &instance() {
     static Multitool multi;
