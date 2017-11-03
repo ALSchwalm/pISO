@@ -33,6 +33,10 @@ Json::Value lvm_run_json_impl(const std::string &cmd) {
   Json::Reader reader;
   const auto &command_results = run_command(cmd + " --reportformat json");
   bool parsed = reader.parse(command_results, root);
+  if (!parsed) {
+    multitool_error("Error while parsing json output of: ", cmd);
+  }
+
   return root;
 }
 } // namespace detail
@@ -52,4 +56,8 @@ Json::Value lvm_lvs_report(std::string options, std::string volname) {
   } else {
     return res;
   }
+}
+
+std::string lvm_lvs_volume_value(std::string field, std::string volname) {
+  return lvm_lvs_report(field, volname)[field].asString();
 }

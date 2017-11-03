@@ -1,8 +1,8 @@
 
 #include "virtualdrive.hpp"
+#include "config.hpp"
 #include "error.hpp"
 #include "font.hpp"
-#include <cstring> //TODO: remove this
 #include <errno.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -25,7 +25,7 @@ Bitmap VirtualDriveHeading::render() const {
 VirtualDrive::VirtualDrive(const std::string &volume_name)
     : m_volume_name{volume_name}, m_heading{*this}, m_selection{
                                                         m_list_items.end()} {
-  m_uuid = lvm_lvs_report("lv_uuid", volume_name)["lv_uuid"].asString();
+  m_uuid = lvm_lvs_volume_value("lv_uuid", volume_name);
   auto sizestr =
       lvm_lvs_report("lv_size --units B", volume_name)["lv_size"].asString();
   m_size = std::stoull(sizestr);
@@ -57,20 +57,14 @@ bool VirtualDrive::mount_internal() {
     return false;
   }
 
-  auto base_mount = getenv("MULTITOOL_BASE_MOUNT");
-  if (base_mount == NULL) {
-    multitool_error("getenv: cannot find 'MULTITOOL_BASE_MOUNT'");
-  }
-  auto path = std::string(base_mount) + "/" + this->name();
+  auto base_mount = config_getenv("MULTITOOL_BASE_MOUNT");
+  auto path = base_mount + "/" + name();
   if (mkdir(path.c_str(), 0777) == -1 && errno != EEXIST) {
     multitool_error("Cannot create path: ", path);
   }
 
-  auto scripts_path = getenv("MULTITOOL_SCRIPTS_PATH");
-  if (scripts_path == NULL) {
-    multitool_error("getenv: cannot find 'MULTITOOL_SCRIPTS_PATH'");
-  }
-  auto vdrive_script = scripts_path + std::string("/vdrive.sh");
+  auto scripts_path = config_getenv("MULTITOOL_SCRIPTS_PATH");
+  auto vdrive_script = scripts_path + "/vdrive.sh";
 
   run_command("sh ", vdrive_script, " mount ", name(), " ", path);
 
@@ -86,17 +80,11 @@ bool VirtualDrive::unmount_internal() {
     return false;
   }
 
-  auto base_mount = getenv("MULTITOOL_BASE_MOUNT");
-  if (base_mount == NULL) {
-    multitool_error("getenv: cannot find 'MULTITOOL_BASE_MOUNT'");
-  }
-  auto path = std::string(base_mount) + "/" + this->name();
+  auto base_mount = config_getenv("MULTITOOL_BASE_MOUNT");
+  auto path = base_mount + "/" + name();
 
-  auto scripts_path = getenv("MULTITOOL_SCRIPTS_PATH");
-  if (scripts_path == NULL) {
-    multitool_error("getenv: cannot find 'MULTITOOL_SCRIPTS_PATH'");
-  }
-  auto vdrive_script = scripts_path + std::string("/vdrive.sh");
+  auto scripts_path = config_getenv("MULTITOOL_SCRIPTS_PATH");
+  auto vdrive_script = scripts_path + "/vdrive.sh";
 
   run_command("sh ", vdrive_script, " unmount ", path);
   m_mount_state = MountState::UNMOUNTED;
@@ -118,8 +106,7 @@ void VirtualDrive::update_list_items() {
 }
 
 float VirtualDrive::percent_used() const {
-  return std::stof(
-      lvm_lvs_report("", m_volume_name)["data_percent"].asString());
+  return std::stof(lvm_lvs_volume_value("data_percent", m_volume_name));
 }
 
 bool VirtualDrive::on_select() {

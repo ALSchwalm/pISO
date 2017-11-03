@@ -41,5 +41,6 @@ template <typename... Args> inline Json::Value lvm_run_json(Args &&... args) {
 }
 
 Json::Value lvm_lvs_report(std::string options = "", std::string volname = "");
+std::string lvm_lvs_volume_value(std::string field, std::string volname);
 
 #endif
