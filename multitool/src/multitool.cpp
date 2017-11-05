@@ -49,6 +49,8 @@ const VirtualDrive &Multitool::add_drive(uint64_t size) {
 
   // // TODO: create partition table on new volume
 
+  m_drives.back().mount_external();
+
   update_list_items();
   return m_drives.back();
 }

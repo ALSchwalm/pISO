@@ -1,0 +1,11 @@
+
+Building
+--------
+
+    cd buildroot
+    make xconfig
+    # Select 'open' and choose 'configs/raspberrypi0_defconfig'
+    # save
+    make
+
+This should produce a file in `output/images/sdcard.img`

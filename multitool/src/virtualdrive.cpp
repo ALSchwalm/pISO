@@ -9,10 +9,18 @@
 
 bool VirtualDriveHeading::on_select() {
   multitool_log("VirtualDriveHeading::on_select()");
-  if (m_vdrive.mount_state() == VirtualDrive::MountState::UNMOUNTED) {
+  switch (m_vdrive.mount_state()) {
+  case VirtualDrive::MountState::UNMOUNTED:
+    m_vdrive.mount_external();
+    break;
+  case VirtualDrive::MountState::EXTERNAL:
+    m_vdrive.unmount_external();
     m_vdrive.mount_internal();
-  } else {
+    break;
+  case VirtualDrive::MountState::INTERNAL:
     m_vdrive.unmount_internal();
+    m_vdrive.mount_external();
+    break;
   }
   return true;
 }
@@ -66,7 +74,7 @@ bool VirtualDrive::mount_internal() {
   auto scripts_path = config_getenv("MULTITOOL_SCRIPTS_PATH");
   auto vdrive_script = scripts_path + "/vdrive.sh";
 
-  run_command("sh ", vdrive_script, " mount ", name(), " ", path);
+  run_command("sh ", vdrive_script, " mount-internal ", name(), " ", path);
 
   update_list_items();
   return true;
@@ -86,7 +94,39 @@ bool VirtualDrive::unmount_internal() {
   auto scripts_path = config_getenv("MULTITOOL_SCRIPTS_PATH");
   auto vdrive_script = scripts_path + "/vdrive.sh";
 
-  run_command("sh ", vdrive_script, " unmount ", path);
+  run_command("sh ", vdrive_script, " unmount-internal ", path);
+  m_mount_state = MountState::UNMOUNTED;
+  return true;
+}
+
+bool VirtualDrive::mount_external() {
+  multitool_log("VirtualDrive::mount_external()");
+
+  if (m_mount_state != MountState::UNMOUNTED) {
+    multitool_log("Drive is mounted");
+    return false;
+  }
+
+  auto scripts_path = config_getenv("MULTITOOL_SCRIPTS_PATH");
+  auto vdrive_script = scripts_path + "/vdrive.sh";
+
+  run_command("sh ", vdrive_script, " mount-external ", name());
+  m_mount_state = MountState::EXTERNAL;
+  return true;
+}
+
+bool VirtualDrive::unmount_external() {
+  multitool_log("VirtualDrive::unmount_external()");
+
+  if (m_mount_state != MountState::EXTERNAL) {
+    multitool_log("Drive is not mounted external");
+    return false;
+  }
+
+  auto scripts_path = config_getenv("MULTITOOL_SCRIPTS_PATH");
+  auto vdrive_script = scripts_path + "/vdrive.sh";
+
+  run_command("sh ", vdrive_script, " unmount-external ", name());
   m_mount_state = MountState::UNMOUNTED;
   return true;
 }

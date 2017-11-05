@@ -30,5 +30,6 @@ Bitmap ISO::render() const {
   auto buff = new char[m_path.size() + 1];
   m_path.copy(buff, m_path.size() + 1);
   auto bitmap = render_text(basename(buff));
+  delete[] buff;
   return bitmap;
 }
