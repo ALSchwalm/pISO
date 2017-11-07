@@ -50,6 +50,7 @@ class Display {
   static const int width = 128;
   static const int height = 64;
 
+  Bitmap m_map;
   int m_spi_fd;
 
   void send_spi_command(unsigned char command);

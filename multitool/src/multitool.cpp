@@ -123,12 +123,15 @@ Bitmap Multitool::render() const {
   Bitmap bitmap;
   for (const auto &drive : m_drives) {
     auto drive_bitmap = drive.render();
+    Bitmap shifted{drive_bitmap.width() + 3, drive_bitmap.height()};
+    shifted.blit(drive_bitmap, {3, 0});
+
     auto old_height = bitmap.height();
-    bitmap.expand_height(drive_bitmap.height());
-    if (drive_bitmap.width() > bitmap.width()) {
-      bitmap.expand_width(drive_bitmap.width() - bitmap.width());
+    bitmap.expand_height(shifted.height());
+    if (shifted.width() > bitmap.width()) {
+      bitmap.expand_width(shifted.width() - bitmap.width());
     }
-    bitmap.blit(drive_bitmap, {0, old_height});
+    bitmap.blit(shifted, {0, old_height}, true);
   }
   return bitmap;
 }

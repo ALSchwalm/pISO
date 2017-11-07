@@ -18,13 +18,10 @@ int main() {
   if (wiringPiSetupGpio() == -1) {
     multitool_error("Error while setting up GPIO: ", strerror(errno));
   }
-
-  Bitmap map{128, 64};
-  auto text = render_text("The swift brown fox jumps over the lazy dog!");
-  map.blit(text, {0, 0});
-
-  Display::instance().update(map);
   auto &multi = Multitool::instance();
+
+  auto text = render_text("The swift brown fox jumps over the lazy dog!");
+  Display::instance().update(text);
 
   GPIO::RotaryDial dial(17, 27, GPIO::GPIO_PULL::UP);
   dial.f_dialed = [&](bool up, long value) {

@@ -6,7 +6,7 @@
 #include <wiringPi.h>
 #include <wiringPiSPI.h>
 
-Display::Display() {
+Display::Display() : m_map{width, height} {
   m_spi_fd = wiringPiSPISetup(channel, speed);
   if (m_spi_fd == -1) {
     multitool_error("Error running wiringPiSPISetup: ", strerror(errno));
@@ -45,7 +45,6 @@ Display::Display() {
 }
 
 void Display::send_spi_command(unsigned char command) {
-  multitool_log("Sending spi command : ", (int)command);
   digitalWrite(dc_pin, LOW);
   wiringPiSPIDataRW(channel, &command, 1);
 }
@@ -55,7 +54,6 @@ void Display::send_spi_command(SSD1306_COMMAND command) {
 }
 
 void Display::send_spi_data(std::vector<unsigned char> &data) {
-  multitool_log("Sending spi data : ", data.size(), " bytes");
   digitalWrite(dc_pin, HIGH);
   wiringPiSPIDataRW(channel, &data[0], data.size());
 }
@@ -69,6 +67,8 @@ void Display::reset() {
 }
 
 void Display::update(const Bitmap &bitmap) {
+  m_map.blit(bitmap, {0, 0});
+
   send_spi_command(SSD1306_COMMAND::COLUMNADDR);
   send_spi_command(0);                  // Column start address. (0 = reset)
   send_spi_command(bitmap.width() - 1); // Column end address.
@@ -84,7 +84,7 @@ void Display::update(const Bitmap &bitmap) {
       unsigned char bits = 0;
       for (unsigned char bit = 0; bit < 8; ++bit) {
         bits = bits << 1;
-        bits |= bitmap[page * 8 + 7 - bit][x];
+        bits |= m_map[page * 8 + 7 - bit][x];
       }
       data.push_back(bits);
     }
