@@ -6,17 +6,17 @@
 #include <libgen.h>
 
 bool ISO::mount() {
-  multitool_log("ISO::mount(): mounting ", m_path);
+  piso_log("ISO::mount(): mounting ", m_path);
   return true;
 }
 
 bool ISO::unmount() {
-  multitool_log("ISO::unmount(): unmounting ", m_path);
+  piso_log("ISO::unmount(): unmounting ", m_path);
   return true;
 }
 
 bool ISO::on_select() {
-  multitool_log("ISO::on_select()");
+  piso_log("ISO::on_select()");
   if (m_mounted) {
     unmount();
   } else {
@@ -26,7 +26,7 @@ bool ISO::on_select() {
 }
 
 Bitmap ISO::render() const {
-  multitool_log("ISO::render()");
+  piso_log("ISO::render()");
   auto buff = new char[m_path.size() + 1];
   m_path.copy(buff, m_path.size() + 1);
   auto bitmap = render_text(basename(buff));

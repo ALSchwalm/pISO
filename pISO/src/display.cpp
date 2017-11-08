@@ -9,7 +9,7 @@
 Display::Display() : m_map{width, height} {
   m_spi_fd = wiringPiSPISetup(channel, speed);
   if (m_spi_fd == -1) {
-    multitool_error("Error running wiringPiSPISetup: ", strerror(errno));
+    piso_error("Error running wiringPiSPISetup: ", strerror(errno));
   }
 
   pinMode(dc_pin, OUTPUT);

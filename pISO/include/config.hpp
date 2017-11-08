@@ -11,7 +11,7 @@ constexpr char THINPOOL_NAME[] = "thinpool";
 inline std::string config_getenv(const char *name) {
   auto val = getenv(name);
   if (val == NULL) {
-    multitool_error("getenv: cannot find '", name, "'");
+    piso_error("getenv: cannot find '", name, "'");
   }
   return val;
 }

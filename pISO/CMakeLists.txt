@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 2.6)
-project (USBMultitool)
+project (pISO)
 
 include_directories(
   "${PROJECT_SOURCE_DIR}/include"
@@ -19,14 +19,14 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(JSONCPP jsoncpp)
 link_libraries(${JSONCPP_LIBRARIES})
 
-# Build multitool
+# Build pISO
 file(GLOB SRC_FILES ${PROJECT_SOURCE_DIR}/src/*.cpp)
-add_executable(multitool ${SRC_FILES})
+add_executable(pISO ${SRC_FILES})
 
-target_link_libraries (multitool
+target_link_libraries (pISO
   cppgpio
   ${JSONCPP_LIBRARIES}
   ${CMAKE_THREAD_LIBS_INIT}
   -lwiringPi)
 
-install (TARGETS multitool DESTINATION bin)
+install (TARGETS pISO DESTINATION bin)

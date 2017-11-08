@@ -1,7 +1,0 @@
-config BR2_PACKAGE_MULTITOOL
-	bool "multitool"
-	depends on BR2_PACKAGE_WIRINGPI
-	help
-	  USB-multitool application
-
-	  http://example.com

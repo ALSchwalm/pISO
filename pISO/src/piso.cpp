@@ -1,20 +1,18 @@
-#include "multitool.hpp"
+#include "piso.hpp"
 #include "bitmap.hpp"
 #include "config.hpp"
 #include "lvmwrapper.hpp"
 #include <algorithm>
 #include <iostream>
 
-Multitool::Multitool() : m_selection{m_list_items.end()} {
+pISO::pISO() : m_selection{m_list_items.end()} {
   rebuild_drives_from_volumes();
 }
 
-bool Multitool::has_selection() const {
-  return m_selection != m_list_items.end();
-}
+bool pISO::has_selection() const { return m_selection != m_list_items.end(); }
 
-void Multitool::update_list_items() {
-  multitool_log("Multitool: Updating menu items");
+void pISO::update_list_items() {
+  piso_log("pISO: Updating menu items");
   m_list_items.clear();
   for (auto &drive : m_drives) {
     m_list_items.push_back(&drive);
@@ -22,8 +20,8 @@ void Multitool::update_list_items() {
   m_selection = m_list_items.begin();
 }
 
-void Multitool::rebuild_drives_from_volumes() {
-  multitool_log("Rebuilding VirtualDrives from lvm volumes");
+void pISO::rebuild_drives_from_volumes() {
+  piso_log("Rebuilding VirtualDrives from lvm volumes");
   m_drives.clear();
 
   auto lvs = lvm_lvs_report();
@@ -31,15 +29,15 @@ void Multitool::rebuild_drives_from_volumes() {
 
     // Only if the logical volume is (V)irtual (to ignore metadata, etc)
     if (volume["lv_attr"].asString()[0] == 'V') {
-      multitool_log("Found volume ", volume["lv_name"]);
+      piso_log("Found volume ", volume["lv_name"]);
       m_drives.push_back(VirtualDrive(volume["lv_name"].asString()));
     }
   }
   update_list_items();
 }
 
-const VirtualDrive &Multitool::add_drive(uint64_t size) {
-  multitool_log("Adding new drive with size=", size);
+const VirtualDrive &pISO::add_drive(uint64_t size) {
+  piso_log("Adding new drive with size=", size);
 
   auto name = "volume" + std::to_string(m_drives.size());
 
@@ -55,11 +53,11 @@ const VirtualDrive &Multitool::add_drive(uint64_t size) {
   return m_drives.back();
 }
 
-void Multitool::remove_drive(const VirtualDrive &drive) {
-  multitool_log("Removing drive ", drive.name());
+void pISO::remove_drive(const VirtualDrive &drive) {
+  piso_log("Removing drive ", drive.name());
   auto drive_iter = std::find(m_drives.begin(), m_drives.end(), drive);
   if (drive_iter == m_drives.end()) {
-    multitool_log("Warning: drive not found");
+    piso_log("Warning: drive not found");
     return;
   }
 
@@ -69,7 +67,7 @@ void Multitool::remove_drive(const VirtualDrive &drive) {
   update_list_items();
 }
 
-float Multitool::percent_used() const {
+float pISO::percent_used() const {
   // The percent used for the whole drive is really the percent of the
   // thin pool. The volume group will always be full (with the thinpool).
   auto lvs = lvm_lvs_report();
@@ -78,11 +76,11 @@ float Multitool::percent_used() const {
       return std::stof(volume["data_percent"].asString());
     }
   }
-  multitool_error("Multitool: unable to locate thinpool");
+  piso_error("pISO: unable to locate thinpool");
 }
 
-bool Multitool::on_select() {
-  multitool_log("Multitool::on_select()");
+bool pISO::on_select() {
+  piso_log("pISO::on_select()");
   if (has_selection()) {
     return (*m_selection)->on_select();
   } else {
@@ -90,8 +88,8 @@ bool Multitool::on_select() {
   }
 }
 
-bool Multitool::on_next() {
-  multitool_log("Multitool::on_next()");
+bool pISO::on_next() {
+  piso_log("pISO::on_next()");
   if (has_selection()) {
     if (!(*m_selection)->on_next()) {
       m_selection++;
@@ -102,8 +100,8 @@ bool Multitool::on_next() {
   }
 }
 
-bool Multitool::on_prev() {
-  multitool_log("Multitool::on_prev()");
+bool pISO::on_prev() {
+  piso_log("pISO::on_prev()");
   if (has_selection()) {
     if (!(*m_selection)->on_prev()) {
       if (m_selection != m_list_items.begin()) {
@@ -118,8 +116,8 @@ bool Multitool::on_prev() {
   }
 }
 
-Bitmap Multitool::render() const {
-  multitool_log("Multitool::render()");
+Bitmap pISO::render() const {
+  piso_log("pISO::render()");
   Bitmap bitmap;
   for (const auto &drive : m_drives) {
     auto drive_bitmap = drive.render();

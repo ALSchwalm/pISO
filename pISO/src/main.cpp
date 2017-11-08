@@ -2,7 +2,7 @@
 #include "display.hpp"
 #include "font.hpp"
 #include "lvmwrapper.hpp"
-#include "multitool.hpp"
+#include "piso.hpp"
 #include <cppgpio.hpp>
 #include <errno.h>
 #include <string.h>
@@ -16,9 +16,9 @@
 
 int main() {
   if (wiringPiSetupGpio() == -1) {
-    multitool_error("Error while setting up GPIO: ", strerror(errno));
+    piso_error("Error while setting up GPIO: ", strerror(errno));
   }
-  auto &multi = Multitool::instance();
+  auto &piso = pISO::instance();
 
   auto text = render_text("The swift brown fox jumps over the lazy dog!");
   Display::instance().update(text);
@@ -28,13 +28,13 @@ int main() {
     std::cout << up << " " << value << std::endl;
 
     if (value > 10) {
-      multi.add_drive(1024 * 1000 * 30);
+      piso.add_drive(1024 * 1000 * 30);
     }
   };
   dial.start();
 
   GPIO::PushButton button(22, GPIO::GPIO_PULL::UP);
-  button.f_pushed = [&]() { multi.on_select(); };
+  button.f_pushed = [&]() { piso.on_select(); };
   button.start();
 
   std::this_thread::sleep_for(std::chrono::hours(1));

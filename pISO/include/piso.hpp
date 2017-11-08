@@ -1,12 +1,12 @@
-#ifndef MULTITOOL_HPP
-#define MULTITOOL_HPP
+#ifndef PISO_HPP
+#define PISO_HPP
 
 #include "error.hpp"
 #include "guiitem.hpp"
 #include "virtualdrive.hpp"
 #include <vector>
 
-class Multitool : public GUIItem {
+class pISO : public GUIItem {
 private:
   std::vector<VirtualDrive> m_drives;
   std::vector<GUIEventHandler *> m_list_items;
@@ -15,18 +15,18 @@ private:
   void update_list_items();
   bool has_selection() const;
 
-  Multitool();
-  Multitool(const Multitool &) = delete;
-  Multitool &operator=(const Multitool &) = delete;
+  pISO();
+  pISO(const pISO &) = delete;
+  pISO &operator=(const pISO &) = delete;
 
   void rebuild_drives_from_volumes();
 
 public:
-  virtual ~Multitool(){};
+  virtual ~pISO(){};
 
-  static Multitool &instance() {
-    static Multitool multi;
-    return multi;
+  static pISO &instance() {
+    static pISO piso;
+    return piso;
   }
 
   std::vector<VirtualDrive> &drives() { return m_drives; }

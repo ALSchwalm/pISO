@@ -4,14 +4,14 @@
 
 namespace detail {
 std::string run_command_impl(const std::string &cmd) {
-  multitool_log("Running command: ", cmd);
+  piso_log("Running command: ", cmd);
 
   char line[1024];
   std::string result = "";
 
   FILE *proc = popen(cmd.c_str(), "r");
   if (proc == NULL) {
-    multitool_error("popen(): command failed: ", cmd);
+    piso_error("popen(): command failed: ", cmd);
   }
 
   while (fgets(line, sizeof(line), proc)) {
@@ -20,7 +20,7 @@ std::string run_command_impl(const std::string &cmd) {
   auto retcode = WEXITSTATUS(pclose(proc));
 
   if (retcode != 0) {
-    multitool_error("popen(): command returned non-zero: ", cmd);
+    piso_error("popen(): command returned non-zero: ", cmd);
   }
 
   return result;
@@ -34,7 +34,7 @@ Json::Value lvm_run_json_impl(const std::string &cmd) {
   const auto &command_results = run_command(cmd + " --reportformat json");
   bool parsed = reader.parse(command_results, root);
   if (!parsed) {
-    multitool_error("Error while parsing json output of: ", cmd);
+    piso_error("Error while parsing json output of: ", cmd);
   }
 
   return root;

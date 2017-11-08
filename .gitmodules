@@ -2,6 +2,6 @@
 [submodule "buildroot"]
 	path = buildroot
 	url = https://github.com/ALSchwalm/buildroot
-[submodule "multitool/CppGPIO"]
-	path = multitool/CppGPIO
-	url = https://github.com/JoachimSchurig/CppGPIO
+[submodule "pISO/CppGPIO"]
+	path = pISO/CppGPIO
+	url = https://github.com/JoachimSchurig/CppGPIO.git

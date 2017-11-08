@@ -8,7 +8,7 @@
 #include <sys/types.h>
 
 bool VirtualDriveHeading::on_select() {
-  multitool_log("VirtualDriveHeading::on_select()");
+  piso_log("VirtualDriveHeading::on_select()");
   switch (m_vdrive.mount_state()) {
   case VirtualDrive::MountState::UNMOUNTED:
     m_vdrive.mount_external();
@@ -26,7 +26,7 @@ bool VirtualDriveHeading::on_select() {
 }
 
 Bitmap VirtualDriveHeading::render() const {
-  multitool_log("VirtualDriveHeading::render()");
+  piso_log("VirtualDriveHeading::render()");
   return render_text(m_vdrive.name());
 }
 
@@ -58,20 +58,20 @@ VirtualDrive &VirtualDrive::operator=(VirtualDrive &&other) {
 }
 
 bool VirtualDrive::mount_internal() {
-  multitool_log("VirtualDrive::mount_internal()");
+  piso_log("VirtualDrive::mount_internal()");
 
   if (m_mount_state != MountState::UNMOUNTED) {
-    multitool_log("Drive is not unmounted");
+    piso_log("Drive is not unmounted");
     return false;
   }
 
-  auto base_mount = config_getenv("MULTITOOL_BASE_MOUNT");
+  auto base_mount = config_getenv("PISO_BASE_MOUNT");
   auto path = base_mount + "/" + name();
   if (mkdir(path.c_str(), 0777) == -1 && errno != EEXIST) {
-    multitool_error("Cannot create path: ", path);
+    piso_error("Cannot create path: ", path);
   }
 
-  auto scripts_path = config_getenv("MULTITOOL_SCRIPTS_PATH");
+  auto scripts_path = config_getenv("PISO_SCRIPTS_PATH");
   auto vdrive_script = scripts_path + "/vdrive.sh";
 
   run_command("sh ", vdrive_script, " mount-internal ", name(), " ", path);
@@ -81,17 +81,17 @@ bool VirtualDrive::mount_internal() {
 }
 
 bool VirtualDrive::unmount_internal() {
-  multitool_log("VirtualDrive::unmount_internal()");
+  piso_log("VirtualDrive::unmount_internal()");
 
   if (m_mount_state != MountState::INTERNAL) {
-    multitool_log("Drive is not mounted internal");
+    piso_log("Drive is not mounted internal");
     return false;
   }
 
-  auto base_mount = config_getenv("MULTITOOL_BASE_MOUNT");
+  auto base_mount = config_getenv("PISO_BASE_MOUNT");
   auto path = base_mount + "/" + name();
 
-  auto scripts_path = config_getenv("MULTITOOL_SCRIPTS_PATH");
+  auto scripts_path = config_getenv("PISO_SCRIPTS_PATH");
   auto vdrive_script = scripts_path + "/vdrive.sh";
 
   run_command("sh ", vdrive_script, " unmount-internal ", path);
@@ -100,14 +100,14 @@ bool VirtualDrive::unmount_internal() {
 }
 
 bool VirtualDrive::mount_external() {
-  multitool_log("VirtualDrive::mount_external()");
+  piso_log("VirtualDrive::mount_external()");
 
   if (m_mount_state != MountState::UNMOUNTED) {
-    multitool_log("Drive is mounted");
+    piso_log("Drive is mounted");
     return false;
   }
 
-  auto scripts_path = config_getenv("MULTITOOL_SCRIPTS_PATH");
+  auto scripts_path = config_getenv("PISO_SCRIPTS_PATH");
   auto vdrive_script = scripts_path + "/vdrive.sh";
 
   run_command("sh ", vdrive_script, " mount-external ", name());
@@ -116,14 +116,14 @@ bool VirtualDrive::mount_external() {
 }
 
 bool VirtualDrive::unmount_external() {
-  multitool_log("VirtualDrive::unmount_external()");
+  piso_log("VirtualDrive::unmount_external()");
 
   if (m_mount_state != MountState::EXTERNAL) {
-    multitool_log("Drive is not mounted external");
+    piso_log("Drive is not mounted external");
     return false;
   }
 
-  auto scripts_path = config_getenv("MULTITOOL_SCRIPTS_PATH");
+  auto scripts_path = config_getenv("PISO_SCRIPTS_PATH");
   auto vdrive_script = scripts_path + "/vdrive.sh";
 
   run_command("sh ", vdrive_script, " unmount-external ", name());
@@ -136,7 +136,7 @@ bool VirtualDrive::has_selection() const {
 }
 
 void VirtualDrive::update_list_items() {
-  multitool_log("VirtualDrive: Updating menu items");
+  piso_log("VirtualDrive: Updating menu items");
   m_list_items.clear();
   m_list_items.push_back(&m_heading);
   for (auto &iso : m_isos) {
@@ -150,7 +150,7 @@ float VirtualDrive::percent_used() const {
 }
 
 bool VirtualDrive::on_select() {
-  multitool_log("VirtualDrive::on_select()");
+  piso_log("VirtualDrive::on_select()");
   if (has_selection()) {
     return (*m_selection)->on_select();
   } else {
@@ -159,7 +159,7 @@ bool VirtualDrive::on_select() {
 }
 
 bool VirtualDrive::on_next() {
-  multitool_log("VirtualDrive::on_next()");
+  piso_log("VirtualDrive::on_next()");
   if (has_selection()) {
     if (!(*m_selection)->on_next()) {
       m_selection++;
@@ -171,7 +171,7 @@ bool VirtualDrive::on_next() {
 }
 
 bool VirtualDrive::on_prev() {
-  multitool_log("VirtualDrive::on_prev()");
+  piso_log("VirtualDrive::on_prev()");
   if (has_selection()) {
     if (!(*m_selection)->on_prev()) {
       if (m_selection != m_list_items.begin()) {
@@ -187,7 +187,7 @@ bool VirtualDrive::on_prev() {
 }
 
 Bitmap VirtualDrive::render() const {
-  multitool_log("VirtualDrive::render()");
+  piso_log("VirtualDrive::render()");
   auto bitmap = m_heading.render();
   for (const auto &iso : m_isos) {
     auto iso_bitmap = iso.render();

@@ -4,8 +4,8 @@
 #
 ################################################################################
 
-MULTITOOL_VERSION = 0.5
-MULTITOOL_SITE = /home/adam/Repos/usb-multitool/multitool
-MULTITOOL_SITE_METHOD:=local
+PISO_VERSION = 0.9
+PISO_SITE = /home/adam/Repos/usb-multitool/pISO
+PISO_SITE_METHOD:=local
 
 $(eval $(cmake-package))
