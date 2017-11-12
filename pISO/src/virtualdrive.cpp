@@ -37,6 +37,7 @@ VirtualDrive::VirtualDrive(const std::string &volume_name)
   auto sizestr =
       lvm_lvs_report("lv_size --units B", volume_name)["lv_size"].asString();
   m_size = std::stoull(sizestr);
+  update_list_items();
 }
 
 VirtualDrive::VirtualDrive(VirtualDrive &&other)
@@ -75,8 +76,8 @@ bool VirtualDrive::mount_internal() {
   auto vdrive_script = scripts_path + "/vdrive.sh";
 
   run_command("sh ", vdrive_script, " mount-internal ", name(), " ", path);
-
   update_list_items();
+  m_mount_state = MountState::INTERNAL;
   return true;
 }
 
@@ -95,6 +96,7 @@ bool VirtualDrive::unmount_internal() {
   auto vdrive_script = scripts_path + "/vdrive.sh";
 
   run_command("sh ", vdrive_script, " unmount-internal ", path);
+  update_list_items();
   m_mount_state = MountState::UNMOUNTED;
   return true;
 }
@@ -111,6 +113,7 @@ bool VirtualDrive::mount_external() {
   auto vdrive_script = scripts_path + "/vdrive.sh";
 
   run_command("sh ", vdrive_script, " mount-external ", name());
+  update_list_items();
   m_mount_state = MountState::EXTERNAL;
   return true;
 }
@@ -127,6 +130,7 @@ bool VirtualDrive::unmount_external() {
   auto vdrive_script = scripts_path + "/vdrive.sh";
 
   run_command("sh ", vdrive_script, " unmount-external ", name());
+  update_list_items();
   m_mount_state = MountState::UNMOUNTED;
   return true;
 }
