@@ -34,11 +34,11 @@ int main() {
   };
   controller.start();
 
-  // auto text = render_text("The swift brown fox jumps over the lazy dog!");
-  // Display::instance().update(text);
+  auto text = render_text("The swift brown fox jumps over the lazy dog!");
+  Display::instance().update(text);
 
   GPIO::PushButton button(22, GPIO::GPIO_PULL::UP);
-  button.f_pushed = [&]() { piso.on_select(); };
+  button.f_pushed = [&]() { std::cout << "here" << std::endl; };
   button.start();
 
   std::this_thread::sleep_for(std::chrono::hours(1));

@@ -45,8 +45,8 @@ class Display {
 
   static const int channel = 0;
   static const int speed = 8000000;
-  static const int dc_pin = 25;
-  static const int rst_pin = 19;
+  static const int dc_pin = 19;
+  static const int rst_pin = 25;
   static const int width = 128;
   static const int height = 64;
 

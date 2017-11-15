@@ -166,7 +166,11 @@ bool VirtualDrive::on_next() {
   piso_log("VirtualDrive::on_next()");
   if (has_selection()) {
     if (!(*m_selection)->on_next()) {
+      (*m_selection)->on_lose_focus();
       m_selection++;
+      if (has_selection()) {
+        (*m_selection)->on_focus();
+      }
     }
     return true;
   } else {
@@ -179,7 +183,11 @@ bool VirtualDrive::on_prev() {
   if (has_selection()) {
     if (!(*m_selection)->on_prev()) {
       if (m_selection != m_list_items.begin()) {
+        (*m_selection)->on_lose_focus();
         m_selection--;
+        if (has_selection()) {
+          (*m_selection)->on_focus();
+        }
       } else {
         return false;
       }

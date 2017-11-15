@@ -11,6 +11,18 @@ public:
   virtual bool on_select() = 0;
   virtual bool on_next() = 0;
   virtual bool on_prev() = 0;
+
+  virtual bool on_focus() {
+    m_focused = true;
+    return true;
+  }
+  virtual bool on_lose_focus() {
+    m_focused = false;
+    return true;
+  }
+
+protected:
+  bool m_focused;
 };
 
 class Bitmap;
