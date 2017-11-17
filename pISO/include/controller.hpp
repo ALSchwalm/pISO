@@ -7,7 +7,7 @@
 
 class Controller {
 public:
-  enum class Rotation { CCW = 0, CW = 1, UNKNOWN = 2 };
+  enum class Rotation { CW = 1, CCW = 0, UNKNOWN = 2 };
 
 private:
   static const int RoAPin = 17;

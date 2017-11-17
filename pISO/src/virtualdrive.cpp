@@ -27,7 +27,15 @@ bool VirtualDriveHeading::on_select() {
 
 Bitmap VirtualDriveHeading::render() const {
   piso_log("VirtualDriveHeading::render()");
-  return render_text(m_vdrive.name());
+  auto text = render_text(m_vdrive.name());
+  if (m_focused) {
+    Bitmap with_select(text.width() + 7, text.height());
+    with_select.blit(text, {7, 0});
+    with_select.blit(selector, {0, 0});
+    return with_select;
+  } else {
+    return text;
+  }
 }
 
 VirtualDrive::VirtualDrive(const std::string &volume_name)
@@ -141,16 +149,36 @@ bool VirtualDrive::has_selection() const {
 
 void VirtualDrive::update_list_items() {
   piso_log("VirtualDrive: Updating menu items");
+  if (has_selection()) {
+    (*m_selection)->on_lose_focus();
+  }
   m_list_items.clear();
   m_list_items.push_back(&m_heading);
   for (auto &iso : m_isos) {
     m_list_items.push_back(&iso);
   }
   m_selection = m_list_items.begin();
+  if (has_selection()) { // FIXME: only do this if something lost focus?
+    (*m_selection)->on_focus();
+  }
 }
 
 float VirtualDrive::percent_used() const {
   return std::stof(lvm_lvs_volume_value("data_percent", m_volume_name));
+}
+
+bool VirtualDrive::on_focus() {
+  GUIEventHandler::on_focus();
+  if (has_selection()) {
+    (*m_selection)->on_focus();
+  }
+}
+
+bool VirtualDrive::on_lose_focus() {
+  GUIEventHandler::on_lose_focus();
+  if (has_selection()) {
+    (*m_selection)->on_lose_focus();
+  }
 }
 
 bool VirtualDrive::on_select() {
@@ -166,10 +194,12 @@ bool VirtualDrive::on_next() {
   piso_log("VirtualDrive::on_next()");
   if (has_selection()) {
     if (!(*m_selection)->on_next()) {
-      (*m_selection)->on_lose_focus();
-      m_selection++;
-      if (has_selection()) {
+      if (std::next(m_selection) != m_list_items.end()) {
+        (*m_selection)->on_lose_focus();
+        m_selection++;
         (*m_selection)->on_focus();
+      } else {
+        return false;
       }
     }
     return true;

@@ -1076,6 +1076,15 @@ const bitmap_t font[128] = {
 
   unprintable
 };
+
+const bitmap_t selector{
+  {0, 0, 0, 0, 0},
+  {0, 0, 1, 0, 0},
+  {0, 1, 1, 1, 0},
+  {0, 0, 1, 0, 0},
+  {0, 0, 0, 0, 0},
+};
+
 // clang-format on
 
 bitmap_t render_text(const std::string &str) {

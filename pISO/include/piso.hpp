@@ -6,11 +6,27 @@
 #include "virtualdrive.hpp"
 #include <vector>
 
+class pISO;
+class NewDriveItem : public GUIItem {
+  pISO &m_piso;
+
+public:
+  NewDriveItem(pISO &piso) : m_piso{piso} {}
+  virtual ~NewDriveItem() {}
+
+  virtual bool on_select() override;
+  virtual bool on_next() override { return false; }
+  virtual bool on_prev() override { return false; }
+
+  virtual Bitmap render() const override;
+};
+
 class pISO : public GUIItem {
 private:
   std::vector<VirtualDrive> m_drives;
-  std::vector<GUIEventHandler *> m_list_items;
-  std::vector<GUIEventHandler *>::iterator m_selection;
+  std::vector<GUIItem *> m_list_items;
+  NewDriveItem m_newdrive;
+  std::vector<GUIItem *>::iterator m_selection;
 
   void update_list_items();
   bool has_selection() const;

@@ -1,6 +1,8 @@
 
 #include "display.hpp"
 #include "error.hpp"
+
+#include <algorithm>
 #include <errno.h>
 #include <string.h>
 #include <wiringPi.h>
@@ -67,24 +69,26 @@ void Display::reset() {
 }
 
 void Display::update(const Bitmap &bitmap) {
+  m_map = Bitmap(this->width, this->height); // Clear the bitmap
   m_map.blit(bitmap, {0, 0});
 
   send_spi_command(SSD1306_COMMAND::COLUMNADDR);
-  send_spi_command(0);                  // Column start address. (0 = reset)
-  send_spi_command(bitmap.width() - 1); // Column end address.
+  send_spi_command(0);                 // Column start address. (0 = reset)
+  send_spi_command(m_map.width() - 1); // Column end address.
   send_spi_command(SSD1306_COMMAND::PAGEADDR);
-  send_spi_command(0);                      // Page start address. (0 = reset)
-  send_spi_command(bitmap.width() / 8 - 1); // Page end address.
+  send_spi_command(0);                     // Page start address. (0 = reset)
+  send_spi_command(m_map.width() / 8 - 1); // Page end address.
 
   auto pages = height / 8;
   std::vector<unsigned char> data;
 
-  for (auto page = 0; page < pages; ++page) {
-    for (auto x = 0; x < width; ++x) {
+  // The screen is flipped, so iterate backwards here
+  for (auto page = pages - 1; page >= 0; --page) {
+    for (auto x = width - 1; x >= 0; --x) {
       unsigned char bits = 0;
       for (unsigned char bit = 0; bit < 8; ++bit) {
         bits = bits << 1;
-        bits |= m_map[page * 8 + 7 - bit][x];
+        bits |= m_map[page * 8 + bit][x];
       }
       data.push_back(bits);
     }

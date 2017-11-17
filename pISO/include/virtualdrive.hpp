@@ -61,6 +61,8 @@ public:
   bool unmount_external();
   MountState mount_state() const { return m_mount_state; }
 
+  virtual bool on_focus() override;
+  virtual bool on_lose_focus() override;
   virtual bool on_select() override;
   virtual bool on_next() override;
   virtual bool on_prev() override;

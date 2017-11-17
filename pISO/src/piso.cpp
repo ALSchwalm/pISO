@@ -1,11 +1,32 @@
 #include "piso.hpp"
 #include "bitmap.hpp"
 #include "config.hpp"
+#include "font.hpp"
 #include "lvmwrapper.hpp"
+
 #include <algorithm>
 #include <iostream>
 
-pISO::pISO() : m_selection{m_list_items.end()} {
+bool NewDriveItem::on_select() {
+  piso_log("NewDriveItem::on_select()");
+  m_piso.add_drive(100 * 1024 * 1024); // TODO: variable
+  return true;
+}
+
+Bitmap NewDriveItem::render() const {
+  piso_log("NewDriveItem::render()");
+  auto text = render_text("Add new drive");
+  if (m_focused) {
+    Bitmap with_select(text.width() + 7, text.height());
+    with_select.blit(text, {7, 0});
+    with_select.blit(selector, {0, 0});
+    return with_select;
+  } else {
+    return text;
+  }
+}
+
+pISO::pISO() : m_newdrive(*this), m_selection{m_list_items.end()} {
   rebuild_drives_from_volumes();
 }
 
@@ -13,11 +34,20 @@ bool pISO::has_selection() const { return m_selection != m_list_items.end(); }
 
 void pISO::update_list_items() {
   piso_log("pISO: Updating menu items");
+  // m_list_items may contain invalid pointers here (if m_drives has been
+  // modified, for example), so don't read from it.
   m_list_items.clear();
   for (auto &drive : m_drives) {
     m_list_items.push_back(&drive);
   }
+  m_list_items.push_back(&m_newdrive);
+  for (const auto &item : m_list_items) {
+    item->on_lose_focus();
+  }
   m_selection = m_list_items.begin();
+  if (has_selection()) { // FIXME: only do this if something lost focus?
+    (*m_selection)->on_focus();
+  }
 }
 
 void pISO::rebuild_drives_from_volumes() {
@@ -92,7 +122,11 @@ bool pISO::on_next() {
   piso_log("pISO::on_next()");
   if (has_selection()) {
     if (!(*m_selection)->on_next()) {
-      m_selection++;
+      if (std::next(m_selection) != m_list_items.end()) {
+        (*m_selection)->on_lose_focus();
+        m_selection++;
+        (*m_selection)->on_focus();
+      }
     }
     return true;
   } else {
@@ -105,7 +139,11 @@ bool pISO::on_prev() {
   if (has_selection()) {
     if (!(*m_selection)->on_prev()) {
       if (m_selection != m_list_items.begin()) {
+        (*m_selection)->on_lose_focus();
         m_selection--;
+        if (has_selection()) {
+          (*m_selection)->on_focus();
+        }
       } else {
         return false;
       }
@@ -119,8 +157,8 @@ bool pISO::on_prev() {
 Bitmap pISO::render() const {
   piso_log("pISO::render()");
   Bitmap bitmap;
-  for (const auto &drive : m_drives) {
-    auto drive_bitmap = drive.render();
+  for (const auto &item : m_list_items) {
+    auto drive_bitmap = item->render();
     Bitmap shifted{drive_bitmap.width() + 3, drive_bitmap.height()};
     shifted.blit(drive_bitmap, {3, 0});
 
