@@ -22,7 +22,7 @@ public:
   virtual Bitmap render() const override;
 };
 
-class VirtualDrive : public GUIItem {
+class VirtualDrive : public GUIListItem {
 public:
   enum class MountState { UNMOUNTED, INTERNAL, EXTERNAL };
 
@@ -35,11 +35,9 @@ private:
   MountState m_mount_state = MountState::UNMOUNTED;
 
   VirtualDriveHeading m_heading;
-  std::vector<GUIItem *> m_list_items;
-  std::vector<GUIItem *>::iterator m_selection;
 
-  void update_list_items();
-  bool has_selection() const;
+protected:
+  virtual void update_list_items() override;
 
 public:
   VirtualDrive(const std::string &volume_name);

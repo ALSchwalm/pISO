@@ -1,6 +1,8 @@
 #ifndef GUIEVENTHANDLER_HPP
 #define GUIEVENTHANDLER_HPP
 
+#include <vector>
+
 class GUIEventHandler {
 public:
   virtual ~GUIEventHandler() {}
@@ -40,6 +42,24 @@ public:
 class GUIItem : public GUIEventHandler, public GUIRenderable {
 public:
   virtual ~GUIItem() {}
+};
+
+class GUIListItem : public GUIItem {
+protected:
+  std::vector<GUIItem *> m_list_items;
+  std::vector<GUIItem *>::iterator m_selection = m_list_items.end();
+
+  virtual void update_list_items() = 0;
+  virtual bool has_selection() const;
+
+public:
+  virtual ~GUIListItem() {}
+
+  virtual bool on_focus() override;
+  virtual bool on_lose_focus() override;
+  virtual bool on_select() override;
+  virtual bool on_next() override;
+  virtual bool on_prev() override;
 };
 
 #endif

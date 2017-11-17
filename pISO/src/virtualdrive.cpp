@@ -39,8 +39,7 @@ Bitmap VirtualDriveHeading::render() const {
 }
 
 VirtualDrive::VirtualDrive(const std::string &volume_name)
-    : m_volume_name{volume_name}, m_heading{*this}, m_selection{
-                                                        m_list_items.end()} {
+    : m_volume_name{volume_name}, m_heading{*this} {
   m_uuid = lvm_lvs_volume_value("lv_uuid", volume_name);
   auto sizestr =
       lvm_lvs_report("lv_size --units B", volume_name)["lv_size"].asString();
@@ -143,10 +142,6 @@ bool VirtualDrive::unmount_external() {
   return true;
 }
 
-bool VirtualDrive::has_selection() const {
-  return m_selection != m_list_items.end();
-}
-
 void VirtualDrive::update_list_items() {
   piso_log("VirtualDrive: Updating menu items");
   if (has_selection()) {
@@ -168,64 +163,28 @@ float VirtualDrive::percent_used() const {
 }
 
 bool VirtualDrive::on_focus() {
-  GUIEventHandler::on_focus();
-  if (has_selection()) {
-    (*m_selection)->on_focus();
-  }
+  piso_log("VirtualDrive::on_focus()");
+  return GUIListItem::on_focus();
 }
 
 bool VirtualDrive::on_lose_focus() {
-  GUIEventHandler::on_lose_focus();
-  if (has_selection()) {
-    (*m_selection)->on_lose_focus();
-  }
+  piso_log("VirtualDrive::on_lose_focus()");
+  return GUIListItem::on_lose_focus();
 }
 
 bool VirtualDrive::on_select() {
   piso_log("VirtualDrive::on_select()");
-  if (has_selection()) {
-    return (*m_selection)->on_select();
-  } else {
-    return false;
-  }
+  return GUIListItem::on_select();
 }
 
 bool VirtualDrive::on_next() {
   piso_log("VirtualDrive::on_next()");
-  if (has_selection()) {
-    if (!(*m_selection)->on_next()) {
-      if (std::next(m_selection) != m_list_items.end()) {
-        (*m_selection)->on_lose_focus();
-        m_selection++;
-        (*m_selection)->on_focus();
-      } else {
-        return false;
-      }
-    }
-    return true;
-  } else {
-    return false;
-  }
+  return GUIListItem::on_next();
 }
 
 bool VirtualDrive::on_prev() {
   piso_log("VirtualDrive::on_prev()");
-  if (has_selection()) {
-    if (!(*m_selection)->on_prev()) {
-      if (m_selection != m_list_items.begin()) {
-        (*m_selection)->on_lose_focus();
-        m_selection--;
-        if (has_selection()) {
-          (*m_selection)->on_focus();
-        }
-      } else {
-        return false;
-      }
-    }
-    return true;
-  } else {
-    return false;
-  }
+  return GUIListItem::on_prev();
 }
 
 Bitmap VirtualDrive::render() const {

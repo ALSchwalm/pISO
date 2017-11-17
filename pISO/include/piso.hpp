@@ -21,15 +21,12 @@ public:
   virtual Bitmap render() const override;
 };
 
-class pISO : public GUIItem {
+class pISO : public GUIListItem {
 private:
   std::vector<VirtualDrive> m_drives;
-  std::vector<GUIItem *> m_list_items;
   NewDriveItem m_newdrive;
-  std::vector<GUIItem *>::iterator m_selection;
 
-  void update_list_items();
-  bool has_selection() const;
+  void update_list_items() override;
 
   pISO();
   pISO(const pISO &) = delete;

@@ -26,11 +26,7 @@ Bitmap NewDriveItem::render() const {
   }
 }
 
-pISO::pISO() : m_newdrive(*this), m_selection{m_list_items.end()} {
-  rebuild_drives_from_volumes();
-}
-
-bool pISO::has_selection() const { return m_selection != m_list_items.end(); }
+pISO::pISO() : m_newdrive(*this) { rebuild_drives_from_volumes(); }
 
 void pISO::update_list_items() {
   piso_log("pISO: Updating menu items");
@@ -111,47 +107,17 @@ float pISO::percent_used() const {
 
 bool pISO::on_select() {
   piso_log("pISO::on_select()");
-  if (has_selection()) {
-    return (*m_selection)->on_select();
-  } else {
-    return false;
-  }
+  return GUIListItem::on_select();
 }
 
 bool pISO::on_next() {
   piso_log("pISO::on_next()");
-  if (has_selection()) {
-    if (!(*m_selection)->on_next()) {
-      if (std::next(m_selection) != m_list_items.end()) {
-        (*m_selection)->on_lose_focus();
-        m_selection++;
-        (*m_selection)->on_focus();
-      }
-    }
-    return true;
-  } else {
-    return false;
-  }
+  return GUIListItem::on_next();
 }
 
 bool pISO::on_prev() {
   piso_log("pISO::on_prev()");
-  if (has_selection()) {
-    if (!(*m_selection)->on_prev()) {
-      if (m_selection != m_list_items.begin()) {
-        (*m_selection)->on_lose_focus();
-        m_selection--;
-        if (has_selection()) {
-          (*m_selection)->on_focus();
-        }
-      } else {
-        return false;
-      }
-    }
-    return true;
-  } else {
-    return false;
-  }
+  return GUIListItem::on_prev();
 }
 
 Bitmap pISO::render() const {
