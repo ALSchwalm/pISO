@@ -16,13 +16,14 @@ bool NewDriveItem::on_select() {
 Bitmap NewDriveItem::render() const {
   piso_log("NewDriveItem::render()");
   auto text = render_text("Add new drive");
+
+  Bitmap indented(text.width() + MENU_INDENT, text.height());
+  indented.blit(text, {MENU_INDENT, 0});
   if (m_focused) {
-    Bitmap with_select(text.width() + 7, text.height());
-    with_select.blit(text, {7, 0});
-    with_select.blit(selector, {0, 0});
-    return with_select;
+    indented.blit(selector, {0, 0});
+    return indented;
   } else {
-    return text;
+    return indented;
   }
 }
 

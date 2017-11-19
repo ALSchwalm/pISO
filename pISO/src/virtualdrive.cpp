@@ -28,13 +28,14 @@ bool VirtualDriveHeading::on_select() {
 Bitmap VirtualDriveHeading::render() const {
   piso_log("VirtualDriveHeading::render()");
   auto text = render_text(m_vdrive.name());
+
+  Bitmap indented(text.width() + MENU_INDENT, text.height());
+  indented.blit(text, {MENU_INDENT, 0});
   if (m_focused) {
-    Bitmap with_select(text.width() + 7, text.height());
-    with_select.blit(text, {7, 0});
-    with_select.blit(selector, {0, 0});
-    return with_select;
+    indented.blit(selector, {0, 0});
+    return indented;
   } else {
-    return text;
+    return indented;
   }
 }
 
@@ -82,7 +83,16 @@ bool VirtualDrive::mount_internal() {
   auto scripts_path = config_getenv("PISO_SCRIPTS_PATH");
   auto vdrive_script = scripts_path + "/vdrive.sh";
 
-  run_command("sh ", vdrive_script, " mount-internal ", name(), " ", path);
+  auto mount_res =
+      run_command("sh ", vdrive_script, " mount-internal ", name(), " ", path);
+  piso_log("mount-internal returned: ", mount_res);
+
+  std::istringstream isostream{mount_res};
+  std::string iso_path;
+  while (std::getline(isostream, iso_path, '\n')) {
+    m_isos.emplace_back(iso_path);
+  }
+
   update_list_items();
   m_mount_state = MountState::INTERNAL;
   return true;
@@ -96,6 +106,12 @@ bool VirtualDrive::unmount_internal() {
     return false;
   }
 
+  for (auto &iso : m_isos) {
+    if (iso.is_mounted()) {
+      iso.unmount();
+    }
+  }
+
   auto base_mount = config_getenv("PISO_BASE_MOUNT");
   auto path = base_mount + "/" + name();
 
@@ -103,6 +119,9 @@ bool VirtualDrive::unmount_internal() {
   auto vdrive_script = scripts_path + "/vdrive.sh";
 
   run_command("sh ", vdrive_script, " unmount-internal ", path);
+
+  m_isos.clear();
+
   update_list_items();
   m_mount_state = MountState::UNMOUNTED;
   return true;
@@ -144,13 +163,13 @@ bool VirtualDrive::unmount_external() {
 
 void VirtualDrive::update_list_items() {
   piso_log("VirtualDrive: Updating menu items");
-  if (has_selection()) {
-    (*m_selection)->on_lose_focus();
-  }
   m_list_items.clear();
   m_list_items.push_back(&m_heading);
   for (auto &iso : m_isos) {
     m_list_items.push_back(&iso);
+  }
+  for (const auto &item : m_list_items) {
+    item->on_lose_focus();
   }
   m_selection = m_list_items.begin();
   if (has_selection()) { // FIXME: only do this if something lost focus?
@@ -194,10 +213,11 @@ Bitmap VirtualDrive::render() const {
     auto iso_bitmap = iso.render();
     auto old_height = bitmap.height();
     bitmap.expand_height(iso_bitmap.height());
-    if (iso_bitmap.width() > bitmap.width()) {
-      bitmap.expand_width(iso_bitmap.width() - bitmap.width());
+    if (iso_bitmap.width() + ISO_LABEL_INDENT > bitmap.width()) {
+      bitmap.expand_width(iso_bitmap.width() - bitmap.width() +
+                          ISO_LABEL_INDENT);
     }
-    bitmap.blit(iso_bitmap, {0, old_height});
+    bitmap.blit(iso_bitmap, {ISO_LABEL_INDENT, old_height});
   }
   return bitmap;
 }

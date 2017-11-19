@@ -27,6 +27,7 @@ public:
   enum class MountState { UNMOUNTED, INTERNAL, EXTERNAL };
 
 private:
+  static const int ISO_LABEL_INDENT = 5;
   std::string m_volume_name;
   std::string m_uuid;
   unsigned long long m_size;

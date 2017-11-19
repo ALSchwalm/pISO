@@ -49,9 +49,17 @@ bool ISO::on_select() {
 
 Bitmap ISO::render() const {
   piso_log("ISO::render()");
-  auto buff = new char[m_path.size() + 1];
-  m_path.copy(buff, m_path.size() + 1);
-  auto bitmap = render_text(basename(buff));
+  auto buff = new char[m_path.size() + 1]();
+  m_path.copy(buff, m_path.size());
+  auto text = render_text(basename(buff));
   delete[] buff;
-  return bitmap;
+
+  Bitmap indented(text.width() + MENU_INDENT, text.height());
+  indented.blit(text, {MENU_INDENT, 0});
+  if (m_focused) {
+    indented.blit(selector, {0, 0});
+    return indented;
+  } else {
+    return indented;
+  }
 }
