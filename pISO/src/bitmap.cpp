@@ -20,13 +20,28 @@ void Bitmap::blit(const Bitmap &other, position_t position, bool transparent) {
     for (auto j = 0; j < other.width(); ++j) {
       auto offset_x = position.first;
       auto offset_y = position.second;
-      if (i + offset_y < this->height() && j + offset_x < this->width()) {
+      if (i + offset_y < this->height() && j + offset_x < this->width() &&
+          i < other.height() && j < other.width()) {
         if (!transparent || other[i][j]) {
           (*this)[i + offset_y][j + offset_x] = other[i][j];
         }
       }
     }
   }
+}
+
+Bitmap Bitmap::rotate(Direction dir) const {
+  Bitmap out{height(), width()};
+  for (auto y = 0; y < height(); ++y) {
+    for (auto x = 0; x < width(); ++x) {
+      if (dir == Direction::Left) {
+        out[width() - x - 1][y] = (*this)[y][x];
+      } else {
+        out[x][height() - y - 1] = (*this)[y][x];
+      }
+    }
+  }
+  return out;
 }
 
 void Bitmap::expand_height(std::size_t count) {

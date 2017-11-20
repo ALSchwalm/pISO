@@ -47,8 +47,6 @@ class Display {
   static const int speed = 8000000;
   static const int dc_pin = 19;
   static const int rst_pin = 25;
-  static const int width = 128;
-  static const int height = 64;
 
   Bitmap m_map;
   int m_spi_fd;
@@ -62,6 +60,9 @@ class Display {
   Display &operator=(const Display &) = delete;
 
 public:
+  static const int width = 128;
+  static const int height = 64;
+
   static Display &instance() {
     static Display display;
     return display;

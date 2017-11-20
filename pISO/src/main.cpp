@@ -16,7 +16,6 @@ int main() {
   }
 
   auto &piso = pISO::instance();
-  Display::instance().update(piso.render());
 
   auto &controller = Controller::instance();
   controller.on_rotate = [&](Controller::Rotation rot) {
@@ -37,6 +36,7 @@ int main() {
   button.start();
 
   while (true) {
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    Display::instance().update(piso.render());
+    std::this_thread::sleep_for(std::chrono::seconds(10));
   }
 }

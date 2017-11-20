@@ -1,10 +1,12 @@
 #include "piso.hpp"
 #include "bitmap.hpp"
 #include "config.hpp"
+#include "display.hpp"
 #include "font.hpp"
 #include "lvmwrapper.hpp"
 
 #include <algorithm>
+#include <iomanip>
 #include <iostream>
 
 bool NewDriveItem::on_select() {
@@ -136,5 +138,18 @@ Bitmap pISO::render() const {
     }
     bitmap.blit(shifted, {0, old_height}, true);
   }
-  return bitmap;
+
+  // TODO: Probably implement scrolling here
+  Bitmap out{Display::width, Display::height};
+  out.blit(bitmap, {0, 0});
+
+  auto percent_free = 100 - percent_used();
+  std::stringstream conv;
+  conv << std::fixed << std::setprecision(2) << percent_free;
+  std::string sidebar_contents = conv.str() + "% Free";
+  auto sidebar = render_text(sidebar_contents);
+  sidebar = sidebar.rotate(Bitmap::Direction::Left);
+
+  out.blit(sidebar, {out.width() - sidebar.width(), 0});
+  return out;
 }

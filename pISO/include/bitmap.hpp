@@ -49,6 +49,9 @@ public:
 
   void blit(const Bitmap &, position_t position, bool transparent = false);
 
+  enum class Direction { Left, Right };
+  Bitmap rotate(Direction) const;
+
   Bitmap() : m_map{} {}
   Bitmap(const std::initializer_list<std::vector<char>> &map) : m_map{map} {}
   Bitmap(std::size_t width, std::size_t height)
