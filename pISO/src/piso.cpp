@@ -6,7 +6,7 @@
 #include "lvmwrapper.hpp"
 
 #include <algorithm>
-#include <iomanip>
+#include <cmath>
 #include <iostream>
 
 bool NewDriveItem::on_select() {
@@ -144,9 +144,8 @@ Bitmap pISO::render() const {
   out.blit(bitmap, {0, 0});
 
   auto percent_free = 100 - percent_used();
-  std::stringstream conv;
-  conv << std::fixed << std::setprecision(2) << percent_free;
-  std::string sidebar_contents = conv.str() + "% Free";
+  std::string sidebar_contents =
+      std::to_string(std::floor(percent_free)) + "% Free";
   auto sidebar = render_text(sidebar_contents);
   sidebar = sidebar.rotate(Bitmap::Direction::Left);
 
