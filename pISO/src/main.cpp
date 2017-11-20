@@ -16,6 +16,7 @@ int main() {
   }
 
   auto &piso = pISO::instance();
+  Display::instance().update(piso.render());
 
   auto &controller = Controller::instance();
   controller.on_rotate = [&](Controller::Rotation rot) {
