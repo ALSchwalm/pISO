@@ -56,6 +56,9 @@ Bitmap ISO::render() const {
 
   Bitmap indented(text.width() + MENU_INDENT, text.height());
   indented.blit(text, {MENU_INDENT, 0});
+  if (m_mounted) {
+    indented.blit(mount_indicator, {selector.width(), 0});
+  }
   if (m_focused) {
     indented.blit(selector, {0, 0});
     return indented;

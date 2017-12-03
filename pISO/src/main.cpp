@@ -29,7 +29,7 @@ int main() {
   };
   controller.start();
 
-  GPIO::PushButton button(22, GPIO::GPIO_PULL::UP);
+  GPIO::PushButton button(27, GPIO::GPIO_PULL::UP);
   button.f_pushed = [&]() {
     piso.on_select();
     Display::instance().update(piso.render());

@@ -11,7 +11,7 @@ public:
 
 private:
   static const int RoAPin = 17;
-  static const int RoBPin = 27;
+  static const int RoBPin = 22;
 
   unsigned char read_a() const;
   unsigned char read_b() const;

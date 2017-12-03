@@ -42,6 +42,7 @@ void Controller::rotary_deal() {
 
   // wait until an update
   while (m_pstate == (m_nstate = rot_state())) {
+    delayMicroseconds(20000);
   }
 
   // update

@@ -11,7 +11,7 @@
 
 bool NewDriveItem::on_select() {
   piso_log("NewDriveItem::on_select()");
-  m_piso.add_drive(100 * 1024 * 1024); // TODO: variable
+  m_piso.add_drive(53687091200ull); // TODO: variable
   return true;
 }
 
@@ -143,8 +143,8 @@ Bitmap pISO::render() const {
   Bitmap out{Display::width, Display::height};
   out.blit(bitmap, {0, 0});
 
-  auto percent_free = 100 - percent_used();
-  std::string sidebar_contents = std::to_string((int)percent_free) + "% Free";
+  int percent_free = 100 - percent_used();
+  std::string sidebar_contents = std::to_string(percent_free) + "% Free";
   auto sidebar = render_text(sidebar_contents);
   sidebar = sidebar.rotate(Bitmap::Direction::Left);
 
