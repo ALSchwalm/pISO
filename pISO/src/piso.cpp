@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <cmath>
 #include <iostream>
+#include <linux/usb/ch9.h> // For USB_CLASS_PER_INTERFACE
 
 bool NewDriveItem::on_select() {
   piso_log("NewDriveItem::on_select()");
@@ -29,7 +30,55 @@ Bitmap NewDriveItem::render() const {
   }
 }
 
-pISO::pISO() : m_newdrive(*this) { rebuild_drives_from_volumes(); }
+pISO::pISO() : m_newdrive(*this) {
+  rebuild_drives_from_volumes();
+  init_usbgx();
+}
+
+void pISO::init_usbgx() {
+  int usbg_ret;
+  usbg_state *usb_state;
+
+  struct usbg_gadget_attrs g_attrs = {
+      .bcdUSB = 0x0200, // USB2
+      .bDeviceClass = USB_CLASS_PER_INTERFACE,
+      .bDeviceSubClass = 0x00,
+      .bDeviceProtocol = 0x00,
+      .bMaxPacketSize0 = 64,
+      .idVendor = VENDOR_ID,
+      .idProduct = PRODUCT_ID,
+      .bcdDevice = 0x0100, // v1.0.0
+  };
+
+  struct usbg_gadget_strs g_strs;
+  g_strs.serial = "0000000000000000";
+  g_strs.manufacturer = "Adam Schwalm & James Tate";
+  g_strs.product = "pISO";
+
+  usbg_ret = usbg_init("/sys/kernel/config", &usb_state);
+  if (usbg_ret != USBG_SUCCESS) {
+    piso_error("init_usbgx error:", usbg_error_name((usbg_error)usbg_ret), ": ",
+               usbg_strerror((usbg_error)usbg_ret));
+  }
+
+  usbg_ret = usbg_create_gadget(usb_state, "g1", &g_attrs, &g_strs, &m_gadget);
+  if (usbg_ret != USBG_SUCCESS) {
+    usbg_cleanup(usb_state);
+    piso_error("init_usbgx error: ", usbg_error_name((usbg_error)usbg_ret),
+               ": ", usbg_strerror((usbg_error)usbg_ret));
+  }
+
+  struct usbg_config_strs c_strs = {"Config 1"};
+  struct usbg_config_attrs c_attrs = {.bmAttributes = 0x80, .bMaxPower = 250};
+
+  usbg_ret =
+      usbg_create_config(m_gadget, 1, "c", &c_attrs, &c_strs, &m_usb_config);
+  if (usbg_ret != USBG_SUCCESS) {
+    usbg_cleanup(usb_state);
+    piso_error("init_usbgx error: ", usbg_error_name((usbg_error)usbg_ret),
+               ": ", usbg_strerror((usbg_error)usbg_ret));
+  }
+}
 
 void pISO::update_list_items() {
   piso_log("pISO: Updating menu items");
@@ -128,8 +177,9 @@ Bitmap pISO::render() const {
   Bitmap bitmap;
   for (const auto &item : m_list_items) {
     auto drive_bitmap = item->render();
-    Bitmap shifted{drive_bitmap.width() + 3, drive_bitmap.height()};
-    shifted.blit(drive_bitmap, {3, 0});
+    Bitmap shifted{drive_bitmap.width() + MENU_LEFT_SPACE,
+                   drive_bitmap.height()};
+    shifted.blit(drive_bitmap, {MENU_LEFT_SPACE, 0});
 
     auto old_height = bitmap.height();
     bitmap.expand_height(shifted.height());
@@ -146,8 +196,13 @@ Bitmap pISO::render() const {
   int percent_free = 100 - percent_used();
   std::string sidebar_contents = std::to_string(percent_free) + "% Free";
   auto sidebar = render_text(sidebar_contents);
-  sidebar = sidebar.rotate(Bitmap::Direction::Left);
+  Bitmap sidebar_with_border{sidebar.width(), sidebar.height() + SIDEBAR_SPACE};
+  for (auto &pixel : sidebar_with_border[0]) {
+    pixel = 1; // Create the 'border' on the right
+  }
+  sidebar_with_border.blit(sidebar, {0, SIDEBAR_SPACE});
+  sidebar_with_border = sidebar_with_border.rotate(Bitmap::Direction::Left);
 
-  out.blit(sidebar, {out.width() - sidebar.width(), 0});
+  out.blit(sidebar_with_border, {out.width() - sidebar_with_border.width(), 0});
   return out;
 }

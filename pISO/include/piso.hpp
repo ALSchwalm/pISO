@@ -4,6 +4,8 @@
 #include "error.hpp"
 #include "guiitem.hpp"
 #include "virtualdrive.hpp"
+
+#include <usbg/usbg.h>
 #include <vector>
 
 class pISO;
@@ -23,8 +25,15 @@ public:
 
 class pISO : public GUIListItem {
 private:
+  static const int VENDOR_ID = 0x1d6b;  // Linux Foundation// Linux Foundation
+  static const int PRODUCT_ID = 0x0104; // Multifunction Composite Gadget
+  static const int SIDEBAR_SPACE = 2;
+  static const int MENU_LEFT_SPACE = 3;
+
   std::vector<VirtualDrive> m_drives;
   NewDriveItem m_newdrive;
+  usbg_gadget *m_gadget;
+  usbg_config *m_usb_config;
 
   void update_list_items() override;
 
@@ -33,6 +42,7 @@ private:
   pISO &operator=(const pISO &) = delete;
 
   void rebuild_drives_from_volumes();
+  void init_usbgx();
 
 public:
   virtual ~pISO(){};

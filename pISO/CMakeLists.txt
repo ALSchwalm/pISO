@@ -27,6 +27,7 @@ target_link_libraries (pISO
   cppgpio
   ${JSONCPP_LIBRARIES}
   ${CMAKE_THREAD_LIBS_INIT}
+  -lusbgx
   -lwiringPi)
 
 install (TARGETS pISO DESTINATION bin)
