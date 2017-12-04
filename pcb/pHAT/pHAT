@@ -1,0 +1,23 @@
+Reference, Quantity, Value, Datasheet, Price
+C1 C2 VBAT1 VCOMH1 VDD1 ,5,2.2uF,https://www.digikey.com/product-detail/en/samsung-electro-mechanics/CL21F225ZOFNNNG/1276-6497-1-ND/5958125,0.02
+IREF1 ,1,390,https://www.digikey.com/product-detail/en/stackpole-electronics-inc/RMCF0805JT390R/RMCF0805JT390RCT-ND/1942549,0.006
+P2 ,1,USB_A,https://www.digikey.com/product-detail/en/cui-inc/UP2-AH-1-TH/102-3996-ND/6187911,0.38
+P4 ,1,CONN_01X30,http://www.wisechip.com.tw/s/2/product-380039/0-96%E2%80%9D-OLED-Display-UG-2864HLBEG01.html,
+Q1 ,1,XTL,https://www.digikey.com/product-detail/en/abracon-llc/ABLS-12.000MHZ-B2-T/535-9067-1-ND/675584,0.17
+R1 R2 R3 ,3,50k,https://www.digikey.com/product-detail/en/stackpole-electronics-inc/RMCF0805JT51K0/RMCF0805JT51K0CT-ND/1942589,0.006
+R4 ,1,2.7K,https://www.digikey.com/product-detail/en/stackpole-electronics-inc/RMCF0805JT2K70/RMCF0805JT2K70CT-ND/1942565,0.006
+R5 ,1,10k,https://www.digikey.com/product-detail/en/stackpole-electronics-inc/RMCF0805JT10K0/RMCF0805JT10K0CT-ND/1942577,0.006
+U1 ,1,FE1.1S,https://goo.gl/x2qU1s,0.3
+U2 ,1,ATTINY102,https://www.digikey.com/product-detail/en/microchip-technology/ATTINY102-SSFR/1611-ATTINY102-SSFRCT-ND/6833015,0.3
+VCC1 VCC2 VCC3 VCC4 ,4,10uF,https://www.digikey.com/product-detail/en/samsung-electro-mechanics/CL21A106KQCLRNC/1276-2405-1-ND/3890491,0.03
+W10 ,1,SCLK,https://www.digikey.com/product-detail/en/mill-max-manufacturing-corp/0906-3-15-20-75-14-11-0/ED8183-ND/1147051,0.3
+W11 ,1,DC,https://www.digikey.com/product-detail/en/mill-max-manufacturing-corp/0906-3-15-20-75-14-11-0/ED8183-ND/1147051,0.3
+W12 ,1,GND,https://www.digikey.com/product-detail/en/mill-max-manufacturing-corp/0906-3-15-20-75-14-11-0/ED8183-ND/1147051,0.3
+W13 ,1,3V3,https://www.digikey.com/product-detail/en/mill-max-manufacturing-corp/0906-3-15-20-75-14-11-0/ED8183-ND/1147051,0.3
+W14 ,1,D_N,https://www.digikey.com/product-detail/en/mill-max-manufacturing-corp/0906-3-15-20-75-14-11-0/ED8183-ND/1147051,0.3
+W15 ,1,D_P,https://www.digikey.com/product-detail/en/mill-max-manufacturing-corp/0906-3-15-20-75-14-11-0/ED8183-ND/1147051,0.3
+W5 ,1,POWER,https://www.digikey.com/product-detail/en/mill-max-manufacturing-corp/0906-3-15-20-75-14-11-0/ED8183-ND/1147051,0.3
+A1 B1 NO1 W6 ,4,VDD5,https://www.digikey.com/product-detail/en/mill-max-manufacturing-corp/0906-3-15-20-75-14-11-0/ED8183-ND/1147051,0.3
+W7 ,1,RST,https://www.digikey.com/product-detail/en/mill-max-manufacturing-corp/0906-3-15-20-75-14-11-0/ED8183-ND/1147051,0.3
+W8 ,1,CS,https://www.digikey.com/product-detail/en/mill-max-manufacturing-corp/0906-3-15-20-75-14-11-0/ED8183-ND/1147051,0.3
+W9 ,1,MOSI,https://www.digikey.com/product-detail/en/mill-max-manufacturing-corp/0906-3-15-20-75-14-11-0/ED8183-ND/1147051,0.3
