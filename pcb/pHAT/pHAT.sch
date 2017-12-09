@@ -1,953 +1,677 @@
 EESchema Schematic File Version 2
 LIBS:pHAT-rescue
 LIBS:pISO
+LIBS:analog_switches
+LIBS:switches
 LIBS:pHAT-cache
 EELAYER 25 0
 EELAYER END
-$Descr A4 11693 8268
+$Descr A 11000 8500
 encoding utf-8
 Sheet 1 1
-Title ""
+Title "pISO"
 Date ""
-Rev ""
+Rev "Rev2"
 Comp ""
-Comment1 ""
+Comment1 "proto"
 Comment2 ""
 Comment3 ""
 Comment4 ""
 $EndDescr
 $Comp
 L GND #PWR01
-U 1 1 59A620D0
-P 1700 4150
-F 0 "#PWR01" H 1700 3900 50  0001 C CNN
-F 1 "GND" H 1700 4000 50  0000 C CNN
-F 2 "" H 1700 4150 50  0000 C CNN
-F 3 "" H 1700 4150 50  0000 C CNN
-	1    1700 4150
-	1    0    0    -1  
-$EndComp
-$Comp
-L GND #PWR02
 U 1 1 59A62435
-P 4500 3100
-F 0 "#PWR02" H 4500 2850 50  0001 C CNN
-F 1 "GND" H 4500 2950 50  0000 C CNN
-F 2 "" H 4500 3100 50  0000 C CNN
-F 3 "" H 4500 3100 50  0000 C CNN
-	1    4500 3100
+P 2950 3350
+F 0 "#PWR01" H 2950 3100 50  0001 C CNN
+F 1 "GND" H 2950 3200 50  0000 C CNN
+F 2 "" H 2950 3350 50  0000 C CNN
+F 3 "" H 2950 3350 50  0000 C CNN
+	1    2950 3350
 	1    0    0    -1  
 $EndComp
-Text Label 1800 3450 0    60   ~ 0
+Text Label 2850 4150 0    60   ~ 0
 CS
-Text Label 1800 3750 0    60   ~ 0
+Text Label 2850 4450 0    60   ~ 0
 SCLK
-Text Label 1800 3600 0    60   ~ 0
+Text Label 2850 4300 0    60   ~ 0
 MOSI
-Text Label 6700 4050 2    60   ~ 0
+Text Label 6300 4100 2    60   ~ 0
 CS
-Text Label 6700 4150 2    60   ~ 0
+Text Label 6300 4200 2    60   ~ 0
 RST
-Text Label 1800 3300 0    60   ~ 0
+Text Label 2850 4000 0    60   ~ 0
 RST
-Text Label 6700 4250 2    60   ~ 0
-D/C
-Text Label 1800 3900 0    60   ~ 0
+Text Label 6300 4300 2    60   ~ 0
 DC
-Text Label 6700 4550 2    60   ~ 0
+Text Label 2850 4600 0    60   ~ 0
+DC
+Text Label 6300 4600 2    60   ~ 0
 SCLK
-Text Label 6700 4650 2    60   ~ 0
+Text Label 6300 4700 2    60   ~ 0
 MOSI
-$Comp
-L TEST_1P W2
-U 1 1 59A7C8BC
-P 2850 3250
-F 0 "W2" H 2850 3520 50  0000 C CNN
-F 1 "A" H 2850 3450 50  0000 C CNN
-F 2 "pISO:swpins" H 3050 3250 50  0001 C CNN
-F 3 "" H 3050 3250 50  0000 C CNN
-F 4 "4" H 2850 3250 60  0001 C CNN "Price"
-	1    2850 3250
-	0    1    1    0   
-$EndComp
-$Comp
-L TEST_1P W3
-U 1 1 59A7C939
-P 3100 3150
-F 0 "W3" H 3100 3420 50  0000 C CNN
-F 1 "B" H 3100 3350 50  0000 C CNN
-F 2 "pISO:swpins" H 3300 3150 50  0001 C CNN
-F 3 "" H 3300 3150 50  0000 C CNN
-	1    3100 3150
-	0    1    1    0   
-$EndComp
-$Comp
-L TEST_1P W1
-U 1 1 59A7CD30
-P 2600 3350
-F 0 "W1" H 2600 3620 50  0000 C CNN
-F 1 "NO" H 2600 3550 50  0000 C CNN
-F 2 "pISO:swpins" H 2800 3350 50  0001 C CNN
-F 3 "" H 2800 3350 50  0000 C CNN
-	1    2600 3350
-	0    1    1    0   
-$EndComp
-$Comp
-L TEST_1P W4
-U 1 1 59A7DD59
-P 1700 4050
-F 0 "W4" H 1700 4320 50  0000 C CNN
-F 1 "COM" H 1700 4250 50  0000 C CNN
-F 2 "pISO:swpins" H 1900 4050 50  0001 C CNN
-F 3 "" H 1900 4050 50  0001 C CNN
-	1    1700 4050
-	0    1    1    0   
-$EndComp
-$Comp
-L USB_B-RESCUE-pHAT P3
-U 1 1 59A7E976
-P 5550 2650
-F 0 "P3" H 5750 2450 50  0000 C CNN
-F 1 "USB_B" H 5500 2850 50  0000 C CNN
-F 2 "pISO:usb_micro" V 5500 2550 50  0001 C CNN
-F 3 "" V 5500 2550 50  0000 C CNN
-	1    5550 2650
-	1    0    0    -1  
-$EndComp
-$Comp
-L GND #PWR03
-U 1 1 59A7F53B
-P 5650 3050
-F 0 "#PWR03" H 5650 2800 50  0001 C CNN
-F 1 "GND" H 5650 2900 50  0000 C CNN
-F 2 "" H 5650 3050 50  0000 C CNN
-F 3 "" H 5650 3050 50  0000 C CNN
-	1    5650 3050
-	1    0    0    -1  
-$EndComp
 $Comp
 L TEST_1P W5
 U 1 1 59A9707C
-P 4000 2950
-F 0 "W5" H 4000 3220 50  0000 C CNN
-F 1 "POWER" H 4000 3150 50  0000 C CNN
-F 2 "pISO:SLP" H 4200 2950 50  0001 C CNN
-F 3 "https://www.digikey.com/product-detail/en/mill-max-manufacturing-corp/0906-3-15-20-75-14-11-0/ED8183-ND/1147051" H 4200 2950 50  0001 C CNN
-F 4 ".30" H 4000 2950 60  0001 C CNN "Price"
-	1    4000 2950
+P 2450 3200
+F 0 "W5" H 2450 3470 50  0000 C CNN
+F 1 "POWER" H 2450 3400 50  0000 C CNN
+F 2 "pISO:SLP" H 2650 3200 50  0001 C CNN
+F 3 "https://www.digikey.com/product-detail/en/mill-max-manufacturing-corp/0906-3-15-20-75-14-11-0/ED8183-ND/1147051" H 2650 3200 50  0001 C CNN
+F 4 ".30" H 2450 3200 60  0001 C CNN "Price"
+	1    2450 3200
 	1    0    0    -1  
 $EndComp
 $Comp
 L CONN_01X30 P4
 U 1 1 59AC40C4
-P 6900 4300
-F 0 "P4" H 6900 5850 50  0000 C CNN
-F 1 "CONN_01X30" V 7000 4300 50  0000 C CNN
-F 2 "pISO:FPC_30" H 6900 4300 50  0001 C CNN
-F 3 "http://www.wisechip.com.tw/s/2/product-380039/0-96%E2%80%9D-OLED-Display-UG-2864HLBEG01.html" H 6900 4300 50  0001 C CNN
-	1    6900 4300
+P 6500 4350
+F 0 "P4" H 6500 5900 50  0000 C CNN
+F 1 "CONN_01X30" V 6600 4350 50  0000 C CNN
+F 2 "pISO:FPC_30" H 6500 4350 50  0001 C CNN
+F 3 "http://www.wisechip.com.tw/s/2/product-380039/0-96%E2%80%9D-OLED-Display-UG-2864HLBEG01.html" H 6500 4350 50  0001 C CNN
+	1    6500 4350
 	1    0    0    -1  
 $EndComp
-Text Label 6700 3950 2    60   ~ 0
+Text Label 6300 4000 2    60   ~ 0
 GND
-Text Label 6700 3750 2    60   ~ 0
+Text Label 6300 3800 2    60   ~ 0
 GND
-Text Label 5900 3550 2    60   ~ 0
+Text Label 5500 3600 2    60   ~ 0
 GND
 $Comp
 L C C1
 U 1 1 59AC4E95
-P 6250 2950
-F 0 "C1" H 6275 3050 50  0000 L CNN
-F 1 "2.2uF" H 6275 2850 50  0000 L CNN
-F 2 "Capacitors_SMD:C_0805" H 6288 2800 50  0001 C CNN
-F 3 "https://www.digikey.com/product-detail/en/samsung-electro-mechanics/CL21F225ZOFNNNG/1276-6497-1-ND/5958125" H 6250 2950 50  0001 C CNN
-F 4 ".02" H 6250 2950 60  0001 C CNN "Price"
-	1    6250 2950
+P 5850 3000
+F 0 "C1" H 5875 3100 50  0000 L CNN
+F 1 "2.2uF" H 5875 2900 50  0000 L CNN
+F 2 "Capacitors_SMD:C_0805" H 5888 2850 50  0001 C CNN
+F 3 "https://www.digikey.com/product-detail/en/samsung-electro-mechanics/CL21F225ZOFNNNG/1276-6497-1-ND/5958125" H 5850 3000 50  0001 C CNN
+F 4 ".02" H 5850 3000 60  0001 C CNN "Price"
+	1    5850 3000
 	0    -1   -1   0   
 $EndComp
 $Comp
 L C C2
 U 1 1 59AC5106
-P 6300 3150
-F 0 "C2" H 6325 3250 50  0000 L CNN
-F 1 "2.2uF" H 6325 3050 50  0000 L CNN
-F 2 "Capacitors_SMD:C_0805" H 6338 3000 50  0001 C CNN
-F 3 "https://www.digikey.com/product-detail/en/samsung-electro-mechanics/CL21F225ZOFNNNG/1276-6497-1-ND/5958125" H 6300 3150 50  0001 C CNN
-F 4 ".02" H 6300 3150 60  0001 C CNN "Price"
-	1    6300 3150
+P 5900 3200
+F 0 "C2" H 5925 3300 50  0000 L CNN
+F 1 "2.2uF" H 5925 3100 50  0000 L CNN
+F 2 "Capacitors_SMD:C_0805" H 5938 3050 50  0001 C CNN
+F 3 "https://www.digikey.com/product-detail/en/samsung-electro-mechanics/CL21F225ZOFNNNG/1276-6497-1-ND/5958125" H 5900 3200 50  0001 C CNN
+F 4 ".02" H 5900 3200 60  0001 C CNN "Price"
+	1    5900 3200
 	0    -1   -1   0   
 $EndComp
 $Comp
 L C VCC1
 U 1 1 59AC5455
-P 5850 5550
-F 0 "VCC1" H 5875 5650 50  0000 L CNN
-F 1 "10uF" H 5875 5450 50  0000 L CNN
-F 2 "Capacitors_SMD:C_0805" H 5888 5400 50  0001 C CNN
-F 3 "https://www.digikey.com/product-detail/en/samsung-electro-mechanics/CL21A106KQCLRNC/1276-2405-1-ND/3890491" H 5850 5550 50  0001 C CNN
-F 4 ".03" H 5850 5550 60  0001 C CNN "Price"
-	1    5850 5550
+P 5450 5600
+F 0 "VCC1" H 5475 5700 50  0000 L CNN
+F 1 "10uF" H 5475 5500 50  0000 L CNN
+F 2 "Capacitors_SMD:C_0805" H 5488 5450 50  0001 C CNN
+F 3 "https://www.digikey.com/product-detail/en/samsung-electro-mechanics/CL21A106KQCLRNC/1276-2405-1-ND/3890491" H 5450 5600 50  0001 C CNN
+F 4 ".03" H 5450 5600 60  0001 C CNN "Price"
+	1    5450 5600
 	0    -1   -1   0   
 $EndComp
 $Comp
 L C VBAT1
 U 1 1 59AC5566
-P 6100 3350
-F 0 "VBAT1" H 6125 3450 50  0000 L CNN
-F 1 "2.2uF" H 6125 3250 50  0000 L CNN
-F 2 "Capacitors_SMD:C_0805" H 6138 3200 50  0001 C CNN
-F 3 "https://www.digikey.com/product-detail/en/samsung-electro-mechanics/CL21F225ZOFNNNG/1276-6497-1-ND/5958125" H 6100 3350 50  0001 C CNN
-F 4 ".02" H 6100 3350 60  0001 C CNN "Price"
-	1    6100 3350
+P 5700 3400
+F 0 "VBAT1" H 5725 3500 50  0000 L CNN
+F 1 "2.2uF" H 5725 3300 50  0000 L CNN
+F 2 "Capacitors_SMD:C_0805" H 5738 3250 50  0001 C CNN
+F 3 "https://www.digikey.com/product-detail/en/samsung-electro-mechanics/CL21F225ZOFNNNG/1276-6497-1-ND/5958125" H 5700 3400 50  0001 C CNN
+F 4 ".02" H 5700 3400 60  0001 C CNN "Price"
+	1    5700 3400
 	0    -1   -1   0   
 $EndComp
 $Comp
 L C VDD1
 U 1 1 59AC5739
-P 6250 3650
-F 0 "VDD1" H 6275 3750 50  0000 L CNN
-F 1 "2.2uF" H 6275 3550 50  0000 L CNN
-F 2 "Capacitors_SMD:C_0805" H 6288 3500 50  0001 C CNN
-F 3 "https://www.digikey.com/product-detail/en/samsung-electro-mechanics/CL21F225ZOFNNNG/1276-6497-1-ND/5958125" H 6250 3650 50  0001 C CNN
-F 4 ".02" H 6250 3650 60  0001 C CNN "Price"
-	1    6250 3650
+P 5850 3700
+F 0 "VDD1" H 5875 3800 50  0000 L CNN
+F 1 "2.2uF" H 5875 3600 50  0000 L CNN
+F 2 "Capacitors_SMD:C_0805" H 5888 3550 50  0001 C CNN
+F 3 "https://www.digikey.com/product-detail/en/samsung-electro-mechanics/CL21F225ZOFNNNG/1276-6497-1-ND/5958125" H 5850 3700 50  0001 C CNN
+F 4 ".02" H 5850 3700 60  0001 C CNN "Price"
+	1    5850 3700
 	0    -1   -1   0   
 $EndComp
 $Comp
-L +3.3V #PWR04
+L +3.3V #PWR02
 U 1 1 59AC5DDC
-P 6500 2650
-F 0 "#PWR04" H 6500 2500 50  0001 C CNN
-F 1 "+3.3V" H 6500 2790 50  0000 C CNN
-F 2 "" H 6500 2650 50  0000 C CNN
-F 3 "" H 6500 2650 50  0000 C CNN
-	1    6500 2650
+P 6100 2700
+F 0 "#PWR02" H 6100 2550 50  0001 C CNN
+F 1 "+3.3V" H 6100 2840 50  0000 C CNN
+F 2 "" H 6100 2700 50  0000 C CNN
+F 3 "" H 6100 2700 50  0000 C CNN
+	1    6100 2700
 	1    0    0    -1  
 $EndComp
-Text Label 6700 3850 2    60   ~ 0
+Text Label 6300 3900 2    60   ~ 0
 GND
-NoConn ~ 6700 4350
-NoConn ~ 6700 4450
-NoConn ~ 6700 4750
-NoConn ~ 6700 4850
-NoConn ~ 6700 4950
-NoConn ~ 6700 5050
-NoConn ~ 6700 5150
-NoConn ~ 6700 5250
+NoConn ~ 6300 4400
+NoConn ~ 6300 4500
+NoConn ~ 6300 4800
+NoConn ~ 6300 4900
+NoConn ~ 6300 5000
+NoConn ~ 6300 5100
+NoConn ~ 6300 5200
+NoConn ~ 6300 5300
 $Comp
 L C VCOMH1
 U 1 1 59AC605A
-P 6150 5450
-F 0 "VCOMH1" H 6175 5550 50  0000 L CNN
-F 1 "2.2uF" H 6175 5350 50  0000 L CNN
-F 2 "Capacitors_SMD:C_0805" H 6188 5300 50  0001 C CNN
-F 3 "https://www.digikey.com/product-detail/en/samsung-electro-mechanics/CL21F225ZOFNNNG/1276-6497-1-ND/5958125" H 6150 5450 50  0001 C CNN
-F 4 ".02" H 6150 5450 60  0001 C CNN "Price"
-	1    6150 5450
+P 5750 5500
+F 0 "VCOMH1" H 5775 5600 50  0000 L CNN
+F 1 "2.2uF" H 5775 5400 50  0000 L CNN
+F 2 "Capacitors_SMD:C_0805" H 5788 5350 50  0001 C CNN
+F 3 "https://www.digikey.com/product-detail/en/samsung-electro-mechanics/CL21F225ZOFNNNG/1276-6497-1-ND/5958125" H 5750 5500 50  0001 C CNN
+F 4 ".02" H 5750 5500 60  0001 C CNN "Price"
+	1    5750 5500
 	0    -1   -1   0   
 $EndComp
-Text Label 5450 5550 2    60   ~ 0
+Text Label 5050 5600 2    60   ~ 0
 GND
 $Comp
 L R IREF1
 U 1 1 59AC6E29
-P 6450 5350
-F 0 "IREF1" V 6530 5350 50  0000 C CNN
-F 1 "390" V 6450 5350 50  0000 C CNN
-F 2 "Resistors_SMD:R_0805" V 6380 5350 50  0001 C CNN
-F 3 "https://www.digikey.com/product-detail/en/stackpole-electronics-inc/RMCF0805JT390R/RMCF0805JT390RCT-ND/1942549" H 6450 5350 50  0001 C CNN
-F 4 ".006" V 6450 5350 60  0001 C CNN "Price"
-	1    6450 5350
+P 6050 5400
+F 0 "IREF1" V 6130 5400 50  0000 C CNN
+F 1 "390" V 6050 5400 50  0000 C CNN
+F 2 "Resistors_SMD:R_0805" V 5980 5400 50  0001 C CNN
+F 3 "https://www.digikey.com/product-detail/en/stackpole-electronics-inc/RMCF0805JT390R/RMCF0805JT390RCT-ND/1942549" H 6050 5400 50  0001 C CNN
+F 4 ".006" V 6050 5400 60  0001 C CNN "Price"
+	1    6050 5400
 	0    1    1    0   
 $EndComp
-$Comp
-L TEST_1P m1
-U 1 1 59AC76B5
-P 2350 4650
-F 0 "m1" H 2350 4920 50  0000 C CNN
-F 1 "mount2" H 2350 4850 50  0000 C CNN
-F 2 "pISO:swpins" H 2550 4650 50  0001 C CNN
-F 3 "" H 2550 4650 50  0000 C CNN
-	1    2350 4650
-	0    -1   -1   0   
-$EndComp
-$Comp
-L TEST_1P m2
-U 1 1 59AC7758
-P 2000 4450
-F 0 "m2" H 2000 4720 50  0000 C CNN
-F 1 "mount1" H 2000 4650 50  0000 C CNN
-F 2 "pISO:swpins" H 2200 4450 50  0001 C CNN
-F 3 "" H 2200 4450 50  0000 C CNN
-	1    2000 4450
-	0    -1   -1   0   
-$EndComp
-NoConn ~ 2350 4650
-NoConn ~ 2000 4450
-Text Label 6700 2850 2    60   ~ 0
+Text Label 6300 2900 2    60   ~ 0
 GND
 $Comp
 L R R3
 U 1 1 59F0071D
-P 3100 2900
-F 0 "R3" V 3180 2900 50  0000 C CNN
-F 1 "50k" V 3100 2900 50  0000 C CNN
-F 2 "Resistors_SMD:R_0805" V 3030 2900 50  0001 C CNN
-F 3 "https://www.digikey.com/product-detail/en/stackpole-electronics-inc/RMCF0805JT51K0/RMCF0805JT51K0CT-ND/1942589" H 3100 2900 50  0001 C CNN
-F 4 ".006" V 3100 2900 60  0001 C CNN "Price"
-	1    3100 2900
+P 4500 2600
+F 0 "R3" V 4580 2600 50  0000 C CNN
+F 1 "50k" V 4500 2600 50  0000 C CNN
+F 2 "Resistors_SMD:R_0805" V 4430 2600 50  0001 C CNN
+F 3 "https://www.digikey.com/product-detail/en/stackpole-electronics-inc/RMCF0805JT51K0/RMCF0805JT51K0CT-ND/1942589" H 4500 2600 50  0001 C CNN
+F 4 ".006" V 4500 2600 60  0001 C CNN "Price"
+	1    4500 2600
 	1    0    0    -1  
 $EndComp
 $Comp
 L R R2
 U 1 1 59F007D4
-P 2850 2900
-F 0 "R2" V 2930 2900 50  0000 C CNN
-F 1 "50k" V 2850 2900 50  0000 C CNN
-F 2 "Resistors_SMD:R_0805" V 2780 2900 50  0001 C CNN
-F 3 "https://www.digikey.com/product-detail/en/stackpole-electronics-inc/RMCF0805JT51K0/RMCF0805JT51K0CT-ND/1942589" H 2850 2900 50  0001 C CNN
-F 4 ".006" V 2850 2900 60  0001 C CNN "Price"
-	1    2850 2900
+P 4100 2600
+F 0 "R2" V 4180 2600 50  0000 C CNN
+F 1 "50k" V 4100 2600 50  0000 C CNN
+F 2 "Resistors_SMD:R_0805" V 4030 2600 50  0001 C CNN
+F 3 "https://www.digikey.com/product-detail/en/stackpole-electronics-inc/RMCF0805JT51K0/RMCF0805JT51K0CT-ND/1942589" H 4100 2600 50  0001 C CNN
+F 4 ".006" V 4100 2600 60  0001 C CNN "Price"
+	1    4100 2600
 	1    0    0    -1  
 $EndComp
 $Comp
 L R R1
 U 1 1 59F0084D
-P 2600 2900
-F 0 "R1" V 2680 2900 50  0000 C CNN
-F 1 "50k" V 2600 2900 50  0000 C CNN
-F 2 "Resistors_SMD:R_0805" V 2530 2900 50  0001 C CNN
-F 3 "https://www.digikey.com/product-detail/en/stackpole-electronics-inc/RMCF0805JT51K0/RMCF0805JT51K0CT-ND/1942589" H 2600 2900 50  0001 C CNN
-F 4 ".006" V 2600 2900 60  0001 C CNN "Price"
-	1    2600 2900
+P 3750 2600
+F 0 "R1" V 3830 2600 50  0000 C CNN
+F 1 "50k" V 3750 2600 50  0000 C CNN
+F 2 "Resistors_SMD:R_0805" V 3680 2600 50  0001 C CNN
+F 3 "https://www.digikey.com/product-detail/en/stackpole-electronics-inc/RMCF0805JT51K0/RMCF0805JT51K0CT-ND/1942589" H 3750 2600 50  0001 C CNN
+F 4 ".006" V 3750 2600 60  0001 C CNN "Price"
+	1    3750 2600
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	1700 4050 1700 4150
+	2850 4150 2750 4150
 Wire Wire Line
-	1800 3450 1700 3450
+	3200 2800 3150 2800
 Wire Wire Line
-	4750 2550 4700 2550
+	2850 4000 2750 4000
 Wire Wire Line
-	1800 3300 1700 3300
+	2750 4300 2850 4300
 Wire Wire Line
-	1700 3600 1800 3600
+	6000 3000 6300 3000
 Wire Wire Line
-	5850 2550 5850 2950
+	6300 3100 5650 3100
 Wire Wire Line
-	5850 2950 5650 2950
+	5650 3100 5650 3000
 Wire Wire Line
-	5650 2950 5650 3050
+	5650 3000 5700 3000
 Wire Wire Line
-	5350 2950 5150 2950
+	6050 3200 6300 3200
 Wire Wire Line
-	5450 2950 5450 3050
+	6300 3300 5700 3300
 Wire Wire Line
-	5450 3050 5400 3050
+	5700 3300 5700 3200
 Wire Wire Line
-	5550 3150 5550 2950
+	5700 3200 5750 3200
 Wire Wire Line
-	5400 3150 5550 3150
+	6300 3400 5850 3400
 Wire Wire Line
-	6400 2950 6700 2950
+	6000 3700 6300 3700
 Wire Wire Line
-	6700 3050 6050 3050
+	5550 3700 5550 3400
 Wire Wire Line
-	6050 3050 6050 2950
+	5500 3600 6300 3600
+Connection ~ 5550 3600
 Wire Wire Line
-	6050 2950 6100 2950
+	6100 2700 6100 3700
+Connection ~ 6100 3400
+Connection ~ 6100 3700
 Wire Wire Line
-	6450 3150 6700 3150
+	6300 5500 5900 5500
 Wire Wire Line
-	6700 3250 6100 3250
+	6300 5600 5600 5600
 Wire Wire Line
-	6100 3250 6100 3150
+	5600 5500 5200 5500
 Wire Wire Line
-	6100 3150 6150 3150
+	5200 5400 5200 5700
 Wire Wire Line
-	6700 3350 6250 3350
+	5050 5600 5300 5600
 Wire Wire Line
-	6400 3650 6700 3650
+	6300 5800 6300 5700
 Wire Wire Line
-	5950 3650 5950 3350
+	6300 5700 5200 5700
+Connection ~ 5200 5600
 Wire Wire Line
-	5900 3550 6700 3550
-Connection ~ 5950 3550
+	6300 5400 6200 5400
 Wire Wire Line
-	6500 2650 6500 3650
-Connection ~ 6500 3350
-Connection ~ 6500 3650
+	5900 5400 5200 5400
+Connection ~ 5200 5500
 Wire Wire Line
-	6700 5450 6300 5450
+	5700 3700 5550 3700
 Wire Wire Line
-	6700 5550 6000 5550
+	4500 2750 4500 2850
+Connection ~ 4500 2850
 Wire Wire Line
-	6000 5450 5600 5450
+	3750 2400 4600 2400
 Wire Wire Line
-	5600 5350 5600 5650
-Wire Wire Line
-	5450 5550 5700 5550
-Wire Wire Line
-	6700 5750 6700 5650
-Wire Wire Line
-	6700 5650 5600 5650
-Connection ~ 5600 5550
-Wire Wire Line
-	6700 5350 6600 5350
-Wire Wire Line
-	6300 5350 5600 5350
-Connection ~ 5600 5450
-Wire Wire Line
-	6100 3650 5950 3650
-Wire Wire Line
-	3100 3050 3100 3150
-Connection ~ 3100 3150
-Wire Wire Line
-	2600 3350 2600 3050
-Wire Wire Line
-	2850 3250 2850 3050
-Wire Wire Line
-	2600 2750 2600 2700
-Wire Wire Line
-	2600 2700 3200 2700
-Wire Wire Line
-	3100 2650 3100 2750
-Connection ~ 3100 2700
-Wire Wire Line
-	2850 2750 2850 2700
-Connection ~ 2850 2700
-Connection ~ 2850 3250
-Connection ~ 2600 3350
+	4500 2350 4500 2450
+Connection ~ 4500 2400
 $Comp
 L TEST_1P M1
 U 1 1 5A09A255
-P 1800 5000
-F 0 "M1" H 1800 5270 50  0000 C CNN
-F 1 "mount1" H 1800 5200 50  0000 C CNN
-F 2 "pISO:mount" H 2000 5000 50  0001 C CNN
-F 3 "" H 2000 5000 50  0000 C CNN
-	1    1800 5000
+P 2600 5650
+F 0 "M1" H 2600 5920 50  0000 C CNN
+F 1 "mount1" H 2600 5850 50  0000 C CNN
+F 2 "pISO:mount" H 2800 5650 50  0001 C CNN
+F 3 "" H 2800 5650 50  0000 C CNN
+	1    2600 5650
 	1    0    0    -1  
 $EndComp
 $Comp
 L TEST_1P M3
 U 1 1 5A09A2EA
-P 2150 5250
-F 0 "M3" H 2150 5520 50  0000 C CNN
-F 1 "mount1" H 2150 5450 50  0000 C CNN
-F 2 "pISO:mount" H 2350 5250 50  0001 C CNN
-F 3 "" H 2350 5250 50  0000 C CNN
-	1    2150 5250
+P 3000 5750
+F 0 "M3" H 3000 6020 50  0000 C CNN
+F 1 "mount1" H 3000 5950 50  0000 C CNN
+F 2 "pISO:mount" H 3200 5750 50  0001 C CNN
+F 3 "" H 3200 5750 50  0000 C CNN
+	1    3000 5750
 	1    0    0    -1  
 $EndComp
 $Comp
 L TEST_1P M4
 U 1 1 5A09A36E
-P 2350 5350
-F 0 "M4" H 2350 5620 50  0000 C CNN
-F 1 "mount1" H 2350 5550 50  0000 C CNN
-F 2 "pISO:mount" H 2550 5350 50  0001 C CNN
-F 3 "" H 2550 5350 50  0000 C CNN
-	1    2350 5350
+P 3200 5800
+F 0 "M4" H 3200 6070 50  0000 C CNN
+F 1 "mount1" H 3200 6000 50  0000 C CNN
+F 2 "pISO:mount" H 3400 5800 50  0001 C CNN
+F 3 "" H 3400 5800 50  0000 C CNN
+	1    3200 5800
 	1    0    0    -1  
 $EndComp
 $Comp
 L TEST_1P M2
 U 1 1 5A09A3F1
-P 1950 5150
-F 0 "M2" H 1950 5420 50  0000 C CNN
-F 1 "mount1" H 1950 5350 50  0000 C CNN
-F 2 "pISO:mount" H 2150 5150 50  0001 C CNN
-F 3 "" H 2150 5150 50  0000 C CNN
-	1    1950 5150
+P 2800 5700
+F 0 "M2" H 2800 5970 50  0000 C CNN
+F 1 "mount1" H 2800 5900 50  0000 C CNN
+F 2 "pISO:mount" H 3000 5700 50  0001 C CNN
+F 3 "" H 3000 5700 50  0000 C CNN
+	1    2800 5700
 	1    0    0    -1  
 $EndComp
 $Comp
-L GND #PWR05
+L GND #PWR03
 U 1 1 5A09ABEB
-P 2050 5450
-F 0 "#PWR05" H 2050 5200 50  0001 C CNN
-F 1 "GND" H 2050 5300 50  0000 C CNN
-F 2 "" H 2050 5450 50  0000 C CNN
-F 3 "" H 2050 5450 50  0000 C CNN
-	1    2050 5450
+P 2900 5800
+F 0 "#PWR03" H 2900 5550 50  0001 C CNN
+F 1 "GND" H 2900 5650 50  0000 C CNN
+F 2 "" H 2900 5800 50  0000 C CNN
+F 3 "" H 2900 5800 50  0000 C CNN
+	1    2900 5800
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	2350 5450 2350 5350
-Wire Wire Line
-	1800 5450 2350 5450
-Wire Wire Line
-	2150 5250 2150 5450
-Connection ~ 2150 5450
-Wire Wire Line
-	1950 5150 1950 5450
-Connection ~ 2050 5450
-Wire Wire Line
-	1800 5000 1800 5450
-Connection ~ 1950 5450
+	2600 5800 3200 5800
+Connection ~ 3000 5800
+Connection ~ 2900 5800
+Connection ~ 2800 5800
+Connection ~ 2450 3200
 $Comp
-L FE1.1S-RESCUE-pHAT U1
-U 1 1 5A10F421
-P 3850 4300
-F 0 "U1" H 3850 3450 60  0000 C CNN
-F 1 "FE1.1S" H 3850 5000 60  0000 C CNN
-F 2 "Housings_SSOP:SSOP-28_3.9x9.9mm_Pitch0.635mm" H 3800 4500 60  0001 C CNN
-F 3 "https://goo.gl/x2qU1s" H 3800 4500 60  0001 C CNN
-F 4 ".30" H 3850 4300 60  0001 C CNN "Price"
-	1    3850 4300
-	1    0    0    -1  
-$EndComp
-NoConn ~ 4350 4300
-$Comp
-L R R4
-U 1 1 5A10F562
-P 3100 5150
-F 0 "R4" V 3180 5150 50  0000 C CNN
-F 1 "2.7K" V 3100 5150 50  0000 C CNN
-F 2 "Resistors_SMD:R_0805" V 3030 5150 50  0001 C CNN
-F 3 "https://www.digikey.com/product-detail/en/stackpole-electronics-inc/RMCF0805JT2K70/RMCF0805JT2K70CT-ND/1942565" H 3100 5150 50  0001 C CNN
-F 4 ".006" V 3100 5150 60  0001 C CNN "Price"
-	1    3100 5150
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	3300 5000 3100 5000
-$Comp
-L GND #PWR06
-U 1 1 5A10FAB9
-P 3100 5350
-F 0 "#PWR06" H 3100 5100 50  0001 C CNN
-F 1 "GND" H 3100 5200 50  0000 C CNN
-F 2 "" H 3100 5350 50  0000 C CNN
-F 3 "" H 3100 5350 50  0000 C CNN
-	1    3100 5350
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	3100 5350 3100 5300
-$Comp
-L GND #PWR07
-U 1 1 5A10FDE3
-P 2850 3750
-F 0 "#PWR07" H 2850 3500 50  0001 C CNN
-F 1 "GND" H 2850 3600 50  0000 C CNN
-F 2 "" H 2850 3750 50  0000 C CNN
-F 3 "" H 2850 3750 50  0000 C CNN
-	1    2850 3750
-	1    0    0    -1  
-$EndComp
-Text Label 3300 3800 2    60   ~ 0
-XOUT
-Text Label 3300 3900 2    60   ~ 0
-XIN
-NoConn ~ 3300 4000
-NoConn ~ 3300 4100
-NoConn ~ 3300 4200
-NoConn ~ 3300 4300
-Connection ~ 4000 2950
-$Comp
-L +3.3V #PWR08
+L +3.3V #PWR04
 U 1 1 5A11071F
-P 3100 2650
-F 0 "#PWR08" H 3100 2500 50  0001 C CNN
-F 1 "+3.3V" H 3100 2790 50  0000 C CNN
-F 2 "" H 3100 2650 50  0000 C CNN
-F 3 "" H 3100 2650 50  0000 C CNN
-	1    3100 2650
+P 4500 2350
+F 0 "#PWR04" H 4500 2200 50  0001 C CNN
+F 1 "+3.3V" H 4500 2490 50  0000 C CNN
+F 2 "" H 4500 2350 50  0000 C CNN
+F 3 "" H 4500 2350 50  0000 C CNN
+	1    4500 2350
 	1    0    0    -1  
 $EndComp
 $Comp
 L TEST_1P W13
 U 1 1 5A110919
-P 3200 2700
-F 0 "W13" H 3200 2970 50  0000 C CNN
-F 1 "3V3" H 3200 2900 50  0000 C CNN
-F 2 "pISO:SLP" H 3400 2700 50  0001 C CNN
-F 3 "https://www.digikey.com/product-detail/en/mill-max-manufacturing-corp/0906-3-15-20-75-14-11-0/ED8183-ND/1147051" H 3400 2700 50  0001 C CNN
-F 4 ".30" H 3200 2700 60  0001 C CNN "Price"
-	1    3200 2700
+P 4600 2400
+F 0 "W13" H 4600 2670 50  0000 C CNN
+F 1 "3V3" H 4600 2600 50  0000 C CNN
+F 2 "pISO:SLP" H 4800 2400 50  0001 C CNN
+F 3 "https://www.digikey.com/product-detail/en/mill-max-manufacturing-corp/0906-0-15-20-76-14-11-0/ED8180-ND/1147048" H 4800 2400 50  0001 C CNN
+F 4 ".28" H 4600 2400 60  0001 C CNN "Price"
+	1    4600 2400
 	0    1    1    0   
 $EndComp
 $Comp
 L TEST_1P W7
 U 1 1 5A110B08
-P 1700 3300
-F 0 "W7" H 1700 3570 50  0000 C CNN
-F 1 "RST" H 1700 3500 50  0000 C CNN
-F 2 "pISO:SLP" H 1900 3300 50  0001 C CNN
-F 3 "https://www.digikey.com/product-detail/en/mill-max-manufacturing-corp/0906-3-15-20-75-14-11-0/ED8183-ND/1147051" H 1900 3300 50  0001 C CNN
-F 4 ".30" H 1700 3300 60  0001 C CNN "Price"
-	1    1700 3300
+P 2750 4000
+F 0 "W7" H 2750 4270 50  0000 C CNN
+F 1 "RST" H 2750 4200 50  0000 C CNN
+F 2 "pISO:SLP" H 2950 4000 50  0001 C CNN
+F 3 "https://www.digikey.com/product-detail/en/mill-max-manufacturing-corp/0906-0-15-20-76-14-11-0/ED8180-ND/1147048" H 2950 4000 50  0001 C CNN
+F 4 ".28" H 2750 4000 60  0001 C CNN "Price"
+	1    2750 4000
 	0    -1   -1   0   
 $EndComp
 $Comp
 L TEST_1P W8
 U 1 1 5A110B8D
-P 1700 3450
-F 0 "W8" H 1700 3720 50  0000 C CNN
-F 1 "CS" H 1700 3650 50  0000 C CNN
-F 2 "pISO:SLP" H 1900 3450 50  0001 C CNN
-F 3 "https://www.digikey.com/product-detail/en/mill-max-manufacturing-corp/0906-3-15-20-75-14-11-0/ED8183-ND/1147051" H 1900 3450 50  0001 C CNN
-F 4 ".30" H 1700 3450 60  0001 C CNN "Price"
-	1    1700 3450
+P 2750 4150
+F 0 "W8" H 2750 4420 50  0000 C CNN
+F 1 "CS" H 2750 4350 50  0000 C CNN
+F 2 "pISO:SLP" H 2950 4150 50  0001 C CNN
+F 3 "https://www.digikey.com/product-detail/en/mill-max-manufacturing-corp/0906-0-15-20-76-14-11-0/ED8180-ND/1147048" H 2950 4150 50  0001 C CNN
+F 4 ".28" H 2750 4150 60  0001 C CNN "Price"
+	1    2750 4150
 	0    -1   -1   0   
 $EndComp
 $Comp
 L TEST_1P W9
 U 1 1 5A110E5E
-P 1700 3600
-F 0 "W9" H 1700 3870 50  0000 C CNN
-F 1 "MOSI" H 1700 3800 50  0000 C CNN
-F 2 "pISO:SLP" H 1900 3600 50  0001 C CNN
-F 3 "https://www.digikey.com/product-detail/en/mill-max-manufacturing-corp/0906-3-15-20-75-14-11-0/ED8183-ND/1147051" H 1900 3600 50  0001 C CNN
-F 4 ".30" H 1700 3600 60  0001 C CNN "Price"
-	1    1700 3600
+P 2750 4300
+F 0 "W9" H 2750 4570 50  0000 C CNN
+F 1 "MOSI" H 2750 4500 50  0000 C CNN
+F 2 "pISO:SLP" H 2950 4300 50  0001 C CNN
+F 3 "https://www.digikey.com/product-detail/en/mill-max-manufacturing-corp/0906-0-15-20-76-14-11-0/ED8180-ND/1147048" H 2950 4300 50  0001 C CNN
+F 4 ".28" H 2750 4300 60  0001 C CNN "Price"
+	1    2750 4300
 	0    -1   -1   0   
 $EndComp
 $Comp
 L TEST_1P W10
 U 1 1 5A110EF5
-P 1700 3750
-F 0 "W10" H 1700 4020 50  0000 C CNN
-F 1 "SCLK" H 1700 3950 50  0000 C CNN
-F 2 "pISO:SLP" H 1900 3750 50  0001 C CNN
-F 3 "https://www.digikey.com/product-detail/en/mill-max-manufacturing-corp/0906-3-15-20-75-14-11-0/ED8183-ND/1147051" H 1900 3750 50  0001 C CNN
-F 4 ".30" H 1700 3750 60  0001 C CNN "Price"
-	1    1700 3750
+P 2750 4450
+F 0 "W10" H 2750 4720 50  0000 C CNN
+F 1 "SCLK" H 2750 4650 50  0000 C CNN
+F 2 "pISO:SLP" H 2950 4450 50  0001 C CNN
+F 3 "https://www.digikey.com/product-detail/en/mill-max-manufacturing-corp/0906-0-15-20-76-14-11-0/ED8180-ND/1147048" H 2950 4450 50  0001 C CNN
+F 4 ".28" H 2750 4450 60  0001 C CNN "Price"
+	1    2750 4450
 	0    -1   -1   0   
 $EndComp
 $Comp
 L TEST_1P W11
 U 1 1 5A110F69
-P 1700 3900
-F 0 "W11" H 1700 4170 50  0000 C CNN
-F 1 "DC" H 1700 4100 50  0000 C CNN
-F 2 "pISO:SLP" H 1900 3900 50  0001 C CNN
-F 3 "https://www.digikey.com/product-detail/en/mill-max-manufacturing-corp/0906-3-15-20-75-14-11-0/ED8183-ND/1147051" H 1900 3900 50  0001 C CNN
-F 4 ".30" H 1700 3900 60  0001 C CNN "Price"
-	1    1700 3900
+P 2750 4600
+F 0 "W11" H 2750 4870 50  0000 C CNN
+F 1 "DC" H 2750 4800 50  0000 C CNN
+F 2 "pISO:SLP" H 2950 4600 50  0001 C CNN
+F 3 "https://www.digikey.com/product-detail/en/mill-max-manufacturing-corp/0906-0-15-20-76-14-11-0/ED8180-ND/1147048" H 2950 4600 50  0001 C CNN
+F 4 ".28" H 2750 4600 60  0001 C CNN "Price"
+	1    2750 4600
 	0    -1   -1   0   
 $EndComp
 $Comp
 L TEST_1P W12
 U 1 1 5A111097
-P 1700 4050
-F 0 "W12" H 1700 4320 50  0000 C CNN
-F 1 "GND" H 1700 4250 50  0000 C CNN
-F 2 "pISO:SLP" H 1900 4050 50  0001 C CNN
-F 3 "https://www.digikey.com/product-detail/en/mill-max-manufacturing-corp/0906-3-15-20-75-14-11-0/ED8183-ND/1147051" H 1900 4050 50  0001 C CNN
-F 4 ".30" H 1700 4050 60  0001 C CNN "Price"
-	1    1700 4050
+P 2750 4750
+F 0 "W12" H 2750 5020 50  0000 C CNN
+F 1 "GND" H 2750 4950 50  0000 C CNN
+F 2 "pISO:SLP" H 2950 4750 50  0001 C CNN
+F 3 "https://www.digikey.com/product-detail/en/mill-max-manufacturing-corp/0906-0-15-20-76-14-11-0/ED8180-ND/1147048" H 2950 4750 50  0001 C CNN
+F 4 ".28" H 2750 4750 60  0001 C CNN "Price"
+	1    2750 4750
 	0    -1   -1   0   
 $EndComp
-NoConn ~ 4350 4100
-NoConn ~ 4350 4200
-Text Label 1800 3100 0    60   ~ 0
-VDD5
-Text Label 4800 4500 0    60   ~ 0
-VDD5
-Text Label 3300 4400 2    60   ~ 0
-DM2_N
-Text Label 3300 4500 2    60   ~ 0
-DM2_P
-Text Label 5400 3150 2    60   ~ 0
-DM2_P
-Text Label 5400 3050 2    60   ~ 0
-DM2_N
-Text Label 3300 4600 2    60   ~ 0
+Wire Wire Line
+	2750 3200 2750 3300
+Wire Wire Line
+	2750 3300 2700 3300
+Wire Wire Line
+	2850 3200 2850 3400
+Wire Wire Line
+	2850 3400 2700 3400
+Text Label 2700 3300 2    60   ~ 0
 DM1_N
-Text Label 3300 4700 2    60   ~ 0
+Text Label 2700 3400 2    60   ~ 0
 DM1_P
 Wire Wire Line
-	4300 2950 4300 3050
+	3200 3200 3200 2800
 Wire Wire Line
-	4300 3050 4250 3050
-Wire Wire Line
-	4400 2950 4400 3150
-Wire Wire Line
-	4400 3150 4250 3150
-Text Label 4250 3050 2    60   ~ 0
-DM1_N
-Text Label 4250 3150 2    60   ~ 0
-DM1_P
-Wire Wire Line
-	4750 2950 4750 2550
-Wire Wire Line
-	4500 3100 4500 2950
+	2950 3350 2950 3200
 $Comp
 L USB_A-RESCUE-pHAT P2
 U 1 1 59A61647
-P 4400 2650
-F 0 "P2" H 4600 2450 50  0000 C CNN
-F 1 "USB_A" H 4350 2850 50  0000 C CNN
-F 2 "pISO:usb" V 4350 2550 50  0001 C CNN
-F 3 "https://www.digikey.com/product-detail/en/cui-inc/UP2-AH-1-TH/102-3996-ND/6187911" H 4350 2550 50  0001 C CNN
-F 4 ".38" H 4400 2650 60  0001 C CNN "Price"
-	1    4400 2650
+P 2850 2900
+F 0 "P2" H 3050 2700 50  0000 C CNN
+F 1 "USB_A" H 2800 3100 50  0000 C CNN
+F 2 "pISO:usb" V 2800 2800 50  0001 C CNN
+F 3 "https://www.digikey.com/product-detail/en/cui-inc/UP2-AH-1-TH/102-3996-ND/6187911" H 2800 2800 50  0001 C CNN
+F 4 ".38" H 2850 2900 60  0001 C CNN "Price"
+	1    2850 2900
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	4500 2950 4750 2950
+	2950 3200 3200 3200
 $Comp
 L TEST_1P W14
 U 1 1 5A114174
-P 4900 5500
-F 0 "W14" H 4900 5770 50  0000 C CNN
-F 1 "D_N" H 4900 5700 50  0000 C CNN
-F 2 "pISO:SLP" H 5100 5500 50  0001 C CNN
-F 3 "https://www.digikey.com/product-detail/en/mill-max-manufacturing-corp/0906-3-15-20-75-14-11-0/ED8183-ND/1147051" H 5100 5500 50  0001 C CNN
-F 4 ".30" H 4900 5500 60  0001 C CNN "Price"
-	1    4900 5500
+P 4050 5650
+F 0 "W14" H 4050 5920 50  0000 C CNN
+F 1 "D_N" H 4050 5850 50  0000 C CNN
+F 2 "pISO:SLP" H 4250 5650 50  0001 C CNN
+F 3 "https://www.digikey.com/product-detail/en/mill-max-manufacturing-corp/0906-0-15-20-76-14-11-0/ED8180-ND/1147048" H 4250 5650 50  0001 C CNN
+F 4 ".28" H 4050 5650 60  0001 C CNN "Price"
+	1    4050 5650
 	-1   0    0    1   
 $EndComp
 $Comp
 L TEST_1P W15
 U 1 1 5A114230
-P 5150 5500
-F 0 "W15" H 5150 5770 50  0000 C CNN
-F 1 "D_P" H 5150 5700 50  0000 C CNN
-F 2 "pISO:SLP" H 5350 5500 50  0001 C CNN
-F 3 "https://www.digikey.com/product-detail/en/mill-max-manufacturing-corp/0906-3-15-20-75-14-11-0/ED8183-ND/1147051" H 5350 5500 50  0001 C CNN
-F 4 ".30" H 5150 5500 60  0001 C CNN "Price"
-	1    5150 5500
+P 4300 5650
+F 0 "W15" H 4300 5920 50  0000 C CNN
+F 1 "D_P" H 4300 5850 50  0000 C CNN
+F 2 "pISO:SLP" H 4500 5650 50  0001 C CNN
+F 3 "https://www.digikey.com/product-detail/en/mill-max-manufacturing-corp/0906-0-15-20-76-14-11-0/ED8180-ND/1147048" H 4500 5650 50  0001 C CNN
+F 4 ".28" H 4300 5650 60  0001 C CNN "Price"
+	1    4300 5650
 	-1   0    0    1   
 $EndComp
-Text Label 4350 4900 0    60   ~ 0
-D_P
-Text Label 4350 5000 0    60   ~ 0
-D_N
-Text Label 4900 5500 2    60   ~ 0
-D_N
-Text Label 5150 5500 2    60   ~ 0
-D_P
-$Comp
-L XTL Q1
-U 1 1 5A114DCE
-P 4000 5550
-F 0 "Q1" H 4000 5300 60  0000 C CNN
-F 1 "XTL" H 4000 5800 60  0000 C CNN
-F 2 "Crystals:Crystal_SMD_HC49-SD" H 4000 5600 60  0001 C CNN
-F 3 "https://www.digikey.com/product-detail/en/abracon-llc/ABLS-12.000MHZ-B2-T/535-9067-1-ND/675584" H 4000 5600 60  0001 C CNN
-F 4 ".17" H 4000 5550 60  0001 C CNN "Price"
-	1    4000 5550
-	1    0    0    -1  
-$EndComp
-Text Label 4450 5550 0    60   ~ 0
-XIN
-Text Label 3550 5550 2    60   ~ 0
-XOUT
-Text Label 2600 2700 2    60   ~ 0
+Text Label 3750 2400 2    60   ~ 0
 3V3
-Text Label 3300 4800 2    60   ~ 0
-1V8
 Wire Wire Line
-	2850 5300 2850 5350
+	2850 4600 2750 4600
 Wire Wire Line
-	2850 5350 3100 5350
-Wire Wire Line
-	2850 5000 2850 4900
-Wire Wire Line
-	2750 4900 3300 4900
-Connection ~ 2850 4900
+	2750 4450 2850 4450
 $Comp
-L GND #PWR09
-U 1 1 5A115B29
-P 4700 4050
-F 0 "#PWR09" H 4700 3800 50  0001 C CNN
-F 1 "GND" H 4700 3900 50  0000 C CNN
-F 2 "" H 4700 4050 50  0000 C CNN
-F 3 "" H 4700 4050 50  0000 C CNN
-	1    4700 4050
-	1    0    0    -1  
-$EndComp
-NoConn ~ 4350 3800
-Text Label 4350 3900 0    60   ~ 0
-3V3_O
-NoConn ~ 4350 4000
-Wire Wire Line
-	1800 3900 1700 3900
-Wire Wire Line
-	1700 3750 1800 3750
-$Comp
-L TEST_1P W6
-U 1 1 5A117140
-P 1700 3100
-F 0 "W6" H 1700 3370 50  0000 C CNN
-F 1 "VDD5" H 1700 3300 50  0000 C CNN
-F 2 "pISO:SLP" H 1900 3100 50  0001 C CNN
-F 3 "https://www.digikey.com/product-detail/en/mill-max-manufacturing-corp/0906-3-15-20-75-14-11-0/ED8183-ND/1147051" H 1900 3100 50  0001 C CNN
-F 4 ".30" H 1700 3100 60  0001 C CNN "Price"
-	1    1700 3100
-	0    -1   -1   0   
-$EndComp
-Wire Wire Line
-	1800 3100 1700 3100
-$Comp
-L GND #PWR010
+L GND #PWR05
 U 1 1 5A117A99
-P 5450 5550
-F 0 "#PWR010" H 5450 5300 50  0001 C CNN
-F 1 "GND" H 5450 5400 50  0000 C CNN
-F 2 "" H 5450 5550 50  0000 C CNN
-F 3 "" H 5450 5550 50  0000 C CNN
-	1    5450 5550
+P 5050 5600
+F 0 "#PWR05" H 5050 5350 50  0001 C CNN
+F 1 "GND" H 5050 5450 50  0000 C CNN
+F 2 "" H 5050 5600 50  0000 C CNN
+F 3 "" H 5050 5600 50  0000 C CNN
+	1    5050 5600
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	4700 4850 4700 4800
-Connection ~ 4700 4500
-Text Label 4850 3700 0    60   ~ 0
-1V8
-Wire Wire Line
-	4700 3750 4700 3700
-Connection ~ 4700 3700
-Wire Wire Line
-	4350 3700 4850 3700
-Wire Wire Line
-	4350 4500 4800 4500
-Wire Wire Line
-	2850 3750 2850 3700
-Wire Wire Line
-	2850 3700 3300 3700
-$Comp
-L GND #PWR011
-U 1 1 5A11B1CE
-P 4700 4850
-F 0 "#PWR011" H 4700 4600 50  0001 C CNN
-F 1 "GND" H 4700 4700 50  0000 C CNN
-F 2 "" H 4700 4850 50  0000 C CNN
-F 3 "" H 4700 4850 50  0000 C CNN
-	1    4700 4850
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	4000 2950 4200 2950
-$Comp
-L C VCC4
-U 1 1 5A1167D6
-P 4700 4650
-F 0 "VCC4" H 4725 4750 50  0000 L CNN
-F 1 "10uF" H 4725 4550 50  0000 L CNN
-F 2 "Capacitors_SMD:C_0805" H 4738 4500 50  0001 C CNN
-F 3 "https://www.digikey.com/product-detail/en/samsung-electro-mechanics/CL21A106KQCLRNC/1276-2405-1-ND/3890491" H 4700 4650 50  0001 C CNN
-F 4 ".03" H 4700 4650 60  0001 C CNN "Price"
-	1    4700 4650
-	1    0    0    -1  
-$EndComp
-$Comp
-L C VCC3
-U 1 1 5A11687E
-P 4700 3900
-F 0 "VCC3" H 4725 4000 50  0000 L CNN
-F 1 "10uF" H 4725 3800 50  0000 L CNN
-F 2 "Capacitors_SMD:C_0805" H 4738 3750 50  0001 C CNN
-F 3 "https://www.digikey.com/product-detail/en/samsung-electro-mechanics/CL21A106KQCLRNC/1276-2405-1-ND/3890491" H 4700 3900 50  0001 C CNN
-F 4 ".03" H 4700 3900 60  0001 C CNN "Price"
-	1    4700 3900
-	1    0    0    -1  
-$EndComp
-$Comp
-L C VCC2
-U 1 1 5A11691B
-P 2850 5150
-F 0 "VCC2" H 2875 5250 50  0000 L CNN
-F 1 "10uF" H 2875 5050 50  0000 L CNN
-F 2 "Capacitors_SMD:C_0805" H 2888 5000 50  0001 C CNN
-F 3 "https://www.digikey.com/product-detail/en/samsung-electro-mechanics/CL21A106KQCLRNC/1276-2405-1-ND/3890491" H 2850 5150 50  0001 C CNN
-F 4 ".03" H 2850 5150 60  0001 C CNN "Price"
-	1    2850 5150
-	1    0    0    -1  
-$EndComp
-$Comp
-L ATTINY102 U2
-U 1 1 5A1187C0
-P 5700 4300
-F 0 "U2" H 5700 4050 60  0000 C CNN
-F 1 "ATTINY102" H 5700 4550 60  0000 C CNN
-F 2 "Housings_SOIC:SOIC-8_3.9x4.9mm_Pitch1.27mm" H 5700 4250 60  0001 C CNN
-F 3 "https://www.digikey.com/product-detail/en/microchip-technology/ATTINY102-SSFR/1611-ATTINY102-SSFRCT-ND/6833015" H 5700 4250 60  0001 C CNN
-F 4 ".3" H 5700 4300 60  0001 C CNN "Price"
-	1    5700 4300
-	1    0    0    -1  
-$EndComp
-Text Label 5200 4150 2    60   ~ 0
+	2450 3200 2650 3200
+Text Label 3850 4200 2    60   ~ 0
 3V3
-Text Label 6200 4150 0    60   ~ 0
+Text Label 4000 4800 2    60   ~ 0
 GND
-Text Label 6200 4250 0    60   ~ 0
+Text Label 4000 4600 2    60   ~ 0
 CS
-Text Label 5200 4250 2    60   ~ 0
+Text Label 5000 4700 0    60   ~ 0
 RST
-Text Label 5200 4350 2    60   ~ 0
-D/C
-Text Label 6200 4450 0    60   ~ 0
+Text Label 4000 4700 2    60   ~ 0
+DC
+Text Label 5000 4600 0    60   ~ 0
 SCLK
-Text Label 6200 4350 0    60   ~ 0
+Text Label 5000 4800 0    60   ~ 0
 MOSI
 $Comp
 L R R5
 U 1 1 5A11B226
-P 5200 4600
-F 0 "R5" V 5280 4600 50  0000 C CNN
-F 1 "10k" V 5200 4600 50  0000 C CNN
-F 2 "Resistors_SMD:R_0805" V 5130 4600 50  0001 C CNN
-F 3 "https://www.digikey.com/product-detail/en/stackpole-electronics-inc/RMCF0805JT10K0/RMCF0805JT10K0CT-ND/1942577" H 5200 4600 50  0001 C CNN
-F 4 ".006" V 5200 4600 60  0001 C CNN "Price"
-	1    5200 4600
+P 3850 4350
+F 0 "R5" V 3930 4350 50  0000 C CNN
+F 1 "10k" V 3850 4350 50  0000 C CNN
+F 2 "Resistors_SMD:R_0805" V 3780 4350 50  0001 C CNN
+F 3 "https://www.digikey.com/product-detail/en/stackpole-electronics-inc/RMCF0805JT10K0/RMCF0805JT10K0CT-ND/1942577" H 3850 4350 50  0001 C CNN
+F 4 ".006" V 3850 4350 60  0001 C CNN "Price"
+	1    3850 4350
 	1    0    0    -1  
 $EndComp
-Text Label 5250 4800 0    60   ~ 0
+Text Label 5000 4500 0    60   ~ 0
 3V3
-Wire Wire Line
-	5200 4750 5200 4800
-Wire Wire Line
-	5200 4800 5250 4800
 $Comp
 L TEST_1P NO1
 U 1 1 5A11EB0C
-P 2600 3350
-F 0 "NO1" H 2600 3620 50  0000 C CNN
-F 1 "VDD5" H 2600 3550 50  0000 C CNN
-F 2 "pISO:SLP" H 2800 3350 50  0001 C CNN
-F 3 "https://www.digikey.com/product-detail/en/mill-max-manufacturing-corp/0906-3-15-20-75-14-11-0/ED8183-ND/1147051" H 2800 3350 50  0001 C CNN
-F 4 ".30" H 2600 3350 60  0001 C CNN "Price"
-	1    2600 3350
+P 3700 3450
+F 0 "NO1" H 3700 3720 50  0000 C CNN
+F 1 "VDD5" H 3700 3650 50  0000 C CNN
+F 2 "pISO:SLP" H 3900 3450 50  0001 C CNN
+F 3 "https://www.digikey.com/product-detail/en/mill-max-manufacturing-corp/0906-0-15-20-76-14-11-0/ED8180-ND/1147048" H 3900 3450 50  0001 C CNN
+F 4 ".28" H 3700 3450 60  0001 C CNN "Price"
+	1    3700 3450
 	0    -1   -1   0   
 $EndComp
 $Comp
 L TEST_1P A1
 U 1 1 5A11EBC7
-P 2850 3250
-F 0 "A1" H 2850 3520 50  0000 C CNN
-F 1 "VDD5" H 2850 3450 50  0000 C CNN
-F 2 "pISO:SLP" H 3050 3250 50  0001 C CNN
-F 3 "https://www.digikey.com/product-detail/en/mill-max-manufacturing-corp/0906-3-15-20-75-14-11-0/ED8183-ND/1147051" H 3050 3250 50  0001 C CNN
-F 4 ".30" H 2850 3250 60  0001 C CNN "Price"
-	1    2850 3250
+P 4050 3150
+F 0 "A1" H 4050 3420 50  0000 C CNN
+F 1 "VDD5" H 4050 3350 50  0000 C CNN
+F 2 "pISO:SLP" H 4250 3150 50  0001 C CNN
+F 3 "https://www.digikey.com/product-detail/en/mill-max-manufacturing-corp/0906-0-15-20-76-14-11-0/ED8180-ND/1147048" H 4250 3150 50  0001 C CNN
+F 4 ".28" H 4050 3150 60  0001 C CNN "Price"
+	1    4050 3150
 	0    -1   -1   0   
 $EndComp
 $Comp
 L TEST_1P B1
 U 1 1 5A11EC65
-P 3100 3150
-F 0 "B1" H 3100 3420 50  0000 C CNN
-F 1 "VDD5" H 3100 3350 50  0000 C CNN
-F 2 "pISO:SLP" H 3300 3150 50  0001 C CNN
-F 3 "https://www.digikey.com/product-detail/en/mill-max-manufacturing-corp/0906-3-15-20-75-14-11-0/ED8183-ND/1147051" H 3300 3150 50  0001 C CNN
-F 4 ".30" H 3100 3150 60  0001 C CNN "Price"
-	1    3100 3150
+P 4500 2850
+F 0 "B1" H 4500 3120 50  0000 C CNN
+F 1 "VDD5" H 4500 3050 50  0000 C CNN
+F 2 "pISO:SLP" H 4700 2850 50  0001 C CNN
+F 3 "https://www.digikey.com/product-detail/en/mill-max-manufacturing-corp/0906-0-15-20-76-14-11-0/ED8180-ND/1147048" H 4700 2850 50  0001 C CNN
+F 4 ".28" H 4500 2850 60  0001 C CNN "Price"
+	1    4500 2850
 	0    -1   -1   0   
 $EndComp
-Text Label 4350 4400 0    60   ~ 0
-3V3_O
-Text Label 4350 4600 0    60   ~ 0
-3V3_O
-Text Label 4350 4700 0    60   ~ 0
-3V3_O
-Text Label 4350 4800 0    60   ~ 0
-3V3_O
-Text Label 2750 4900 2    60   ~ 0
-3V3_O
+Wire Wire Line
+	2600 5650 2600 5800
+Wire Wire Line
+	2800 5700 2800 5800
+Wire Wire Line
+	3000 5750 3000 5800
+Wire Wire Line
+	4000 4500 3850 4500
+$Comp
+L ATTINY25/45/85 U1
+U 1 1 5A2BAB57
+P 4500 4650
+F 0 "U1" H 4500 4400 60  0000 C CNN
+F 1 "ATTINY25/45/85" H 4500 4900 60  0000 C CNN
+F 2 "Housings_SOIC:SOIJ-8_5.3x5.3mm_Pitch1.27mm" H 4500 4600 60  0001 C CNN
+F 3 "https://www.digikey.com/product-detail/en/microchip-technology/ATTINY25V-10SH/1611-ATTINY25V-10SH-ND/6829774" H 4500 4600 60  0001 C CNN
+F 4 ".51" H 4500 4650 60  0001 C CNN "Price"
+	1    4500 4650
+	1    0    0    -1  
+$EndComp
+Text Label 4050 5650 1    60   ~ 0
+DM1_N
+Text Label 4300 5650 1    60   ~ 0
+DM1_P
+Wire Wire Line
+	4100 2450 4100 2400
+Connection ~ 4100 2400
+Wire Wire Line
+	3750 2400 3750 2450
+Wire Wire Line
+	4100 2750 4100 3150
+Wire Wire Line
+	3750 2750 3750 3450
+NoConn ~ 6300 3500
+Text Label 2850 4750 0    60   ~ 0
+GND
+Wire Wire Line
+	2850 4750 2750 4750
+Wire Wire Line
+	4050 3150 4150 3150
+Connection ~ 4100 3150
+Wire Wire Line
+	3700 3450 3800 3450
+Connection ~ 3750 3450
+Wire Wire Line
+	4200 3450 5050 3450
+Wire Wire Line
+	5050 3450 5050 2850
+Wire Wire Line
+	5050 2850 4900 2850
+Wire Wire Line
+	4550 3150 5050 3150
+Connection ~ 5050 3150
+Text Label 5050 3150 0    60   ~ 0
+GND
+$Comp
+L SW_Push SW1
+U 1 1 5A2C33B8
+P 4000 3450
+F 0 "SW1" H 4050 3550 50  0000 L CNN
+F 1 "SW_Push" H 4000 3390 50  0000 C CNN
+F 2 "pISO:spst" H 4000 3650 50  0001 C CNN
+F 3 "https://www.digikey.com/products/en/switches/tactile-switches/197?k=&pkeyword=&pv69=3&FV=1f140000%2Cffe000c5&mnonly=0&ColumnSort=1000011&page=1&quantity=750&ptm=0&fid=0&pageSize=500" H 4000 3650 50  0001 C CNN
+F 4 ".13" H 4000 3450 60  0001 C CNN "Price"
+	1    4000 3450
+	1    0    0    -1  
+$EndComp
+$Comp
+L SW_Push SW2
+U 1 1 5A2C36C0
+P 4350 3150
+F 0 "SW2" H 4400 3250 50  0000 L CNN
+F 1 "SW_Push" H 4350 3090 50  0000 C CNN
+F 2 "pISO:spst" H 4350 3350 50  0001 C CNN
+F 3 "https://www.digikey.com/products/en/switches/tactile-switches/197?k=&pkeyword=&pv69=3&FV=1f140000%2Cffe000c5&mnonly=0&ColumnSort=1000011&page=1&quantity=750&ptm=0&fid=0&pageSize=500" H 4350 3350 50  0001 C CNN
+F 4 ".13" H 4350 3150 60  0001 C CNN "Price"
+	1    4350 3150
+	1    0    0    -1  
+$EndComp
+$Comp
+L SW_Push SW3
+U 1 1 5A2C3749
+P 4700 2850
+F 0 "SW3" H 4750 2950 50  0000 L CNN
+F 1 "SW_Push" H 4700 2790 50  0000 C CNN
+F 2 "pISO:spst" H 4700 3050 50  0001 C CNN
+F 3 "https://www.digikey.com/products/en/switches/tactile-switches/197?k=&pkeyword=&pv69=3&FV=1f140000%2Cffe000c5&mnonly=0&ColumnSort=1000011&page=1&quantity=750&ptm=0&fid=0&pageSize=500" H 4700 3050 50  0001 C CNN
+F 4 ".13" H 4700 2850 60  0001 C CNN "Price"
+	1    4700 2850
+	1    0    0    -1  
+$EndComp
 $EndSCHEMATC
