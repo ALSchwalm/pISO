@@ -32,7 +32,7 @@ Bitmap NewDriveItem::render() const {
 
 pISO::pISO() : m_newdrive(*this) {
   rebuild_drives_from_volumes();
-  init_usbgx();
+  // init_usbgx();
 }
 
 void pISO::init_usbgx() {
