@@ -1,42 +1,29 @@
 #ifndef CONTROLLER_HPP
 #define CONTROLLER_HPP
 
+#include <cppgpio.hpp>
 #include <functional>
-#include <thread>
-#include <wiringPi.h>
 
 class Controller {
 public:
-  enum class Rotation { CW = 1, CCW = 0, UNKNOWN = 2 };
+  enum class Direction { UP = 0, DOWN = 1 };
 
 private:
-  static const int RoAPin = 17;
-  static const int RoBPin = 22;
+  static const int UP_PIN = 17;
+  static const int DOWN_PIN = 22;
+  static const int SELECT_PIN = 27;
 
-  unsigned char read_a() const;
-  unsigned char read_b() const;
-  unsigned char rot_state() const { return (read_a() << 1) | read_b(); }
-
-  Rotation m_current_rotation = Rotation::UNKNOWN;
-  char m_pstate;
-  char m_nstate;
-  int m_error_time = 0;
-  int m_rotation = 0;
-  std::thread m_rotation_thread;
-  std::thread m_button_thread;
-
-  int cw_error_check();
-  int ccw_error_check();
-  void rotary_deal();
-  void rotation_worker();
+  GPIO::PushButton m_down;
+  GPIO::PushButton m_up;
+  GPIO::PushButton m_select;
 
   Controller &operator=(const Controller &) = delete;
   Controller(const Controller &) = delete;
   Controller();
 
 public:
-  std::function<void(Rotation)> on_rotate;
-  std::function<void()> on_press;
+  std::function<void(Direction)> on_move;
+  std::function<void()> on_select;
 
   static Controller &instance() {
     static Controller c;

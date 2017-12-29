@@ -19,22 +19,19 @@ int main() {
   Display::instance().update(piso.render());
 
   auto &controller = Controller::instance();
-  controller.on_rotate = [&](Controller::Rotation rot) {
-    if (rot == Controller::Rotation::CW) {
+  controller.on_move = [&](Controller::Direction dir) {
+    if (dir == Controller::Direction::UP) {
       piso.on_prev();
     } else {
       piso.on_next();
     }
     Display::instance().update(piso.render());
   };
-  controller.start();
-
-  GPIO::PushButton button(27, GPIO::GPIO_PULL::UP);
-  button.f_pushed = [&]() {
+  controller.on_select = [&]() {
     piso.on_select();
     Display::instance().update(piso.render());
   };
-  button.start();
+  controller.start();
 
   while (true) {
     Display::instance().update(piso.render());
