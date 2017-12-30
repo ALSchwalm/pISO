@@ -47,7 +47,7 @@ bool ISO::on_select() {
   return true;
 }
 
-Bitmap ISO::render() const {
+std::pair<Bitmap, GUIRenderable::RenderMode> ISO::render() const {
   piso_log("ISO::render()");
   auto buff = new char[m_path.size() + 1]();
   m_path.copy(buff, m_path.size());
@@ -61,8 +61,8 @@ Bitmap ISO::render() const {
   }
   if (m_focused) {
     indented.blit(selector, {0, 0});
-    return indented;
+    return {indented, GUIRenderable::RenderMode::NORMAL};
   } else {
-    return indented;
+    return {indented, GUIRenderable::RenderMode::NORMAL};
   }
 }

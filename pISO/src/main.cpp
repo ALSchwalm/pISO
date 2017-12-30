@@ -16,7 +16,7 @@ int main() {
   }
 
   auto &piso = pISO::instance();
-  Display::instance().update(piso.render());
+  Display::instance().update(piso.render().first);
 
   auto &controller = Controller::instance();
   controller.on_move = [&](Controller::Direction dir) {
@@ -25,16 +25,16 @@ int main() {
     } else {
       piso.on_next();
     }
-    Display::instance().update(piso.render());
+    Display::instance().update(piso.render().first);
   };
   controller.on_select = [&]() {
     piso.on_select();
-    Display::instance().update(piso.render());
+    Display::instance().update(piso.render().first);
   };
   controller.start();
 
   while (true) {
-    Display::instance().update(piso.render());
+    Display::instance().update(piso.render().first);
     std::this_thread::sleep_for(std::chrono::seconds(10));
   }
 }

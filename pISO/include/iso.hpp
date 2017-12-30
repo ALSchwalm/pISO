@@ -20,7 +20,7 @@ public:
   virtual bool on_next() override { return false; }
   virtual bool on_prev() override { return false; }
 
-  virtual Bitmap render() const override;
+  virtual std::pair<Bitmap, GUIRenderable::RenderMode> render() const override;
 };
 
 #endif

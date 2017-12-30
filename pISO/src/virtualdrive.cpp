@@ -25,7 +25,8 @@ bool VirtualDriveHeading::on_select() {
   return true;
 }
 
-Bitmap VirtualDriveHeading::render() const {
+std::pair<Bitmap, GUIRenderable::RenderMode>
+VirtualDriveHeading::render() const {
   piso_log("VirtualDriveHeading::render()");
   auto text = render_text(m_vdrive.name());
 
@@ -36,9 +37,9 @@ Bitmap VirtualDriveHeading::render() const {
   }
   if (m_focused) {
     indented.blit(selector, {0, 0});
-    return indented;
+    return {indented, GUIRenderable::RenderMode::NORMAL};
   } else {
-    return indented;
+    return {indented, GUIRenderable::RenderMode::NORMAL};
   }
 }
 
@@ -209,11 +210,11 @@ bool VirtualDrive::on_prev() {
   return GUIListItem::on_prev();
 }
 
-Bitmap VirtualDrive::render() const {
+std::pair<Bitmap, GUIRenderable::RenderMode> VirtualDrive::render() const {
   piso_log("VirtualDrive::render()");
-  auto bitmap = m_heading.render();
+  auto bitmap = m_heading.render().first;
   for (const auto &iso : m_isos) {
-    auto iso_bitmap = iso.render();
+    auto iso_bitmap = iso.render().first;
     auto old_height = bitmap.height();
     bitmap.expand_height(iso_bitmap.height());
     if (iso_bitmap.width() + ISO_LABEL_INDENT > bitmap.width()) {
@@ -222,5 +223,5 @@ Bitmap VirtualDrive::render() const {
     }
     bitmap.blit(iso_bitmap, {ISO_LABEL_INDENT, old_height});
   }
-  return bitmap;
+  return {bitmap, GUIRenderable::RenderMode::NORMAL};
 }

@@ -19,7 +19,7 @@ public:
   virtual bool on_next() override { return false; }
   virtual bool on_prev() override { return false; }
 
-  virtual Bitmap render() const override;
+  virtual std::pair<Bitmap, GUIRenderable::RenderMode> render() const override;
 };
 
 class VirtualDrive : public GUIListItem {
@@ -66,7 +66,7 @@ public:
   virtual bool on_next() override;
   virtual bool on_prev() override;
 
-  virtual Bitmap render() const override;
+  virtual std::pair<Bitmap, GUIRenderable::RenderMode> render() const override;
 };
 
 inline bool operator==(const VirtualDrive &left, const VirtualDrive &right) {

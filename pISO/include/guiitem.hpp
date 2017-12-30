@@ -1,6 +1,7 @@
 #ifndef GUIEVENTHANDLER_HPP
 #define GUIEVENTHANDLER_HPP
 
+#include <utility>
 #include <vector>
 
 class GUIEventHandler {
@@ -30,13 +31,13 @@ protected:
 class Bitmap;
 class GUIRenderable {
 public:
-  enum RenderMode {
+  enum class RenderMode {
     NORMAL,
     FULLSCREEN,
   };
 
   virtual ~GUIRenderable() {}
-  virtual Bitmap render() const = 0;
+  virtual std::pair<Bitmap, RenderMode> render() const = 0;
 };
 
 class GUIItem : public GUIEventHandler, public GUIRenderable {

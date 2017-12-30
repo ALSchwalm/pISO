@@ -11,16 +11,19 @@
 class pISO;
 class NewDriveItem : public GUIItem {
   pISO &m_piso;
+  bool m_selecting_size;
+  int m_current_percent;
 
 public:
-  NewDriveItem(pISO &piso) : m_piso{piso} {}
+  NewDriveItem(pISO &piso)
+      : m_piso{piso}, m_selecting_size{false}, m_current_percent{100} {}
   virtual ~NewDriveItem() {}
 
   virtual bool on_select() override;
-  virtual bool on_next() override { return false; }
-  virtual bool on_prev() override { return false; }
+  virtual bool on_next() override;
+  virtual bool on_prev() override;
 
-  virtual Bitmap render() const override;
+  virtual std::pair<Bitmap, GUIRenderable::RenderMode> render() const override;
 };
 
 class pISO : public GUIListItem {
@@ -63,7 +66,7 @@ public:
   virtual bool on_next() override;
   virtual bool on_prev() override;
 
-  virtual Bitmap render() const override;
+  virtual std::pair<Bitmap, GUIRenderable::RenderMode> render() const override;
 };
 
 #endif

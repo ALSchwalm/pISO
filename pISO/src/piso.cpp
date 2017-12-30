@@ -12,21 +12,57 @@
 
 bool NewDriveItem::on_select() {
   piso_log("NewDriveItem::on_select()");
-  m_piso.add_drive(53687091200ull); // TODO: variable
+  if (m_selecting_size) {
+    m_piso.add_drive(m_current_percent / 100.0 *
+                     53687091200ull); // TODO: get size from pISO
+    m_selecting_size = false;
+    m_current_percent = 100;
+  } else {
+    m_selecting_size = true;
+  }
   return true;
 }
 
-Bitmap NewDriveItem::render() const {
-  piso_log("NewDriveItem::render()");
-  auto text = render_text("Add new drive");
-
-  Bitmap indented(text.width() + MENU_INDENT, text.height());
-  indented.blit(text, {MENU_INDENT, 0});
-  if (m_focused) {
-    indented.blit(selector, {0, 0});
-    return indented;
+bool NewDriveItem::on_next() {
+  piso_log("NewDriveItem::on_next()");
+  if (!m_selecting_size) {
+    return false;
   } else {
-    return indented;
+    m_current_percent += 10;
+    return true;
+  }
+}
+
+bool NewDriveItem::on_prev() {
+  piso_log("NewDriveItem::on_prev()");
+  if (!m_selecting_size) {
+    return false;
+  } else {
+    m_current_percent -= 10;
+    if (m_current_percent < 0) {
+      m_current_percent = 0;
+    }
+    return true;
+  }
+}
+
+std::pair<Bitmap, GUIRenderable::RenderMode> NewDriveItem::render() const {
+  piso_log("NewDriveItem::render()");
+  if (!m_selecting_size) {
+    auto text = render_text("Add new drive");
+
+    Bitmap indented(text.width() + MENU_INDENT, text.height());
+    indented.blit(text, {MENU_INDENT, 0});
+    if (m_focused) {
+      indented.blit(selector, {0, 0});
+      return {indented, GUIRenderable::RenderMode::NORMAL};
+    } else {
+      return {indented, GUIRenderable::RenderMode::NORMAL};
+    }
+  } else {
+    auto text = render_text(
+        "New drive capacity: " + std::to_string(m_current_percent) + "%");
+    return {text, GUIRenderable::RenderMode::FULLSCREEN};
   }
 }
 
@@ -172,14 +208,18 @@ bool pISO::on_prev() {
   return GUIListItem::on_prev();
 }
 
-Bitmap pISO::render() const {
+std::pair<Bitmap, GUIRenderable::RenderMode> pISO::render() const {
   piso_log("pISO::render()");
   Bitmap bitmap;
   for (const auto &item : m_list_items) {
     auto drive_bitmap = item->render();
-    Bitmap shifted{drive_bitmap.width() + MENU_LEFT_SPACE,
-                   drive_bitmap.height()};
-    shifted.blit(drive_bitmap, {MENU_LEFT_SPACE, 0});
+    if (drive_bitmap.second == GUIRenderable::RenderMode::FULLSCREEN) {
+      return drive_bitmap;
+    }
+
+    Bitmap shifted{drive_bitmap.first.width() + MENU_LEFT_SPACE,
+                   drive_bitmap.first.height()};
+    shifted.blit(drive_bitmap.first, {MENU_LEFT_SPACE, 0});
 
     auto old_height = bitmap.height();
     bitmap.expand_height(shifted.height());
@@ -204,5 +244,5 @@ Bitmap pISO::render() const {
   sidebar_with_border = sidebar_with_border.rotate(Bitmap::Direction::Left);
 
   out.blit(sidebar_with_border, {out.width() - sidebar_with_border.width(), 0});
-  return out;
+  return {out, GUIRenderable::RenderMode::NORMAL};
 }
