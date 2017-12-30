@@ -13,8 +13,9 @@
 bool NewDriveItem::on_select() {
   piso_log("NewDriveItem::on_select()");
   if (m_selecting_size) {
-    m_piso.add_drive(m_current_percent / 100.0 *
-                     53687091200ull); // TODO: get size from pISO
+    unsigned long long new_size = m_current_percent / 100.0 * m_piso.size();
+    // sizes must be a multiple of 512
+    m_piso.add_drive(((new_size + 512 - 1) / 512) * 512);
     m_selecting_size = false;
     m_current_percent = 100;
   } else {
@@ -191,6 +192,12 @@ float pISO::percent_used() const {
     }
   }
   piso_error("pISO: unable to locate thinpool");
+}
+
+unsigned long long pISO::size() const {
+  auto sizestr =
+      lvm_lvs_report("lv_size --units B", THINPOOL_NAME)["lv_size"].asString();
+  return std::stoull(sizestr);
 }
 
 bool pISO::on_select() {

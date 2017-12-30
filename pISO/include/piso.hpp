@@ -61,6 +61,7 @@ public:
   void remove_drive(const VirtualDrive &drive);
 
   float percent_used() const;
+  unsigned long long size() const;
 
   virtual bool on_select() override;
   virtual bool on_next() override;
