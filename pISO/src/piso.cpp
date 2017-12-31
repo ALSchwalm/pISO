@@ -7,8 +7,10 @@
 
 #include <algorithm>
 #include <cmath>
+#include <iomanip>
 #include <iostream>
 #include <linux/usb/ch9.h> // For USB_CLASS_PER_INTERFACE
+#include <sstream>
 
 bool NewDriveItem::on_select() {
   piso_log("NewDriveItem::on_select()");
@@ -61,9 +63,21 @@ std::pair<Bitmap, GUIRenderable::RenderMode> NewDriveItem::render() const {
       return {indented, GUIRenderable::RenderMode::NORMAL};
     }
   } else {
-    auto text = render_text(
-        "New drive capacity: " + std::to_string(m_current_percent) + "%");
-    return {text, GUIRenderable::RenderMode::FULLSCREEN};
+    Bitmap disp(Display::width, Display::height);
+    auto text = render_text("New drive capacity:");
+    disp.blit(text, {0, 0});
+
+    double bytes_per_gb = 1024 * 1024 * 1024;
+    std::stringstream ss;
+    ss << m_current_percent << "%";
+    ss << " (" << std::fixed << std::setprecision(1)
+       << (m_piso.size() / bytes_per_gb * m_current_percent / 100) << "GB)";
+    auto size_text = render_text(ss.str());
+
+    // TODO: less arbitrary position
+    disp.blit(size_text, {15, 25});
+
+    return {disp, GUIRenderable::RenderMode::FULLSCREEN};
   }
 }
 
