@@ -3,6 +3,7 @@
 
 #include <cppgpio.hpp>
 #include <functional>
+#include <mutex>
 
 class Controller {
 public:
@@ -16,6 +17,7 @@ private:
   GPIO::PushButton m_down;
   GPIO::PushButton m_up;
   GPIO::PushButton m_select;
+  std::mutex m_controller_lock;
 
   Controller &operator=(const Controller &) = delete;
   Controller(const Controller &) = delete;
