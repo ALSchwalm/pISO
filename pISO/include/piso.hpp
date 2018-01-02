@@ -3,6 +3,7 @@
 
 #include "error.hpp"
 #include "guiitem.hpp"
+#include "options.hpp"
 #include "virtualdrive.hpp"
 
 #include <usbg/usbg.h>
@@ -35,10 +36,11 @@ private:
 
   std::vector<VirtualDrive> m_drives;
   NewDriveItem m_newdrive;
+  OptionsItem m_options;
   usbg_gadget *m_gadget;
   usbg_config *m_usb_config;
 
-  void update_list_items() override;
+  virtual void update_list_items() override;
 
   pISO();
   pISO(const pISO &) = delete;

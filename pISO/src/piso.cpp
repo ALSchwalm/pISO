@@ -140,6 +140,7 @@ void pISO::update_list_items() {
     m_list_items.push_back(&drive);
   }
   m_list_items.push_back(&m_newdrive);
+  m_list_items.push_back(&m_options);
   for (const auto &item : m_list_items) {
     item->on_lose_focus();
   }
