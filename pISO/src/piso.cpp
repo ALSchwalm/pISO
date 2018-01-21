@@ -31,7 +31,10 @@ bool NewDriveItem::on_next() {
   if (!m_selecting_size) {
     return false;
   } else {
-    m_current_percent += 10;
+    m_current_percent -= 10;
+    if (m_current_percent < 0) {
+      m_current_percent = 0;
+    }
     return true;
   }
 }
@@ -41,10 +44,7 @@ bool NewDriveItem::on_prev() {
   if (!m_selecting_size) {
     return false;
   } else {
-    m_current_percent -= 10;
-    if (m_current_percent < 0) {
-      m_current_percent = 0;
-    }
+    m_current_percent += 10;
     return true;
   }
 }
@@ -169,13 +169,15 @@ void pISO::rebuild_drives_from_volumes() {
 const VirtualDrive &pISO::add_drive(uint64_t size) {
   piso_log("Adding new drive with size=", size);
 
-  auto name = "volume" + std::to_string(m_drives.size());
+  auto name = "Drive" + std::to_string(m_drives.size() + 1);
 
   lvm_run("lvcreate -V ", size, "B -T ", VOLUME_GROUP_NAME, "/", THINPOOL_NAME,
           " -n ", name);
   m_drives.emplace_back(name);
 
-  // // TODO: create partition table on new volume
+  // Add a partition table (but no partitions)
+  run_command("(printf \"p\nw\n\" | fdisk /dev/", VOLUME_GROUP_NAME, "/", name,
+              ") || true");
 
   m_drives.back().mount_external();
 

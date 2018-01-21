@@ -1,5 +1,6 @@
 #include <cppgpio.hpp>
 #include <errno.h>
+#include <exception>
 #include <string.h>
 #include <wiringPi.h>
 
@@ -10,7 +11,15 @@
 #include "lvmwrapper.hpp"
 #include "piso.hpp"
 
+void terminate_handler() {
+  // TODO: include a link to the wiki/issue page
+  Display::instance().update(render_text("An error occured."));
+  std::abort();
+}
+
 int main() {
+  std::set_terminate(terminate_handler);
+
   if (wiringPiSetupGpio() == -1) {
     piso_error("Error while setting up GPIO: ", strerror(errno));
   }

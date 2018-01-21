@@ -10,9 +10,9 @@ public:
   enum class Direction { UP = 0, DOWN = 1 };
 
 private:
-  static const int UP_PIN = 17;
+  static const int UP_PIN = 27;
   static const int DOWN_PIN = 22;
-  static const int SELECT_PIN = 27;
+  static const int SELECT_PIN = 17;
 
   GPIO::PushButton m_down;
   GPIO::PushButton m_up;
