@@ -93,8 +93,8 @@ bool VirtualDrive::mount_internal() {
 
   std::istringstream isostream{mount_res};
   std::string iso_path;
-  while (std::getline(isostream, iso_path, '\n')) {
-    m_isos.emplace_back(iso_path);
+  for (unsigned int i = 0; std::getline(isostream, iso_path, '\n'); ++i) {
+    m_isos.emplace_back(iso_path, name() + std::to_string(i));
   }
 
   update_list_items();

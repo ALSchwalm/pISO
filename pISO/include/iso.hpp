@@ -6,10 +6,12 @@
 
 class ISO : public GUIItem {
   std::string m_path;
+  std::string m_id;
   bool m_mounted = false;
 
 public:
-  ISO(const std::string &path) : m_path{path} {}
+  ISO(const std::string &path, const std::string &id)
+      : m_path{path}, m_id{id} {}
   virtual ~ISO() {}
 
   bool mount();

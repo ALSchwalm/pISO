@@ -17,7 +17,7 @@ bool ISO::mount() {
   auto scripts_path = config_getenv("PISO_SCRIPTS_PATH");
   auto iso_script = scripts_path + "/iso.sh";
 
-  run_command("sh ", iso_script, " mount ", m_path);
+  run_command("sh ", iso_script, " mount ", m_path, " ", m_id);
   m_mounted = true;
   return true;
 }
@@ -32,7 +32,7 @@ bool ISO::unmount() {
   auto scripts_path = config_getenv("PISO_SCRIPTS_PATH");
   auto iso_script = scripts_path + "/iso.sh";
 
-  run_command("sh ", iso_script, " unmount ", m_path);
+  run_command("sh ", iso_script, " unmount ", m_path, " ", m_id);
   m_mounted = false;
   return true;
 }
