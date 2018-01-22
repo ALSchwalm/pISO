@@ -43,7 +43,10 @@ int main() {
   controller.start();
 
   while (true) {
-    Display::instance().update(piso.render().first);
+    {
+      std::lock_guard<std::mutex> lock{controller.lock()};
+      Display::instance().update(piso.render().first);
+    }
     std::this_thread::sleep_for(std::chrono::seconds(10));
   }
 }

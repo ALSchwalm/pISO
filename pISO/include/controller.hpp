@@ -26,6 +26,7 @@ private:
 public:
   std::function<void(Direction)> on_move;
   std::function<void()> on_select;
+  std::mutex &lock() { return m_controller_lock; }
 
   static Controller &instance() {
     static Controller c;
