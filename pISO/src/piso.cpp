@@ -1,6 +1,7 @@
 #include "piso.hpp"
 #include "bitmap.hpp"
 #include "config.hpp"
+#include "controller.hpp"
 #include "display.hpp"
 #include "font.hpp"
 #include "lvmwrapper.hpp"
@@ -11,47 +12,66 @@
 #include <iostream>
 #include <linux/usb/ch9.h> // For USB_CLASS_PER_INTERFACE
 #include <sstream>
+#include <thread>
 
 bool NewDriveItem::on_select() {
   piso_log("NewDriveItem::on_select()");
-  if (m_selecting_size) {
+  switch (m_state) {
+  case State::NORMAL: {
+    m_state = State::SELECTING;
+    break;
+  }
+  case State::SELECTING: {
     unsigned long long new_size = m_current_percent / 100.0 * m_piso.size();
-    // sizes must be a multiple of 512
-    m_piso.add_drive(((new_size + 512 - 1) / 512) * 512);
-    m_selecting_size = false;
-    m_current_percent = 100;
-  } else {
-    m_selecting_size = true;
+    std::thread f{[this, new_size] {
+      // sizes must be a multiple of 512
+      this->m_piso.add_drive(((new_size + 512 - 1) / 512) * 512);
+      this->m_current_percent = 100;
+      this->m_state = State::NORMAL;
+
+      // We could just wait here, when the refresh happens, the screen will show
+      // the right thing, but that could be (at most) 10 seconds away and may
+      // make the format seem slow (also, the user could input commands that
+      // they couldn't see).
+      // TODO: find a better way to do this
+      auto &controller = Controller::instance();
+      std::lock_guard<std::mutex> lock{controller.lock()};
+      Display::instance().update(this->m_piso.render().first);
+    }};
+    f.detach();
+    m_state = State::WAITING;
+  } break;
+  case State::WAITING:
+    break;
   }
   return true;
 }
 
 bool NewDriveItem::on_next() {
   piso_log("NewDriveItem::on_next()");
-  if (!m_selecting_size) {
-    return false;
-  } else {
+  if (m_state == State::SELECTING) {
     m_current_percent -= 10;
     if (m_current_percent < 0) {
       m_current_percent = 0;
     }
     return true;
   }
+  return false;
 }
 
 bool NewDriveItem::on_prev() {
   piso_log("NewDriveItem::on_prev()");
-  if (!m_selecting_size) {
-    return false;
-  } else {
+  if (m_state == State::SELECTING) {
     m_current_percent += 10;
     return true;
   }
+  return false;
 }
 
 std::pair<Bitmap, GUIRenderable::RenderMode> NewDriveItem::render() const {
   piso_log("NewDriveItem::render()");
-  if (!m_selecting_size) {
+  switch (m_state) {
+  case State::NORMAL: {
     auto text = render_text("Add new drive");
 
     Bitmap indented(text.width() + MENU_INDENT, text.height());
@@ -62,7 +82,8 @@ std::pair<Bitmap, GUIRenderable::RenderMode> NewDriveItem::render() const {
     } else {
       return {indented, GUIRenderable::RenderMode::NORMAL};
     }
-  } else {
+  }
+  case State::SELECTING: {
     Bitmap disp(Display::width, Display::height);
     auto text = render_text("New drive capacity:");
     disp.blit(text, {0, 0});
@@ -78,6 +99,13 @@ std::pair<Bitmap, GUIRenderable::RenderMode> NewDriveItem::render() const {
     disp.blit(size_text, {15, 25});
 
     return {disp, GUIRenderable::RenderMode::FULLSCREEN};
+  }
+  case State::WAITING: {
+    Bitmap disp(Display::width, Display::height);
+    auto text = render_text("Formatting new disk");
+    disp.blit(text, {0, 0});
+    return {disp, GUIRenderable::RenderMode::FULLSCREEN};
+  }
   }
 }
 
@@ -175,9 +203,10 @@ const VirtualDrive &pISO::add_drive(uint64_t size) {
           " -n ", name);
   m_drives.emplace_back(name);
 
-  // Add a partition table (but no partitions)
-  run_command("(printf \"p\nw\n\" | fdisk /dev/", VOLUME_GROUP_NAME, "/", name,
-              ") || true");
+  // Add a default exfat partition (mostly for windows)
+  run_command("(printf \"o\nn\np\n1\n\n\nw\" | fdisk /dev/", VOLUME_GROUP_NAME,
+              "/", name, ") || true");
+  run_command("mkfs.exfat /dev/", VOLUME_GROUP_NAME, "/", name);
 
   m_drives.back().mount_external();
 
