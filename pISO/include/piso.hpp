@@ -3,35 +3,12 @@
 
 #include "error.hpp"
 #include "guiitem.hpp"
+#include "newdrive.hpp"
 #include "options.hpp"
 #include "virtualdrive.hpp"
 
 #include <usbg/usbg.h>
 #include <vector>
-
-class pISO;
-class NewDriveItem : public GUIItem {
-  enum class State {
-    NORMAL,    // User hasn't selected new drive
-    SELECTING, // User has selected the new drive option, is now picking size
-    WAITING    // User has picked a size and is waiting for the format to finish
-  };
-
-  pISO &m_piso;
-  State m_state;
-  int m_current_percent;
-
-public:
-  NewDriveItem(pISO &piso)
-      : m_piso{piso}, m_state{State::NORMAL}, m_current_percent{100} {}
-  virtual ~NewDriveItem() {}
-
-  virtual bool on_select() override;
-  virtual bool on_next() override;
-  virtual bool on_prev() override;
-
-  virtual std::pair<Bitmap, GUIRenderable::RenderMode> render() const override;
-};
 
 class pISO : public GUIListItem {
 private:
@@ -65,7 +42,7 @@ public:
 
   std::vector<VirtualDrive> &drives() { return m_drives; }
   const std::vector<VirtualDrive> &drives() const { return m_drives; }
-  const VirtualDrive &add_drive(uint64_t size);
+  const VirtualDrive &add_drive(uint64_t size, DriveFormat format);
   void remove_drive(const VirtualDrive &drive);
 
   float percent_used() const;

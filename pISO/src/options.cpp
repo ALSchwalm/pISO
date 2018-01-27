@@ -2,15 +2,6 @@
 #include "config.hpp"
 #include "font.hpp"
 
-Bitmap add_selector(Bitmap bitmap, bool should_add) {
-  Bitmap indented(bitmap.width() + MENU_INDENT, bitmap.height());
-  indented.blit(bitmap, {MENU_INDENT, 0});
-  if (should_add) {
-    indented.blit(selector, {0, 0});
-  }
-  return indented;
-}
-
 std::pair<Bitmap, GUIRenderable::RenderMode> RemoveDriveItem::render() const {
   return {add_selector(render_text("Remove Drive"), m_focused),
           GUIRenderable::RenderMode::NORMAL};

@@ -1,6 +1,7 @@
 #ifndef GUIEVENTHANDLER_HPP
 #define GUIEVENTHANDLER_HPP
 
+#include <functional>
 #include <utility>
 #include <vector>
 
@@ -61,6 +62,22 @@ public:
   virtual bool on_select() override;
   virtual bool on_next() override;
   virtual bool on_prev() override;
+};
+
+class SimpleGUIItem : public GUIItem {
+protected:
+  std::string m_text;
+  std::function<void()> m_callback;
+
+public:
+  template <typename Callback>
+  SimpleGUIItem(const std::string &text, Callback callback)
+      : m_text{text}, m_callback{callback} {}
+
+  virtual std::pair<Bitmap, GUIRenderable::RenderMode> render() const override;
+  virtual bool on_select() override;
+  virtual bool on_next() override { return false; }
+  virtual bool on_prev() override { return false; }
 };
 
 #endif

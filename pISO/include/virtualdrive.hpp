@@ -22,6 +22,8 @@ public:
   virtual std::pair<Bitmap, GUIRenderable::RenderMode> render() const override;
 };
 
+enum class DriveFormat { WINDOWS, LINUX, MAC, UNIVERSAL };
+
 class VirtualDrive : public GUIListItem {
 public:
   enum class MountState { UNMOUNTED, INTERNAL, EXTERNAL };

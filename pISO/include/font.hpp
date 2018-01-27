@@ -11,6 +11,7 @@ extern const bitmap_t selector;
 extern const bitmap_t mount_indicator;
 
 bitmap_t render_text(const std::string &str);
+bitmap_t add_selector(bitmap_t map, bool should_add);
 void gen_pbm(const bitmap_t &map, const std::string &filename);
 
 #endif

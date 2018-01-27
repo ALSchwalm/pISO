@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 
+#include "config.hpp"
 #include "font.hpp"
 
 // clang-format off
@@ -1139,6 +1140,15 @@ void gen_pbm(const bitmap_t &map, const std::string &filename) {
     }
     outfile << std::endl;
   }
+}
+
+bitmap_t add_selector(bitmap_t bitmap, bool should_add) {
+  bitmap_t indented(bitmap.width() + MENU_INDENT, bitmap.height());
+  indented.blit(bitmap, {MENU_INDENT, 0});
+  if (should_add) {
+    indented.blit(selector, {0, 0});
+  }
+  return indented;
 }
 
 #ifdef DEBUG

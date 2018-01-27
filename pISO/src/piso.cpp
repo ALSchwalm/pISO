@@ -8,106 +8,9 @@
 
 #include <algorithm>
 #include <cmath>
-#include <iomanip>
 #include <iostream>
 #include <linux/usb/ch9.h> // For USB_CLASS_PER_INTERFACE
 #include <sstream>
-#include <thread>
-
-bool NewDriveItem::on_select() {
-  piso_log("NewDriveItem::on_select()");
-  switch (m_state) {
-  case State::NORMAL: {
-    m_state = State::SELECTING;
-    break;
-  }
-  case State::SELECTING: {
-    unsigned long long new_size = m_current_percent / 100.0 * m_piso.size();
-    std::thread f{[this, new_size] {
-      // sizes must be a multiple of 512
-      this->m_piso.add_drive(((new_size + 512 - 1) / 512) * 512);
-      this->m_current_percent = 100;
-      this->m_state = State::NORMAL;
-
-      // We could just wait here, when the refresh happens, the screen will show
-      // the right thing, but that could be (at most) 10 seconds away and may
-      // make the format seem slow (also, the user could input commands that
-      // they couldn't see).
-      // TODO: find a better way to do this
-      auto &controller = Controller::instance();
-      std::lock_guard<std::mutex> lock{controller.lock()};
-      Display::instance().update(this->m_piso.render().first);
-    }};
-    f.detach();
-    m_state = State::WAITING;
-  } break;
-  case State::WAITING:
-    break;
-  }
-  return true;
-}
-
-bool NewDriveItem::on_next() {
-  piso_log("NewDriveItem::on_next()");
-  if (m_state == State::SELECTING) {
-    m_current_percent -= 10;
-    if (m_current_percent < 0) {
-      m_current_percent = 0;
-    }
-    return true;
-  }
-  return false;
-}
-
-bool NewDriveItem::on_prev() {
-  piso_log("NewDriveItem::on_prev()");
-  if (m_state == State::SELECTING) {
-    m_current_percent += 10;
-    return true;
-  }
-  return false;
-}
-
-std::pair<Bitmap, GUIRenderable::RenderMode> NewDriveItem::render() const {
-  piso_log("NewDriveItem::render()");
-  switch (m_state) {
-  case State::NORMAL: {
-    auto text = render_text("Add new drive");
-
-    Bitmap indented(text.width() + MENU_INDENT, text.height());
-    indented.blit(text, {MENU_INDENT, 0});
-    if (m_focused) {
-      indented.blit(selector, {0, 0});
-      return {indented, GUIRenderable::RenderMode::NORMAL};
-    } else {
-      return {indented, GUIRenderable::RenderMode::NORMAL};
-    }
-  }
-  case State::SELECTING: {
-    Bitmap disp(Display::width, Display::height);
-    auto text = render_text("New drive capacity:");
-    disp.blit(text, {0, 0});
-
-    double bytes_per_gb = 1024 * 1024 * 1024;
-    std::stringstream ss;
-    ss << m_current_percent << "%";
-    ss << " (" << std::fixed << std::setprecision(1)
-       << (m_piso.size() / bytes_per_gb * m_current_percent / 100) << "GB)";
-    auto size_text = render_text(ss.str());
-
-    // TODO: less arbitrary position
-    disp.blit(size_text, {15, 25});
-
-    return {disp, GUIRenderable::RenderMode::FULLSCREEN};
-  }
-  case State::WAITING: {
-    Bitmap disp(Display::width, Display::height);
-    auto text = render_text("Formatting new disk");
-    disp.blit(text, {0, 0});
-    return {disp, GUIRenderable::RenderMode::FULLSCREEN};
-  }
-  }
-}
 
 pISO::pISO() : m_newdrive(*this) {
   rebuild_drives_from_volumes();
@@ -194,7 +97,7 @@ void pISO::rebuild_drives_from_volumes() {
   update_list_items();
 }
 
-const VirtualDrive &pISO::add_drive(uint64_t size) {
+const VirtualDrive &pISO::add_drive(uint64_t size, DriveFormat format) {
   piso_log("Adding new drive with size=", size);
 
   auto name = "Drive" + std::to_string(m_drives.size() + 1);
@@ -203,10 +106,42 @@ const VirtualDrive &pISO::add_drive(uint64_t size) {
           " -n ", name);
   m_drives.emplace_back(name);
 
-  // Add a default exfat partition (mostly for windows)
-  run_command("(printf \"o\nn\np\n1\n\n\nw\" | fdisk /dev/", VOLUME_GROUP_NAME,
-              "/", name, ") || true");
-  run_command("mkfs.exfat /dev/", VOLUME_GROUP_NAME, "/", name);
+  switch (format) {
+  case DriveFormat::MAC:
+  case DriveFormat::UNIVERSAL:
+  case DriveFormat::WINDOWS:
+    // EXFAT and NTFS use the ntfs type
+    run_command("parted --script /dev/", VOLUME_GROUP_NAME, "/", name,
+                " \\\n mklabel msdos \\\n mkpart primary ntfs 0% 100%");
+    break;
+  case DriveFormat::LINUX:
+    run_command("parted --script /dev/", VOLUME_GROUP_NAME, "/", name,
+                " \\\n mklabel msdos \\\n mkpart primary ext3 0% 100%");
+    break;
+  }
+
+  // Create a loopback device for the partition (so we can format it)
+  auto scripts_path = config_getenv("PISO_SCRIPTS_PATH");
+  auto vdrive_script = scripts_path + "/vdrive.sh";
+  auto loopback_res =
+      run_command("sh ", vdrive_script, " mount-internal-basic ", name);
+  std::istringstream partitions{loopback_res};
+  std::string first_partition;
+  std::getline(partitions, first_partition, '\n');
+
+  // Format the partition based on the system
+  switch (format) {
+  case DriveFormat::WINDOWS:
+    run_command("mkfs.ntfs -f ", first_partition);
+    break;
+  case DriveFormat::LINUX:
+    run_command("mkfs.ext3 ", first_partition);
+    break;
+  case DriveFormat::MAC:
+  case DriveFormat::UNIVERSAL:
+    run_command("mkfs.exfat ", first_partition);
+    break;
+  }
 
   m_drives.back().mount_external();
 

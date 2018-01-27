@@ -1,5 +1,7 @@
 #include "guiitem.hpp"
+#include "bitmap.hpp"
 #include "error.hpp"
+#include "font.hpp"
 
 bool GUIListItem::has_selection() const {
   return m_selection != m_list_items.end();
@@ -8,15 +10,17 @@ bool GUIListItem::has_selection() const {
 bool GUIListItem::on_focus() {
   GUIEventHandler::on_focus();
   if (has_selection()) {
-    (*m_selection)->on_focus();
+    return (*m_selection)->on_focus();
   }
+  return false;
 }
 
 bool GUIListItem::on_lose_focus() {
   GUIEventHandler::on_lose_focus();
   if (has_selection()) {
-    (*m_selection)->on_lose_focus();
+    return (*m_selection)->on_lose_focus();
   }
+  return false;
 }
 
 bool GUIListItem::on_select() {
@@ -61,4 +65,16 @@ bool GUIListItem::on_prev() {
   } else {
     return false;
   }
+}
+
+std::pair<Bitmap, GUIRenderable::RenderMode> SimpleGUIItem::render() const {
+  piso_log("SimpleGUIItem::on_render");
+  return {add_selector(render_text(m_text), m_focused),
+          GUIRenderable::RenderMode::NORMAL};
+}
+
+bool SimpleGUIItem::on_select() {
+  piso_log("SimpleGUIItem::on_select");
+  m_callback();
+  return true;
 }
