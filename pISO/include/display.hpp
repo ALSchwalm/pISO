@@ -50,6 +50,7 @@ class Display {
 
   Bitmap m_map;
   int m_spi_fd;
+  bool m_invert_image = true;
 
   void send_spi_command(unsigned char command);
   void send_spi_command(SSD1306_COMMAND command);
@@ -68,6 +69,7 @@ public:
     return display;
   }
 
+  void flip_orientation() { m_invert_image = !m_invert_image; }
   void update(const Bitmap &);
   void reset();
 };

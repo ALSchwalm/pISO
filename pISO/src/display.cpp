@@ -82,15 +82,28 @@ void Display::update(const Bitmap &bitmap) {
   auto pages = height / 8;
   std::vector<unsigned char> data;
 
-  // The screen is flipped, so iterate backwards here
-  for (auto page = pages - 1; page >= 0; --page) {
-    for (auto x = width - 1; x >= 0; --x) {
-      unsigned char bits = 0;
-      for (unsigned char bit = 0; bit < 8; ++bit) {
-        bits = bits << 1;
-        bits |= m_map[page * 8 + bit][x];
+  if (m_invert_image) {
+    // The screen is flipped, so iterate backwards here
+    for (auto page = pages - 1; page >= 0; --page) {
+      for (auto x = width - 1; x >= 0; --x) {
+        unsigned char bits = 0;
+        for (unsigned char bit = 0; bit < 8; ++bit) {
+          bits = bits << 1;
+          bits |= m_map[page * 8 + bit][x];
+        }
+        data.push_back(bits);
       }
-      data.push_back(bits);
+    }
+  } else {
+    for (auto page = 0; page < pages; ++page) {
+      for (auto x = 0; x < width; ++x) {
+        unsigned char bits = 0;
+        for (unsigned char bit = 0; bit < 8; ++bit) {
+          bits = bits << 1;
+          bits |= m_map[page * 8 + 7 - bit][x];
+        }
+        data.push_back(bits);
+      }
     }
   }
 

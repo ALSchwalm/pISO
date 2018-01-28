@@ -1,4 +1,5 @@
 #include "controller.hpp"
+#include "display.hpp"
 #include "error.hpp"
 
 Controller::Controller()
@@ -8,19 +9,25 @@ Controller::Controller()
 void Controller::start() {
   m_down.f_pushed = [this]() {
     std::lock_guard<std::mutex> lock{this->m_controller_lock};
-    this->on_move(Direction::DOWN);
+    this->on_move((!m_invert_input) ? Direction::DOWN : Direction::UP);
   };
   m_down.start();
 
   m_up.f_pushed = [this]() {
     std::lock_guard<std::mutex> lock{this->m_controller_lock};
-    this->on_move(Direction::UP);
+    this->on_move((!m_invert_input) ? Direction::UP : Direction::DOWN);
   };
   m_up.start();
 
-  m_select.f_pushed = [this]() {
+  m_select.f_released = [this](std::chrono::nanoseconds time) {
     std::lock_guard<std::mutex> lock{this->m_controller_lock};
-    this->on_select();
+    if (time > m_long_press_time) {
+      this->flip_input();
+      Display::instance().flip_orientation();
+      this->on_long_press();
+    } else {
+      this->on_select();
+    }
   };
   m_select.start();
 }

@@ -18,6 +18,8 @@ private:
   GPIO::PushButton m_up;
   GPIO::PushButton m_select;
   std::mutex m_controller_lock;
+  bool m_invert_input = false;
+  std::chrono::seconds m_long_press_time = std::chrono::seconds(1);
 
   Controller &operator=(const Controller &) = delete;
   Controller(const Controller &) = delete;
@@ -26,6 +28,7 @@ private:
 public:
   std::function<void(Direction)> on_move;
   std::function<void()> on_select;
+  std::function<void()> on_long_press;
   std::mutex &lock() { return m_controller_lock; }
 
   static Controller &instance() {
@@ -34,6 +37,7 @@ public:
   }
 
   void start();
+  void flip_input() { m_invert_input = !m_invert_input; }
 };
 
 #endif

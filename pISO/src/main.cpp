@@ -40,6 +40,9 @@ int main() {
     piso.on_select();
     Display::instance().update(piso.render().first);
   };
+  controller.on_long_press = [&] {
+    Display::instance().update(piso.render().first);
+  };
   controller.start();
 
   while (true) {
