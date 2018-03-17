@@ -2,7 +2,7 @@ use error;
 use mio::*;
 use std::thread;
 use std::time;
-use sysfs_gpio::{Direction, Edge, Pin};
+use sysfs_gpio::{AsyncPinPoller, Direction, Edge, Pin};
 
 pub struct Controller {
     poll: Poll,
@@ -13,6 +13,9 @@ pub struct Controller {
     up_input: Pin,
     down_input: Pin,
     select_input: Pin,
+    up_poller: AsyncPinPoller,
+    down_poller: AsyncPinPoller,
+    select_poller: AsyncPinPoller,
 }
 
 impl Controller {
@@ -51,6 +54,9 @@ impl Controller {
             up_input: up_input,
             down_input: down_input,
             select_input: select_input,
+            up_poller: up_poller,
+            down_poller: down_poller,
+            select_poller: select_poller,
         })
     }
 

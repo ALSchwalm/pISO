@@ -17,12 +17,12 @@ HOST_CARGO_ENV = \
 define PISO_BUILD_CMDS
 	(cd $(@D); \
 		$(HOST_MAKE_ENV) $(HOST_CARGO_ENV) \
-		$(HOST_DIR)/bin/cargo build --target=$(RUST_TARGET_NAME) --release)
+		$(HOST_DIR)/bin/cargo build --target=$(RUSTC_TARGET_NAME) --release)
 endef
 
 define PISO_INSTALL_TARGET_CMDS
 	$(INSTALL) -D -s --strip-program=$(HOST_DIR)/bin/arm-linux-strip \
-		-m 0755 $(@D)/target/$(RUST_TARGET_NAME)/release/pISO \
+		-m 0755 $(@D)/target/$(RUSTC_TARGET_NAME)/release/pISO \
 		$(TARGET_DIR)/usr/bin/pISO
 endef
 

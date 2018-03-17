@@ -1,0 +1,7 @@
+config BR2_PACKAGE_PISO
+	bool "pISO"
+	depends on BR2_PACKAGE_HOST_CARGO
+	help
+	  pISO application
+
+	  https://www.kickstarter.com/projects/178023282/piso-the-most-versatile-flash-drive-yet
