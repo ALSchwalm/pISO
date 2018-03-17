@@ -5,7 +5,7 @@
 ################################################################################
 
 PISO_VERSION = 0.20
-PISO_SITE = $(HOST_DIR)/../../../pISO
+PISO_SITE = /home/adam/repos/pISO/pISO-rs
 PISO_SITE_METHOD:=local
 
 HOST_CARGO_HOME = $(HOST_DIR)/share/cargo
@@ -22,8 +22,8 @@ endef
 
 define PISO_INSTALL_TARGET_CMDS
 	$(INSTALL) -D -s --strip-program=$(HOST_DIR)/bin/arm-linux-strip \
-		-m 0755 $(@D)/target/$(RUST_TARGET_NAME)/release/pISO \
-		$(TARGET_DIR)/usr/bin/pISO
+		-m 0755 $(@D)/target/$(RUST_TARGET_NAME)/release/pISO-rs \
+		$(TARGET_DIR)/usr/bin/pISO-rs
 endef
 
 $(eval $(generic-package))

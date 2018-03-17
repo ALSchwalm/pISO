@@ -1,0 +1,14 @@
+[package]
+name = "pISO"
+version = "0.2.0"
+authors = ["Adam Schwalm <adamschwalm@gmail.com>"]
+
+[dependencies]
+derive-error-chain = "0.11.0"
+error-chain = "0.11.0"
+mio = "0.6"
+spidev = "0.3.0"
+
+[dependencies.sysfs_gpio]
+features = ["mio-evented"]
+version = "0.5"
