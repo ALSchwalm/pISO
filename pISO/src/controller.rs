@@ -78,43 +78,33 @@ impl Controller {
         let mut last_event = time::SystemTime::now();
 
         loop {
-            println!("polling");
             self.poll.poll(&mut self.events, None)?;
 
-            println!("after poll");
             for e in self.events.iter() {
-                println!("got event");
                 if last_event.elapsed().unwrap() > debounce_delay && e.readiness().is_readable() {
-                    println!("processing event");
                     thread::sleep(debounce_min_hold);
 
                     match e.token() {
                         Token(1) => {
-                            println!("up");
                             if self.up_input.get_value()? != 0 {
                                 continue;
                             }
-                            println!("up after debounce");
                             if let Some(ref mut callback) = self.on_up_callback {
                                 (callback)();
                             }
                         },
                         Token(2) => {
-                            println!("down");
                             if self.down_input.get_value()? != 0 {
                                 continue;
                             }
-                            println!("down after debounce");
                             if let Some(ref mut callback) = self.on_down_callback {
                                 (callback)();
                             }
                         }
                         Token(3) => {
-                            println!("select");
                             if self.select_input.get_value()? != 0 {
                                 continue;
                             }
-                            println!("select after debounce");
                             if let Some(ref mut callback) = self.on_select_callback {
                                 (callback)();
                             }
