@@ -1,5 +1,5 @@
 use bitmap::Bitmap;
-use spidev::{Spidev, SpidevOptions, SpidevTransfer, SPI_MODE_0};
+use spidev::{SPI_MODE_0, Spidev, SpidevOptions, SpidevTransfer};
 use std::io::Write;
 use std::thread;
 use std::time;
@@ -56,7 +56,7 @@ pub struct Display {
     contents: Bitmap,
     dc_pin: Pin,
     rst_pin: Pin,
-    bus: Spidev
+    bus: Spidev,
 }
 
 impl Display {
@@ -82,12 +82,13 @@ impl Display {
             contents: Bitmap::new(128, 64),
             dc_pin: dc_pin,
             rst_pin: rst_pin,
-            bus: spi
+            bus: spi,
         })
     }
 
     fn send_spi_command<Cmd>(&mut self, cmd: Cmd) -> error::Result<()>
-        where Cmd: Into<u8>
+    where
+        Cmd: Into<u8>,
     {
         self.dc_pin.set_value(0)?;
         self.bus.write(&[cmd.into()])?;
@@ -109,7 +110,7 @@ impl Display {
         self.send_spi_command(SSD1306Command::SetMultiplex)?;
         self.send_spi_command(0x3F)?;
         self.send_spi_command(SSD1306Command::SetDisplayOffset)?;
-        self.send_spi_command(0x0)?;                                      // no offset
+        self.send_spi_command(0x0)?; // no offset
         self.send_spi_command((SSD1306Command::SetStartLine as u8) | 0x0)?; // line #0
         self.send_spi_command(SSD1306Command::ChargePump)?;
         self.send_spi_command(0x14)?;

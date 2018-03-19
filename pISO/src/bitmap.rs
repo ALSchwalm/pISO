@@ -1,13 +1,13 @@
 use std::ops::{Deref, DerefMut, Index};
 
-pub struct Bitmap{
-    contents: Vec<Vec<u8>>
+pub struct Bitmap {
+    contents: Vec<Vec<u8>>,
 }
 
 impl Bitmap {
     pub fn new(width: usize, height: usize) -> Bitmap {
         Bitmap {
-            contents: vec![vec![0; width]; height]
+            contents: vec![vec![0; width]; height],
         }
     }
 
@@ -16,9 +16,7 @@ impl Bitmap {
 
         contents.extend(slice.iter().map(|s| s.to_vec()));
 
-        Bitmap {
-            contents: contents
-        }
+        Bitmap { contents: contents }
     }
 
     pub fn width(&self) -> usize {
@@ -46,10 +44,8 @@ impl Bitmap {
         if height > self.height() {
             let self_width = self.width();
             let self_height = self.height();
-            self.contents.append(&mut vec![
-                vec![0;  self_width];
-                height - self_height
-            ]);
+            self.contents
+                .append(&mut vec![vec![0; self_width]; height - self_height]);
         } else {
             self.contents.truncate(height);
         }
@@ -70,20 +66,23 @@ impl Bitmap {
 
         for i in 0..other.height() {
             for j in 0..other.width() {
-                self.contents[i+position.1][j+position.0] = other[i][j];
+                self.contents[i + position.1][j + position.0] = other[i][j];
             }
         }
     }
 }
 
-impl<Idx> Index<Idx> for Bitmap where Idx: Into<usize> {
+impl<Idx> Index<Idx> for Bitmap
+where
+    Idx: Into<usize>,
+{
     type Output = Vec<u8>;
     fn index(&self, index: Idx) -> &Self::Output {
         &self.contents[index.into()]
     }
 }
 
-impl Deref for Bitmap{
+impl Deref for Bitmap {
     type Target = Vec<Vec<u8>>;
     fn deref(&self) -> &Self::Target {
         &self.contents

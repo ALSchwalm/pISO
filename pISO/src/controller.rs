@@ -92,7 +92,7 @@ impl Controller {
                             if let Some(ref mut callback) = self.on_up_callback {
                                 (callback)();
                             }
-                        },
+                        }
                         Token(2) => {
                             if self.down_input.get_value()? != 0 {
                                 continue;
@@ -109,7 +109,7 @@ impl Controller {
                                 (callback)();
                             }
                         }
-                        Token(_) => unreachable!()
+                        Token(_) => unreachable!(),
                     }
                     last_event = time::SystemTime::now();
                 }

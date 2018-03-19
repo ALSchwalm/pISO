@@ -1,7 +1,7 @@
 use error::{ErrorKind, Result, ResultExt};
 use std::fs::{create_dir_all, read_dir, remove_file, File};
 use std::io::Read;
-use std::path::{Path,PathBuf};
+use std::path::{Path, PathBuf};
 use std::io::Write;
 use std::os::unix::fs::symlink;
 use std::thread;
@@ -18,44 +18,43 @@ pub struct GadgetConfig {
     pub product: &'static str,
 
     pub max_power: &'static str,
-    pub configuration: &'static str
+    pub configuration: &'static str,
 }
 
 pub struct UsbGadget {
     config: GadgetConfig,
     root: PathBuf,
-    current_id: u64
+    current_id: u64,
 }
 
 pub struct StorageID(u64);
 
 impl UsbGadget {
     pub fn new<P>(root: P, config: GadgetConfig) -> Result<UsbGadget>
-        where P: AsRef<Path> {
-
+    where
+        P: AsRef<Path>,
+    {
         // Wait for the UDC to exist in sysfs
         Self::wait_for_path(root.as_ref().join("UDC"), Duration::from_millis(1500))?;
 
         let mut gadget = UsbGadget {
             config: config,
             root: PathBuf::from(root.as_ref()),
-            current_id: 0
+            current_id: 0,
         };
 
-        gadget.configure().chain_err(|| "Failed to configure usb gadget")?;
+        gadget
+            .configure()
+            .chain_err(|| "Failed to configure usb gadget")?;
 
         Ok(gadget)
     }
 
     fn configure(&mut self) -> Result<()> {
-        File::create(self.root.join("idVendor"))?
-            .write_all(self.config.vendor_id.as_bytes())?;
-        File::create(self.root.join("idProduct"))?
-            .write_all(self.config.product_id.as_bytes())?;
-        File::create(self.root.join("bcdDevice"))?
-            .write_all(self.config.device_bcd.as_bytes())?;
-        File::create(self.root.join("bcdUSB"))?
-            .write_all(self.config.usb_bcd.as_bytes())?;
+        File::create(self.root.join("idVendor"))?.write_all(self.config.vendor_id.as_bytes())?;
+        File::create(self.root.join("idProduct"))?.write_all(self.config.product_id.as_bytes())?;
+        File::create(self.root.join("bcdDevice"))?.write_all(self.config.device_bcd.as_bytes())?;
+        File::create(self.root.join("bcdUSB"))?.write_all(self.config.usb_bcd.as_bytes())?;
 
         create_dir_all(self.root.join("strings/0x409/"))?;
 
@@ -76,14 +75,15 @@ impl UsbGadget {
     }
 
     fn wait_for_path<P>(path: P, total_wait: Duration) -> Result<()>
-        where P: AsRef<Path>
+    where
+        P: AsRef<Path>,
     {
         let now = Instant::now();
         let wait = Duration::from_millis(50);
 
         while now.elapsed() < total_wait {
             if path.as_ref().exists() {
-                return Ok(())
+                return Ok(());
             }
             thread::sleep(wait);
         }
@@ -92,11 +92,11 @@ impl UsbGadget {
 
     fn activate_udc(&mut self) -> Result<()> {
         let mut udcs = read_dir("/sys/class/udc")?;
-        let udc = udcs.next().ok_or(ErrorKind::Msg("No available udc".into()))??
+        let udc = udcs.next()
+            .ok_or(ErrorKind::Msg("No available udc".into()))??
             .file_name();
 
-        File::create(self.root.join("UDC"))?
-            .write_all(udc.to_string_lossy().as_bytes())?;
+        File::create(self.root.join("UDC"))?.write_all(udc.to_string_lossy().as_bytes())?;
         Ok(())
     }
 
@@ -108,8 +108,7 @@ impl UsbGadget {
 
         // Only deactivate if it is currently active
         if contents.len() > 0 {
-            File::create(udc_path)?
-                .write_all(b"")?;
+            File::create(udc_path)?.write_all(b"")?;
         }
         Ok(())
     }
@@ -121,15 +120,21 @@ impl UsbGadget {
         new_id
     }
 
-    pub fn export_file<P>(&mut self, path: P, cdrom: bool) -> Result<StorageID> where P: AsRef<Path> {
+    pub fn export_file<P>(&mut self, path: P, cdrom: bool) -> Result<StorageID>
+    where
+        P: AsRef<Path>,
+    {
         self.deactivate_udc()?;
         let id = self.new_storage_id();
 
-        let storage_root = self.root.join(format!("functions/mass_storage.{}/lun.0", id.0));
+        let storage_root = self.root
+            .join(format!("functions/mass_storage.{}/lun.0", id.0));
         create_dir_all(&storage_root)?;
 
-        File::create(self.root.join(format!("functions/mass_storage.{}/stall", id.0)))?
-            .write_all(b"1")?;
+        File::create(
+            self.root
+                .join(format!("functions/mass_storage.{}/stall", id.0)),
+        )?.write_all(b"1")?;
 
         File::create(storage_root.join("cdrom"))?.write_all((cdrom as i32).to_string().as_bytes())?;
 
@@ -141,14 +146,16 @@ impl UsbGadget {
         File::create(storage_root.join("file"))?
             .write_all(path.as_ref().to_string_lossy().as_bytes())?;
 
-        symlink(self.root.join(format!("functions/mass_storage.{}", id.0)),
-                self.root.join(format!("configs/c.1/mass_storage.{}", id.0)))?;
+        symlink(
+            self.root.join(format!("functions/mass_storage.{}", id.0)),
+            self.root.join(format!("configs/c.1/mass_storage.{}", id.0)),
+        )?;
 
         self.activate_udc()?;
         Ok(id)
     }
 
-    pub fn unexport_file(&mut self, id: StorageID) -> Result<()> {
+    pub fn unexport_file(&mut self, id: &StorageID) -> Result<()> {
         self.deactivate_udc()?;
 
         remove_file(self.root.join(format!("configs/c.1/mass_storage.{}", id.0)))?;

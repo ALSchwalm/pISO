@@ -1,8 +1,9 @@
 use bitmap::Bitmap;
 
 pub fn render_text<S>(text: S) -> Bitmap
-    where S: AsRef<str> {
-
+where
+    S: AsRef<str>,
+{
     let mut text_map = Bitmap::new(0, 0);
     for letter in text.as_ref().bytes() {
         let letter_map = if letter > FONT.len() as u8 {
