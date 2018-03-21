@@ -3,6 +3,12 @@ extern crate error_chain;
 #[macro_use]
 extern crate derive_error_chain;
 extern crate mio;
+#[macro_use]
+extern crate serde;
+#[macro_use]
+extern crate serde_derive;
+#[macro_use]
+extern crate serde_json;
 extern crate spidev;
 extern crate sysfs_gpio;
 
@@ -12,14 +18,25 @@ mod bitmap;
 mod controller;
 mod display;
 mod error;
-use error::ResultExt;
 mod font;
+mod lvm;
 mod usb;
+mod utils;
 mod vdrive;
+
+use error::ResultExt;
 
 quick_main!(run);
 
 fn run() -> error::Result<()> {
+    let mut vg = lvm::VolumeGroup::from_path("/dev/VolGroup01")?;
+    for volume in vg.volumes()? {
+        println!("{}", volume.name);
+    }
+    // vg.create_volume("test", 10 * 1024 * 1024)?;
+
+    return Ok(());
+
     let mut disp = display::Display::new().chain_err(|| "Failed to create display")?;
     disp.on().chain_err(|| "Failed to activate display")?;
 
