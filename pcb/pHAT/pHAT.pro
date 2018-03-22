@@ -1,4 +1,4 @@
-update=12/8/2017 8:44:43 PM
+update=3/22/2018 5:31:37 PM
 version=1
 last_client=kicad
 [pcbnew]
@@ -30,6 +30,6 @@ version=1
 LibDir=../../piso_v2
 [eeschema/libraries]
 LibName1=pHAT-rescue
-LibName2=C:/Users/theja/Desktop/pISO/pcb/pISO
-LibName3=analog_switches
-LibName4=switches
+LibName2=analog_switches
+LibName3=switches
+LibName4=C:/Users/James/Desktop/pISO/pcb/pISO
