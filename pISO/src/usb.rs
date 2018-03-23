@@ -4,8 +4,8 @@ use std::io::Read;
 use std::path::{Path, PathBuf};
 use std::io::Write;
 use std::os::unix::fs::symlink;
-use std::thread;
 use std::time::{Duration, Instant};
+use utils::wait_for_path;
 
 pub struct GadgetConfig {
     pub vendor_id: &'static str,
@@ -35,7 +35,7 @@ impl UsbGadget {
         P: AsRef<Path>,
     {
         // Wait for the UDC to exist in sysfs
-        Self::wait_for_path(root.as_ref().join("UDC"), Duration::from_millis(1500))?;
+        wait_for_path(root.as_ref().join("UDC"), Duration::from_millis(1500))?;
 
         let mut gadget = UsbGadget {
             config: config,
@@ -74,29 +74,21 @@ impl UsbGadget {
         Ok(())
     }
 
-    fn wait_for_path<P>(path: P, total_wait: Duration) -> Result<()>
-    where
-        P: AsRef<Path>,
-    {
-        let now = Instant::now();
-        let wait = Duration::from_millis(50);
-
-        while now.elapsed() < total_wait {
-            if path.as_ref().exists() {
-                return Ok(());
-            }
-            thread::sleep(wait);
-        }
-        Err("timeout while waiting for path".into())
-    }
-
-    fn activate_udc(&mut self) -> Result<()> {
+    fn activate_udc_if_ready(&mut self) -> Result<()> {
         let mut udcs = read_dir("/sys/class/udc")?;
         let udc = udcs.next()
             .ok_or(ErrorKind::Msg("No available udc".into()))??
             .file_name();
 
-        File::create(self.root.join("UDC"))?.write_all(udc.to_string_lossy().as_bytes())?;
+        let functions = read_dir(self.root.join("configs/c.1"))?;
+        for entry in functions {
+            let entry = entry?;
+            if entry.file_type()?.is_symlink() {
+                File::create(self.root.join("UDC"))?.write_all(udc.to_string_lossy().as_bytes())?;
+                break;
+            }
+        }
+
         Ok(())
     }
 
@@ -151,7 +143,7 @@ impl UsbGadget {
             self.root.join(format!("configs/c.1/mass_storage.{}", id.0)),
         )?;
 
-        self.activate_udc()?;
+        self.activate_udc_if_ready()?;
         Ok(id)
     }
 
@@ -160,7 +152,7 @@ impl UsbGadget {
 
         remove_file(self.root.join(format!("configs/c.1/mass_storage.{}", id.0)))?;
 
-        self.activate_udc()?;
+        self.activate_udc_if_ready()?;
         Ok(())
     }
 }

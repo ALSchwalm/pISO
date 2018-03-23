@@ -20,30 +20,24 @@ mod display;
 mod error;
 mod font;
 mod lvm;
+mod piso;
 mod usb;
 mod utils;
 mod vdrive;
 
 use error::ResultExt;
+use std::sync::{Arc, Mutex};
 
 quick_main!(run);
 
 fn run() -> error::Result<()> {
-    let mut vg = lvm::VolumeGroup::from_path("/dev/VolGroup01")?;
-    for volume in vg.volumes()? {
-        println!("{}", volume.name);
-    }
-    // vg.create_volume("test", 10 * 1024 * 1024)?;
-
-    return Ok(());
-
     let mut disp = display::Display::new().chain_err(|| "Failed to create display")?;
     disp.on().chain_err(|| "Failed to activate display")?;
 
     let bitmap = font::render_text("hello");
     disp.update(bitmap)?;
 
-    let mut gadget = usb::UsbGadget::new(
+    let mut gadget = Arc::new(Mutex::new(usb::UsbGadget::new(
         "/sys/kernel/config/usb_gadget/g1",
         usb::GadgetConfig {
             vendor_id: "0x1d6b",
@@ -58,12 +52,18 @@ fn run() -> error::Result<()> {
             max_power: "250",
             configuration: "Config 1",
         },
-    )?;
+    )?));
 
-    gadget.export_file("/usr/bin/perf", false)?;
+    let mut vg = lvm::VolumeGroup::from_path("/dev/VolGroup00")?;
+    let volume = vg.create_volume("Drive0", 12 * 1024 * 1024)?;
+    let mut vdrive = vdrive::VirtualDrive::new(volume, gadget.clone())?;
+    vdrive.mount_external()?;
 
     let mut controller = controller::Controller::new()?;
-    controller.on_select(Box::new(|| {
+    controller.on_select(Box::new(move || {
+        vdrive.unmount_external().expect("Unmount external failed");
+        vdrive.mount_internal().expect("Mount internal failed");
+
         println!("select");
     }));
     controller.on_up(Box::new(|| {

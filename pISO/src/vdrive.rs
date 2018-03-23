@@ -5,6 +5,7 @@ use utils;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
+use std::time::Duration;
 
 const VDRIVE_MOUNT_ROOT: &str = "/mnt";
 
@@ -22,13 +23,9 @@ pub struct VirtualDrive {
 
 impl VirtualDrive {
     pub fn new(
-        name: String,
-        size: u64,
-        vg: &mut lvm::VolumeGroup,
+        volume: lvm::LogicalVolume,
         usb: Arc<Mutex<usb::UsbGadget>>,
     ) -> Result<VirtualDrive> {
-        let volume = vg.create_volume(&name, size)?;
-
         Ok(VirtualDrive {
             state: MountState::Unmounted,
             usb: usb,
@@ -36,15 +33,8 @@ impl VirtualDrive {
         })
     }
 
-    pub fn from<P>(path: P, usb: Arc<Mutex<usb::UsbGadget>>) -> Result<VirtualDrive>
-    where
-        P: AsRef<Path>,
-    {
-        Ok(VirtualDrive {
-            volume: lvm::LogicalVolume::from_path(path)?,
-            state: MountState::Unmounted,
-            usb: usb,
-        })
+    pub fn name(&self) -> &str {
+        &self.volume.name
     }
 
     pub fn mount_external(&mut self) -> Result<()> {
@@ -104,14 +94,16 @@ impl VirtualDrive {
         match self.state {
             MountState::Unmounted => {
                 let volume_path = &self.volume.path.to_string_lossy();
-                let loopback_path = PathBuf::from(utils::run_check_output("losetup", &["-f"])?);
-                let loopback_name = loopback_path
+                let loopback_path =
+                    PathBuf::from(utils::run_check_output("losetup", &["-f"])?.trim_right());
+                let loopback_name: String = loopback_path
                     .file_name()
                     .ok_or(ErrorKind::Msg("loopback path has no file name".into()))?
                     .to_string_lossy()
-                    .into_owned();
+                    .into();
 
                 utils::run_check_output("losetup", &["-fPL", volume_path])?;
+                utils::wait_for_path(&loopback_path, Duration::from_millis(1000))?;
                 utils::run_check_output("partprobe", &[loopback_path])?;
 
                 let mut mounted_partitions = vec![];
@@ -124,8 +116,9 @@ impl VirtualDrive {
                     {
                         let mount_point = Path::new(VDRIVE_MOUNT_ROOT).join(entry.file_name());
                         fs::create_dir_all(&mount_point)?;
-                        self.mount_partition(&entry.path(), &mount_point)?;
-                        mounted_partitions.push(mount_point.to_path_buf());
+                        if self.mount_partition(&entry.path(), &mount_point).is_ok() {
+                            mounted_partitions.push(mount_point.to_path_buf());
+                        }
                     }
                 }
                 self.state = MountState::Internal(mounted_partitions);

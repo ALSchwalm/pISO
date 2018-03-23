@@ -165,7 +165,7 @@ impl VolumeGroup {
                 "-T",
                 &format!("{}/thinpool", &self.name),
                 "-n",
-                name,
+                &name,
             ])
             .output()
             .chain_err(|| "lvcreate could not start")?;
