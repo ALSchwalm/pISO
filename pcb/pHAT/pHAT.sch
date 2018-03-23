@@ -18,17 +18,6 @@ Comment2 ""
 Comment3 ""
 Comment4 ""
 $EndDescr
-$Comp
-L GND #PWR2
-U 1 1 59A62435
-P 2950 3350
-F 0 "#PWR2" H 2950 3100 50  0001 C CNN
-F 1 "GND" H 2950 3200 50  0000 C CNN
-F 2 "" H 2950 3350 50  0000 C CNN
-F 3 "" H 2950 3350 50  0000 C CNN
-	1    2950 3350
-	1    0    0    -1  
-$EndComp
 Text Label 2850 4150 0    60   ~ 0
 CS
 Text Label 2850 4450 0    60   ~ 0
@@ -52,13 +41,13 @@ MOSI
 $Comp
 L TEST_1P W5
 U 1 1 59A9707C
-P 2450 3200
-F 0 "W5" H 2450 3470 50  0000 C CNN
-F 1 "POWER" H 2450 3400 50  0000 C CNN
-F 2 "pISO:SLP" H 2650 3200 50  0001 C CNN
-F 3 "https://www.digikey.com/product-detail/en/mill-max-manufacturing-corp/0906-3-15-20-75-14-11-0/ED8183-ND/1147051" H 2650 3200 50  0001 C CNN
-F 4 ".30" H 2450 3200 60  0001 C CNN "Price"
-	1    2450 3200
+P 1750 3300
+F 0 "W5" H 1750 3570 50  0000 C CNN
+F 1 "POWER" H 1750 3500 50  0000 C CNN
+F 2 "pISO:SLP" H 1950 3300 50  0001 C CNN
+F 3 "https://www.digikey.com/product-detail/en/mill-max-manufacturing-corp/0906-3-15-20-75-14-11-0/ED8183-ND/1147051" H 1950 3300 50  0001 C CNN
+F 4 ".30" H 1750 3300 60  0001 C CNN "Price"
+	1    1750 3300
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -139,10 +128,10 @@ F 4 ".02" H 5850 3700 60  0001 C CNN "Price"
 	0    -1   -1   0   
 $EndComp
 $Comp
-L +3.3V #PWR5
+L +3.3V #PWR01
 U 1 1 59AC5DDC
 P 6100 2700
-F 0 "#PWR5" H 6100 2550 50  0001 C CNN
+F 0 "#PWR01" H 6100 2550 50  0001 C CNN
 F 1 "+3.3V" H 6100 2840 50  0000 C CNN
 F 2 "" H 6100 2700 50  0000 C CNN
 F 3 "" H 6100 2700 50  0000 C CNN
@@ -189,8 +178,6 @@ Text Label 6300 2900 2    60   ~ 0
 GND
 Wire Wire Line
 	2850 4150 2750 4150
-Wire Wire Line
-	3200 2800 3150 2800
 Wire Wire Line
 	2850 4000 2750 4000
 Wire Wire Line
@@ -299,10 +286,10 @@ F 3 "" H 3000 5700 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L GND #PWR1
+L GND #PWR02
 U 1 1 5A09ABEB
 P 2900 5800
-F 0 "#PWR1" H 2900 5550 50  0001 C CNN
+F 0 "#PWR02" H 2900 5550 50  0001 C CNN
 F 1 "GND" H 2900 5650 50  0000 C CNN
 F 2 "" H 2900 5800 50  0000 C CNN
 F 3 "" H 2900 5800 50  0000 C CNN
@@ -314,12 +301,11 @@ Wire Wire Line
 Connection ~ 3000 5800
 Connection ~ 2900 5800
 Connection ~ 2800 5800
-Connection ~ 2450 3200
 $Comp
-L +3.3V #PWR3
+L +3.3V #PWR03
 U 1 1 5A11071F
 P 4500 2350
-F 0 "#PWR3" H 4500 2200 50  0001 C CNN
+F 0 "#PWR03" H 4500 2200 50  0001 C CNN
 F 1 "+3.3V" H 4500 2490 50  0000 C CNN
 F 2 "" H 4500 2350 50  0000 C CNN
 F 3 "" H 4500 2350 50  0000 C CNN
@@ -410,36 +396,10 @@ F 4 ".28" H 2750 4750 60  0001 C CNN "Price"
 	1    2750 4750
 	0    -1   -1   0   
 $EndComp
-Wire Wire Line
-	2750 3200 2750 3300
-Wire Wire Line
-	2750 3300 2700 3300
-Wire Wire Line
-	2850 3200 2850 3400
-Wire Wire Line
-	2850 3400 2700 3400
-Text Label 2700 3300 2    60   ~ 0
+Text Label 2100 2250 2    60   ~ 0
 DM1_N
-Text Label 2700 3400 2    60   ~ 0
+Text Label 2100 2150 2    60   ~ 0
 DM1_P
-Wire Wire Line
-	3200 3200 3200 2800
-Wire Wire Line
-	2950 3350 2950 3200
-$Comp
-L USB_A-RESCUE-pHAT P2
-U 1 1 59A61647
-P 2850 2900
-F 0 "P2" H 3050 2700 50  0000 C CNN
-F 1 "USB_A" H 2800 3100 50  0000 C CNN
-F 2 "pISO:usb" V 2800 2800 50  0001 C CNN
-F 3 "https://www.digikey.com/product-detail/en/cui-inc/UP2-AH-1-TH/102-3996-ND/6187911" H 2800 2800 50  0001 C CNN
-F 4 ".38" H 2850 2900 60  0001 C CNN "Price"
-	1    2850 2900
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	2950 3200 3200 3200
 $Comp
 L TEST_1P W14
 U 1 1 5A114174
@@ -471,18 +431,16 @@ Wire Wire Line
 Wire Wire Line
 	2750 4450 2850 4450
 $Comp
-L GND #PWR4
+L GND #PWR04
 U 1 1 5A117A99
 P 5050 5600
-F 0 "#PWR4" H 5050 5350 50  0001 C CNN
+F 0 "#PWR04" H 5050 5350 50  0001 C CNN
 F 1 "GND" H 5050 5450 50  0000 C CNN
 F 2 "" H 5050 5600 50  0000 C CNN
 F 3 "" H 5050 5600 50  0000 C CNN
 	1    5050 5600
 	1    0    0    -1  
 $EndComp
-Wire Wire Line
-	2450 3200 2650 3200
 Text Label 3850 4200 2    60   ~ 0
 3V3
 Text Label 4000 4800 2    60   ~ 0
@@ -709,4 +667,49 @@ F 4 ".28" H 1800 4200 60  0001 C CNN "Price"
 	1    1800 4200
 	0    -1   -1   0   
 $EndComp
+$Comp
+L USBC U2
+U 1 1 5AB44745
+P 2550 2200
+F 0 "U2" H 2550 1550 60  0000 C CNN
+F 1 "USBC" H 2550 2850 60  0000 C CNN
+F 2 "pISO:USBC" H 2550 2000 60  0001 C CNN
+F 3 "" H 2550 2000 60  0001 C CNN
+	1    2550 2200
+	1    0    0    -1  
+$EndComp
+Text Label 2100 1650 2    60   ~ 0
+GND
+Text Label 2950 1650 0    60   ~ 0
+GND
+Text Label 2950 2750 0    60   ~ 0
+GND
+Text Label 2100 2750 2    60   ~ 0
+GND
+Text Label 1750 3300 0    60   ~ 0
+piPOWER
+Text Label 2100 1950 2    60   ~ 0
+piPOWER
+Text Label 2100 2450 2    60   ~ 0
+piPOWER
+Text Label 2950 1950 0    60   ~ 0
+piPOWER
+Text Label 2950 2450 0    60   ~ 0
+piPOWER
+NoConn ~ 2100 1750
+NoConn ~ 2100 1850
+NoConn ~ 2100 2050
+NoConn ~ 2100 2350
+NoConn ~ 2100 2550
+NoConn ~ 2100 2650
+NoConn ~ 2950 2550
+NoConn ~ 2950 2650
+NoConn ~ 2950 2350
+NoConn ~ 2950 2050
+NoConn ~ 2950 1850
+NoConn ~ 2950 1750
+Text Label 2950 2150 0    60   ~ 0
+DM1_P
+Text Label 2950 2250 0    60   ~ 0
+DM1_N
 $EndSCHEMATC
