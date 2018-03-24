@@ -34,8 +34,10 @@ use std::sync::{Arc, Mutex};
 quick_main!(run);
 
 fn run() -> error::Result<()> {
+    println!("Building display manager");
     let mut manager = displaymanager::DisplayManager::new()?;
 
+    println!("Building USB gadget");
     let mut gadget = Arc::new(Mutex::new(usb::UsbGadget::new(
         "/sys/kernel/config/usb_gadget/g1",
         usb::GadgetConfig {
@@ -57,10 +59,13 @@ fn run() -> error::Result<()> {
         },
     )?));
 
+    println!("Building pISO");
     let mut piso = piso::PIso::new(manager.clone(), gadget)?;
 
+    println!("Rendering pISO");
     manager.lock()?.render(&piso)?;
 
+    println!("Building controller");
     let mut controller = controller::Controller::new()?;
     controller.on_select(Box::new(move || {
         piso.add_drive(12 * 1024 * 1024);

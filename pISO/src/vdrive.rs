@@ -25,7 +25,7 @@ pub struct VirtualDrive {
     pub usb: Arc<Mutex<usb::UsbGadget>>,
     pub volume: lvm::LogicalVolume,
     pub disp: Arc<Mutex<DisplayManager>>,
-    window: WindowId,
+    pub window: WindowId,
 }
 
 impl VirtualDrive {

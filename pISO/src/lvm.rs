@@ -152,7 +152,7 @@ impl VolumeGroup {
         let report = lvs()?;
         Ok(report
             .into_iter()
-            .filter(|lv| lv.vg_name == self.name)
+            .filter(|lv| lv.vg_name == self.name && !lv.lv_attr.starts_with("t"))
             .map(|lv| LogicalVolume::from_report(&self, lv))
             .collect())
     }

@@ -1,5 +1,5 @@
 use bitmap;
-use displaymanager::{DisplayManager, Widget, Window, WindowId};
+use displaymanager::{DisplayManager, Position, Widget, Window, WindowId};
 use error::Result;
 use font;
 use input;
@@ -19,7 +19,11 @@ pub struct PIso {
 
 impl PIso {
     pub fn new(disp: Arc<Mutex<DisplayManager>>, usb: Arc<Mutex<usb::UsbGadget>>) -> Result<PIso> {
-        let window = disp.lock()?.root();
+        let window = {
+            let mut manager = disp.lock()?;
+            let root = manager.root();
+            manager.add_child(root, Position::Normal)?
+        };
         let vg = lvm::VolumeGroup::from_path("/dev/VolGroup00")?;
         let drives = Self::build_drives_from_vg(window, &disp, &vg, &usb)?;
 
@@ -28,7 +32,7 @@ impl PIso {
             usb: usb,
             vg: vg,
             window: window,
-            disp: disp,
+            disp: disp.clone(),
         })
     }
 
@@ -38,10 +42,11 @@ impl PIso {
         vg: &lvm::VolumeGroup,
         usb: &Arc<Mutex<usb::UsbGadget>>,
     ) -> Result<Vec<vdrive::VirtualDrive>> {
-        let mut drives = vec![];
+        let mut drives: Vec<vdrive::VirtualDrive> = vec![];
         for vol in vg.volumes()?.into_iter() {
+            let winid = drives.last().map(|vdrive| vdrive.window).unwrap_or(window);
             drives.push(vdrive::VirtualDrive::new(
-                window,
+                winid,
                 disp.clone(),
                 usb.clone(),
                 vol,
@@ -53,8 +58,15 @@ impl PIso {
     pub fn add_drive(&mut self, size: u64) -> Result<&vdrive::VirtualDrive> {
         let volume = self.vg
             .create_volume(&format!("Drive{}", self.drives.len()), size)?;
-        let vdrive =
-            vdrive::VirtualDrive::new(self.window, self.disp.clone(), self.usb.clone(), volume)?;
+        let vdrive = vdrive::VirtualDrive::new(
+            self.drives
+                .last()
+                .map(|vdrive| vdrive.window)
+                .unwrap_or(self.window),
+            self.disp.clone(),
+            self.usb.clone(),
+            volume,
+        )?;
         self.drives.push(vdrive);
         Ok(self.drives
             .last()

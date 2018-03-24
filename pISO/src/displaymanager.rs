@@ -125,6 +125,7 @@ impl DisplayManager {
             base: &mut bitmap::Bitmap,
             widget: &Widget,
         ) -> Result<()> {
+            println!("Rendering windowid={}", widget.windowid());
             //TODO: make the less terrible
             let bmap = {
                 let mut window = manager
