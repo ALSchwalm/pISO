@@ -13,10 +13,11 @@ pub struct GadgetConfig {
     pub device_bcd: &'static str,
     pub usb_bcd: &'static str,
 
-    pub serial_number: &'static str,
+    // The serial number will vary from unit to unit
+    pub serial_number: String,
+
     pub manufacturer: &'static str,
     pub product: &'static str,
-
     pub max_power: &'static str,
     pub configuration: &'static str,
 }

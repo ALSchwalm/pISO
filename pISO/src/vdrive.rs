@@ -1,7 +1,12 @@
+use bitmap;
+use displaymanager::{DisplayManager, Position, Widget, Window, WindowId};
 use error::{ErrorKind, Result};
+use font;
+use input;
 use lvm;
 use usb;
 use utils;
+use render;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
@@ -19,17 +24,24 @@ pub struct VirtualDrive {
     pub state: MountState,
     pub usb: Arc<Mutex<usb::UsbGadget>>,
     pub volume: lvm::LogicalVolume,
+    pub disp: Arc<Mutex<DisplayManager>>,
+    window: WindowId,
 }
 
 impl VirtualDrive {
     pub fn new(
-        volume: lvm::LogicalVolume,
+        parent: WindowId,
+        disp: Arc<Mutex<DisplayManager>>,
         usb: Arc<Mutex<usb::UsbGadget>>,
+        volume: lvm::LogicalVolume,
     ) -> Result<VirtualDrive> {
+        let our_window = disp.lock()?.add_child(parent, Position::Normal)?;
         Ok(VirtualDrive {
+            window: our_window,
             state: MountState::Unmounted,
             usb: usb,
             volume: volume,
+            disp: disp,
         })
     }
 
@@ -41,10 +53,7 @@ impl VirtualDrive {
         match self.state {
             MountState::External(_) => Ok(()),
             MountState::Unmounted => {
-                let id = self.usb
-                    .lock()
-                    .map_err(|_| "Failed to lock usb mutex")?
-                    .export_file(&self.volume.path, false)?;
+                let id = self.usb.lock()?.export_file(&self.volume.path, false)?;
                 self.state = MountState::External(id);
                 Ok(())
             }
@@ -61,10 +70,7 @@ impl VirtualDrive {
                 return Err("Attempt to unmount_external while mounted internal".into());
             }
             MountState::External(ref id) => {
-                self.usb
-                    .lock()
-                    .map_err(|_| "Failed to lock usb mutex")?
-                    .unexport_file(id)?;
+                self.usb.lock()?.unexport_file(id)?;
             }
         }
         self.state = MountState::Unmounted;
@@ -143,5 +149,33 @@ impl VirtualDrive {
         };
         self.state = MountState::Unmounted;
         Ok(())
+    }
+}
+
+impl render::Render for VirtualDrive {
+    fn render(&self, window: &Window) -> Result<bitmap::Bitmap> {
+        Ok(font::render_text(self.name()))
+    }
+}
+
+impl input::Input for VirtualDrive {
+    fn on_up(&mut self) -> bool {
+        true
+    }
+    fn on_down(&mut self) -> bool {
+        true
+    }
+    fn on_select(&mut self) -> bool {
+        true
+    }
+}
+
+impl Widget for VirtualDrive {
+    fn children(&self) -> Vec<&Widget> {
+        vec![]
+    }
+
+    fn windowid(&self) -> WindowId {
+        self.window
     }
 }

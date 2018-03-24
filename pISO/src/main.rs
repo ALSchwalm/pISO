@@ -17,10 +17,13 @@ use std::thread;
 mod bitmap;
 mod controller;
 mod display;
+mod displaymanager;
 mod error;
 mod font;
+mod input;
 mod lvm;
 mod piso;
+mod render;
 mod usb;
 mod utils;
 mod vdrive;
@@ -31,11 +34,7 @@ use std::sync::{Arc, Mutex};
 quick_main!(run);
 
 fn run() -> error::Result<()> {
-    let mut disp = display::Display::new().chain_err(|| "Failed to create display")?;
-    disp.on().chain_err(|| "Failed to activate display")?;
-
-    let bitmap = font::render_text("hello");
-    disp.update(bitmap)?;
+    let mut manager = displaymanager::DisplayManager::new()?;
 
     let mut gadget = Arc::new(Mutex::new(usb::UsbGadget::new(
         "/sys/kernel/config/usb_gadget/g1",
@@ -45,7 +44,11 @@ fn run() -> error::Result<()> {
             device_bcd: "0x0100",
             usb_bcd: "0x0200",
 
-            serial_number: "0000000000000000",
+            // Pull the serial number from the Pi's proc/cpuinfo
+            serial_number: utils::run_check_output(
+                "awk",
+                &["/Serial/{print $3}", "/proc/cpuinfo"],
+            )?,
             manufacturer: "Adam Schwalm & James Tate",
             product: "pISO",
 
@@ -54,16 +57,18 @@ fn run() -> error::Result<()> {
         },
     )?));
 
-    let mut vg = lvm::VolumeGroup::from_path("/dev/VolGroup00")?;
-    let volume = vg.create_volume("Drive0", 12 * 1024 * 1024)?;
-    let mut vdrive = vdrive::VirtualDrive::new(volume, gadget.clone())?;
-    vdrive.mount_external()?;
+    let mut piso = piso::PIso::new(manager.clone(), gadget)?;
+
+    manager.lock()?.render(&piso)?;
 
     let mut controller = controller::Controller::new()?;
     controller.on_select(Box::new(move || {
-        vdrive.unmount_external().expect("Unmount external failed");
-        vdrive.mount_internal().expect("Mount internal failed");
-
+        piso.add_drive(12 * 1024 * 1024);
+        manager
+            .lock()
+            .unwrap()
+            .render(&piso)
+            .expect("Render failed");
         println!("select");
     }));
     controller.on_up(Box::new(|| {
