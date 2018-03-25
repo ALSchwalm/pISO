@@ -83,12 +83,12 @@ impl DisplayManager {
         self.windows.get_mut(&id)
     }
 
-    fn children(&self, id: WindowId) -> Vec<WindowId> {
+    fn children(&self, id: WindowId) -> Vec<&Window> {
         self.windows
             .iter()
             .filter_map(|(&winid, ref window)| {
                 if window.parent == id {
-                    Some(winid)
+                    Some(*window)
                 } else {
                     None
                 }
@@ -103,19 +103,38 @@ impl DisplayManager {
             .next()
     }
 
+    fn position_from_parent(&self, parent: &Window, child: &Window) -> (usize, usize) {
+        let height = self.children(parent.id)
+            .iter()
+            .take_while(|win| win.id != child.id)
+            .filter_map(|win| match win.position {
+                Position::Normal => Some(win.size.1),
+                _ => None,
+            })
+            .sum();
+
+        (0, height)
+    }
+
     fn calculate_position(&self, window: &Window) -> (usize, usize) {
         let parent_win = self.parent_window(window);
-        let parent_size = parent_win.map(|win| win.size).unwrap_or((0, 0));
+        let normal_offset = parent_win
+            .map(|parent| self.position_from_parent(parent, window))
+            .unwrap_or((0, 0));
         let parent_pos = parent_win
             .map(|win| self.calculate_position(win))
             .unwrap_or((0, 0));
 
         match window.position {
             Position::Fixed(x, y) => (x, y),
-            Position::Relative(x_off, y_off) => {
-                (parent_pos.0 + x_off, parent_pos.1 + parent_size.1 + y_off)
-            }
-            Position::Normal => (parent_pos.0, parent_pos.1 + parent_size.1),
+            Position::Relative(x_off, y_off) => (
+                parent_pos.0 + normal_offset.0 + x_off,
+                parent_pos.1 + normal_offset.1 + y_off,
+            ),
+            Position::Normal => (
+                parent_pos.0 + normal_offset.0,
+                parent_pos.1 + normal_offset.1,
+            ),
         }
     }
 
@@ -127,22 +146,25 @@ impl DisplayManager {
         ) -> Result<()> {
             println!("Rendering windowid={}", widget.windowid());
             //TODO: make the less terrible
+            let pos = {
+                let window = manager
+                    .get(widget.windowid())
+                    .ok_or(format!("failed to find window id={}", widget.windowid()))?;
+
+                manager.calculate_position(window)
+            };
             let bmap = {
                 let mut window = manager
                     .get_mut(widget.windowid())
                     .ok_or(format!("failed to find window id={}", widget.windowid()))?;
                 let bmap = widget.render(window)?;
                 window.size = (bmap.width(), bmap.height());
+                println!("Window size is ({}, {})", bmap.width(), bmap.height());
                 bmap
             };
-            {
-                let window = manager
-                    .get(widget.windowid())
-                    .ok_or(format!("failed to find window id={}", widget.windowid()))?;
 
-                let pos = manager.calculate_position(window);
-                base.blit(bmap, pos);
-            }
+            println!("Blitting to ({}, {})", pos.0, pos.1);
+            base.blit(bmap, pos);
 
             for child in widget.children() {
                 render_window(manager, base, child)?

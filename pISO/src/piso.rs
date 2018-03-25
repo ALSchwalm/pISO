@@ -44,9 +44,8 @@ impl PIso {
     ) -> Result<Vec<vdrive::VirtualDrive>> {
         let mut drives: Vec<vdrive::VirtualDrive> = vec![];
         for vol in vg.volumes()?.into_iter() {
-            let winid = drives.last().map(|vdrive| vdrive.window).unwrap_or(window);
             drives.push(vdrive::VirtualDrive::new(
-                winid,
+                window,
                 disp.clone(),
                 usb.clone(),
                 vol,
@@ -58,15 +57,8 @@ impl PIso {
     pub fn add_drive(&mut self, size: u64) -> Result<&vdrive::VirtualDrive> {
         let volume = self.vg
             .create_volume(&format!("Drive{}", self.drives.len()), size)?;
-        let vdrive = vdrive::VirtualDrive::new(
-            self.drives
-                .last()
-                .map(|vdrive| vdrive.window)
-                .unwrap_or(self.window),
-            self.disp.clone(),
-            self.usb.clone(),
-            volume,
-        )?;
+        let vdrive =
+            vdrive::VirtualDrive::new(self.window, self.disp.clone(), self.usb.clone(), volume)?;
         self.drives.push(vdrive);
         Ok(self.drives
             .last()
