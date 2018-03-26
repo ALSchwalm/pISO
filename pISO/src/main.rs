@@ -70,22 +70,18 @@ fn run() -> error::Result<()> {
     controller.on_event(Box::new(move |event| {
         match event {
             controller::Event::Up => {}
-            controller::Event::Down => {
-                manager
-                    .lock()
-                    .unwrap()
-                    .on_down(&mut piso)
-                    .expect("On down failed");
-            }
+            controller::Event::Down => {}
             controller::Event::Select => {
                 piso.add_drive(12 * 1024 * 1024);
             }
         }
+
+        let mut manager = manager.lock().unwrap();
         manager
-            .lock()
-            .unwrap()
-            .render(&piso)
-            .expect("Render failed");
+            .on_event(&mut piso, &event)
+            .expect("Event handling failed");
+
+        manager.render(&piso).expect("Render failed");
     }));
 
     controller.start().expect("controller failed");

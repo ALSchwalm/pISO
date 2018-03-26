@@ -4,6 +4,7 @@ use std::thread;
 use std::time;
 use sysfs_gpio::{AsyncPinPoller, Direction, Edge, Pin};
 
+#[derive(PartialEq, Eq)]
 pub enum Event {
     Up,
     Down,

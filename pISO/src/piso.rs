@@ -1,7 +1,7 @@
 use bitmap;
+use controller;
 use displaymanager::{DisplayManager, Position, Widget, Window, WindowId};
 use error::Result;
-use font;
 use input;
 use lvm;
 use usb;
@@ -87,13 +87,7 @@ impl render::Render for PIso {
 }
 
 impl input::Input for PIso {
-    fn on_up(&mut self) -> bool {
-        false
-    }
-    fn on_down(&mut self) -> bool {
-        false
-    }
-    fn on_select(&mut self) -> bool {
+    fn on_event(&mut self, event: &controller::Event) -> bool {
         false
     }
 }

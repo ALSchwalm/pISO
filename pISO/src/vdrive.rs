@@ -1,4 +1,5 @@
 use bitmap;
+use controller;
 use displaymanager::{DisplayManager, Position, Widget, Window, WindowId};
 use error::{ErrorKind, Result};
 use font;
@@ -164,14 +165,8 @@ impl render::Render for VirtualDrive {
 }
 
 impl input::Input for VirtualDrive {
-    fn on_up(&mut self) -> bool {
+    fn on_event(&mut self, event: &controller::Event) -> bool {
         false
-    }
-    fn on_down(&mut self) -> bool {
-        false
-    }
-    fn on_select(&mut self) -> bool {
-        true
     }
 }
 

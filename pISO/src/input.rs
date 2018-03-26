@@ -1,11 +1,7 @@
+use controller;
+
 pub trait Input {
-    fn on_up(&mut self) -> bool {
-        true
-    }
-    fn on_down(&mut self) -> bool {
-        true
-    }
-    fn on_select(&mut self) -> bool {
+    fn on_event(&mut self, event: &controller::Event) -> bool {
         true
     }
 }
