@@ -83,11 +83,11 @@ impl DisplayManager {
         self.windows.get_mut(&id)
     }
 
-    fn children(&self, id: WindowId) -> Vec<&Window> {
+    fn children(&self, target: &Window) -> Vec<&Window> {
         self.windows
             .iter()
-            .filter_map(|(&winid, ref window)| {
-                if window.parent == id {
+            .filter_map(|(_, ref window)| {
+                if window.parent == target.id {
                     Some(*window)
                 } else {
                     None
@@ -104,7 +104,7 @@ impl DisplayManager {
     }
 
     fn position_from_parent(&self, parent: &Window, child: &Window) -> (usize, usize) {
-        let height = self.children(parent.id)
+        let height = self.children(parent)
             .iter()
             .take_while(|win| win.id != child.id)
             .filter_map(|win| match win.position {
@@ -138,6 +138,101 @@ impl DisplayManager {
         }
     }
 
+    fn first_descendant<'a>(&'a self, window: &'a Window) -> &'a Window {
+        self.children(window)
+            .get(0)
+            .map(|win| self.first_descendant(win))
+            .unwrap_or(window)
+    }
+
+    fn next_window(&self, window: &Window) -> Option<&Window> {
+        if let Some(parent) = self.parent_window(window) {
+            let children = self.children(parent);
+            children
+                .iter()
+                .position(|win| win.id == window.id)
+                .and_then(|pos| children.into_iter().nth(pos + 1))
+                .map(|win| self.first_descendant(win))
+        } else {
+            None
+        }
+    }
+
+    pub fn shift_focus(&mut self, window: WindowId) {
+        println!("Shifting focus to window id={}", window);
+        for (&id, cand) in self.windows.iter_mut() {
+            if id == window {
+                cand.focus = true;
+            } else {
+                cand.focus = false;
+            }
+        }
+    }
+
+    pub fn on_down(&mut self, root: &mut Widget) -> Result<()> {
+        enum VisitState {
+            NotFound,
+            FoundHandled,
+            FoundNotHandled,
+        }
+        fn visit(manager: &mut DisplayManager, widget: &mut Widget) -> Result<VisitState> {
+            let focus = manager
+                .get(widget.windowid())
+                .ok_or(format!("failed to find window id={}", widget.windowid()))?
+                .focus;
+
+            if focus {
+                // If we have focus, try to handle the event
+                if widget.on_down() {
+                    println!("Focused window handled event");
+                    return Ok(VisitState::FoundHandled);
+                } else {
+                    println!("Focused window did not handle event");
+                    return Ok(VisitState::FoundNotHandled);
+                }
+            } else {
+                // If we don't have focus, try to find out what does
+                let mut res = (0, VisitState::NotFound);
+                for child in widget.mut_children().iter_mut() {
+                    match visit(manager, *child)? {
+                        VisitState::FoundHandled => return Ok(VisitState::FoundHandled),
+                        VisitState::FoundNotHandled => {
+                            println!("Child in focus but did not handle event");
+                            res = (child.windowid(), VisitState::FoundNotHandled);
+                            break;
+                        }
+                        VisitState::NotFound => (),
+                    }
+                }
+
+                //TODO: if one of our children was in focus but couldn't handle the event,
+                //      shift focus to the 'next' window
+                match res {
+                    (id, VisitState::FoundNotHandled) => {
+                        let next_window = {
+                            let window = manager
+                                .get(id)
+                                .ok_or(format!("failed to find window id={}", id))?;
+                            manager.next_window(window).map(|win| win.id)
+                        };
+
+                        if let Some(id) = next_window {
+                            manager.shift_focus(id);
+                            return Ok(VisitState::FoundHandled);
+                        } else {
+                            println!("No 'next window' from this window id={}", widget.windowid());
+                        }
+                    }
+                    _ => (),
+                }
+            }
+            Ok(VisitState::NotFound)
+        }
+
+        visit(self, root)?;
+        Ok(())
+    }
+
     pub fn render(&mut self, root: &Widget) -> Result<()> {
         fn render_window(
             manager: &mut DisplayManager,
@@ -145,7 +240,7 @@ impl DisplayManager {
             widget: &Widget,
         ) -> Result<()> {
             println!("Rendering windowid={}", widget.windowid());
-            //TODO: make the less terrible
+            //TODO: make this less terrible
             let pos = {
                 let window = manager
                     .get(widget.windowid())
@@ -188,6 +283,7 @@ impl DisplayManager {
 }
 
 pub trait Widget: render::Render + input::Input {
+    fn mut_children(&mut self) -> Vec<&mut Widget>;
     fn children(&self) -> Vec<&Widget>;
     fn windowid(&self) -> WindowId;
 }

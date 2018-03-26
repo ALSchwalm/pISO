@@ -154,16 +154,21 @@ impl VirtualDrive {
 
 impl render::Render for VirtualDrive {
     fn render(&self, window: &Window) -> Result<bitmap::Bitmap> {
-        Ok(font::render_text(self.name()))
+        let mut base = bitmap::Bitmap::new(10, 1);
+        base.blit(font::render_text(self.name()), (10, 0));
+        if window.focus {
+            base.blit(bitmap::Bitmap::from_slice(font::ARROW), (0, 0));
+        }
+        Ok(base)
     }
 }
 
 impl input::Input for VirtualDrive {
     fn on_up(&mut self) -> bool {
-        true
+        false
     }
     fn on_down(&mut self) -> bool {
-        true
+        false
     }
     fn on_select(&mut self) -> bool {
         true
@@ -171,6 +176,10 @@ impl input::Input for VirtualDrive {
 }
 
 impl Widget for VirtualDrive {
+    fn mut_children(&mut self) -> Vec<&mut Widget> {
+        vec![]
+    }
+
     fn children(&self) -> Vec<&Widget> {
         vec![]
     }

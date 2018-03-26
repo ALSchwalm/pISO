@@ -27,6 +27,11 @@ impl PIso {
         let vg = lvm::VolumeGroup::from_path("/dev/VolGroup00")?;
         let drives = Self::build_drives_from_vg(window, &disp, &vg, &usb)?;
 
+        // Focus the first drive
+        drives.iter().next().map(|drive| {
+            disp.lock().map(|mut disp| disp.shift_focus(drive.window));
+        });
+
         Ok(PIso {
             drives: drives,
             usb: usb,
@@ -60,6 +65,15 @@ impl PIso {
         let vdrive =
             vdrive::VirtualDrive::new(self.window, self.disp.clone(), self.usb.clone(), volume)?;
         self.drives.push(vdrive);
+
+        // Focus the first drive
+        if self.drives.len() == 1 {
+            let drive = self.drives.iter().next().unwrap();
+            self.disp
+                .lock()
+                .map(|mut disp| disp.shift_focus(drive.window));
+        }
+
         Ok(self.drives
             .last()
             .expect("vdrive was somehow empty after push"))
@@ -74,17 +88,24 @@ impl render::Render for PIso {
 
 impl input::Input for PIso {
     fn on_up(&mut self) -> bool {
-        true
+        false
     }
     fn on_down(&mut self) -> bool {
-        true
+        false
     }
     fn on_select(&mut self) -> bool {
-        true
+        false
     }
 }
 
 impl Widget for PIso {
+    fn mut_children(&mut self) -> Vec<&mut Widget> {
+        self.drives
+            .iter_mut()
+            .map(|vdrive| vdrive as &mut Widget)
+            .collect()
+    }
+
     fn children(&self) -> Vec<&Widget> {
         self.drives.iter().map(|vdrive| vdrive as &Widget).collect()
     }

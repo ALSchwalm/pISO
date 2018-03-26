@@ -71,6 +71,18 @@ const UNPRINTABLE: &'static [&[u8]] = font_char!{
     {1, 1, 1, 1}
 };
 
+pub const ARROW: &'static [&[u8]] = font_char!{
+    {0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0},
+    {0, 0, 1, 0, 0, 0},
+    {0, 0, 0, 1, 0, 0},
+    {1, 1, 1, 1, 1, 0},
+    {0, 0, 0, 1, 0, 0},
+    {0, 0, 1, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0}
+};
+
 const FONT: [&[&[u8]]; 128] = font!{
     // The first 32 unprintable characters
     "NUL" => UNPRINTABLE,

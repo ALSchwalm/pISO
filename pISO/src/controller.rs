@@ -4,12 +4,16 @@ use std::thread;
 use std::time;
 use sysfs_gpio::{AsyncPinPoller, Direction, Edge, Pin};
 
+pub enum Event {
+    Up,
+    Down,
+    Select,
+}
+
 pub struct Controller {
     poll: Poll,
     events: Events,
-    on_select_callback: Option<Box<FnMut()>>,
-    on_up_callback: Option<Box<FnMut()>>,
-    on_down_callback: Option<Box<FnMut()>>,
+    on_event_callback: Option<Box<FnMut(Event)>>,
     up_input: Pin,
     down_input: Pin,
     select_input: Pin,
@@ -48,9 +52,7 @@ impl Controller {
         Ok(Controller {
             poll: poll,
             events: events,
-            on_select_callback: None,
-            on_up_callback: None,
-            on_down_callback: None,
+            on_event_callback: None,
             up_input: up_input,
             down_input: down_input,
             select_input: select_input,
@@ -60,16 +62,8 @@ impl Controller {
         })
     }
 
-    pub fn on_select(&mut self, callback: Box<FnMut()>) {
-        self.on_select_callback = Some(callback);
-    }
-
-    pub fn on_up(&mut self, callback: Box<FnMut()>) {
-        self.on_up_callback = Some(callback);
-    }
-
-    pub fn on_down(&mut self, callback: Box<FnMut()>) {
-        self.on_down_callback = Some(callback);
+    pub fn on_event(&mut self, callback: Box<FnMut(Event)>) {
+        self.on_event_callback = Some(callback);
     }
 
     pub fn start(mut self) -> error::Result<()> {
@@ -89,24 +83,24 @@ impl Controller {
                             if self.up_input.get_value()? != 0 {
                                 continue;
                             }
-                            if let Some(ref mut callback) = self.on_up_callback {
-                                (callback)();
+                            if let Some(ref mut callback) = self.on_event_callback {
+                                (callback)(Event::Up);
                             }
                         }
                         Token(2) => {
                             if self.down_input.get_value()? != 0 {
                                 continue;
                             }
-                            if let Some(ref mut callback) = self.on_down_callback {
-                                (callback)();
+                            if let Some(ref mut callback) = self.on_event_callback {
+                                (callback)(Event::Down);
                             }
                         }
                         Token(3) => {
                             if self.select_input.get_value()? != 0 {
                                 continue;
                             }
-                            if let Some(ref mut callback) = self.on_select_callback {
-                                (callback)();
+                            if let Some(ref mut callback) = self.on_event_callback {
+                                (callback)(Event::Select);
                             }
                         }
                         Token(_) => unreachable!(),

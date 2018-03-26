@@ -67,20 +67,25 @@ fn run() -> error::Result<()> {
 
     println!("Building controller");
     let mut controller = controller::Controller::new()?;
-    controller.on_select(Box::new(move || {
-        piso.add_drive(12 * 1024 * 1024);
+    controller.on_event(Box::new(move |event| {
+        match event {
+            controller::Event::Up => {}
+            controller::Event::Down => {
+                manager
+                    .lock()
+                    .unwrap()
+                    .on_down(&mut piso)
+                    .expect("On down failed");
+            }
+            controller::Event::Select => {
+                piso.add_drive(12 * 1024 * 1024);
+            }
+        }
         manager
             .lock()
             .unwrap()
             .render(&piso)
             .expect("Render failed");
-        println!("select");
-    }));
-    controller.on_up(Box::new(|| {
-        println!("up");
-    }));
-    controller.on_down(Box::new(|| {
-        println!("down");
     }));
 
     controller.start().expect("controller failed");
