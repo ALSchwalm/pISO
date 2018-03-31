@@ -22,7 +22,7 @@ impl NewDrive {
 impl render::Render for NewDrive {
     fn render(&self, window: &Window) -> error::Result<bitmap::Bitmap> {
         let mut base = bitmap::Bitmap::new(10, 1);
-        base.blit(font::render_text("New Drive"), (10, 0));
+        base.blit(font::render_text("New Drive"), (12, 0));
         if window.focus {
             base.blit(bitmap::Bitmap::from_slice(font::ARROW), (0, 0));
         }

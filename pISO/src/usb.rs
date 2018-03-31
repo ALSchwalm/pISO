@@ -5,6 +5,7 @@ use std::path::{Path, PathBuf};
 use std::io::Write;
 use std::os::unix::fs::symlink;
 use std::time::{Duration, Instant};
+use std::thread;
 use utils::wait_for_path;
 
 pub struct GadgetConfig {
@@ -85,24 +86,45 @@ impl UsbGadget {
         for entry in functions {
             let entry = entry?;
             if entry.file_type()?.is_symlink() {
+                println!("Activating UDC");
                 File::create(self.root.join("UDC"))?.write_all(udc.to_string_lossy().as_bytes())?;
+
+                assert!(
+                    self.is_udc_active()
+                        .chain_err(|| "failed to check if udc is active")?,
+                    "UDC was not active after activate"
+                );
                 break;
             }
         }
-
         Ok(())
     }
 
-    fn deactivate_udc(&mut self) -> Result<()> {
+    fn is_udc_active(&mut self) -> Result<bool> {
         let udc_path = self.root.join("UDC");
         let mut file = File::open(&udc_path)?;
         let mut contents = String::new();
         file.read_to_string(&mut contents)?;
 
+        Ok(contents != "\n")
+    }
+
+    fn deactivate_udc(&mut self) -> Result<()> {
+        let udc_path = self.root.join("UDC");
+
         // Only deactivate if it is currently active
-        if contents.len() > 0 {
-            File::create(udc_path)?.write_all(b"")?;
+        if self.is_udc_active()
+            .chain_err(|| "failed to check if udc is active")?
+        {
+            println!("Deactivating UDC: {}", udc_path.display());
+            File::create(udc_path)?.write_all(b"\n")?;
         }
+
+        assert!(
+            !self.is_udc_active()
+                .chain_err(|| "failed to check if udc is active")?,
+            "UDC was still active after deactivate"
+        );
         Ok(())
     }
 
@@ -117,7 +139,8 @@ impl UsbGadget {
     where
         P: AsRef<Path>,
     {
-        self.deactivate_udc()?;
+        self.deactivate_udc()
+            .chain_err(|| "failed to deactivate UDC")?;
         let id = self.new_storage_id();
 
         let storage_root = self.root
@@ -144,16 +167,19 @@ impl UsbGadget {
             self.root.join(format!("configs/c.1/mass_storage.{}", id.0)),
         )?;
 
-        self.activate_udc_if_ready()?;
+        self.activate_udc_if_ready()
+            .chain_err(|| "failed to activate UDC")?;
         Ok(id)
     }
 
     pub fn unexport_file(&mut self, id: &StorageID) -> Result<()> {
-        self.deactivate_udc()?;
+        self.deactivate_udc()
+            .chain_err(|| "failed to deactivate UDC")?;
 
         remove_file(self.root.join(format!("configs/c.1/mass_storage.{}", id.0)))?;
 
-        self.activate_udc_if_ready()?;
+        self.activate_udc_if_ready()
+            .chain_err(|| "failed to activate UDC")?;
         Ok(())
     }
 }

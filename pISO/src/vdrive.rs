@@ -2,7 +2,7 @@ use action;
 use bitmap;
 use controller;
 use displaymanager::{DisplayManager, Position, Widget, Window, WindowId};
-use error::{ErrorKind, Result};
+use error::{ErrorKind, Result, ResultExt};
 use font;
 use input;
 use lvm;
@@ -53,7 +53,10 @@ impl VirtualDrive {
         match self.state {
             MountState::External(_) => Ok(()),
             MountState::Unmounted => {
-                let id = self.usb.lock()?.export_file(&self.volume.path, false)?;
+                let id = self.usb
+                    .lock()?
+                    .export_file(&self.volume.path, false)
+                    .chain_err(|| "failed to mount drive external")?;
                 self.state = MountState::External(id);
                 Ok(())
             }
@@ -70,7 +73,10 @@ impl VirtualDrive {
                 return Err("Attempt to unmount_external while mounted internal".into());
             }
             MountState::External(ref id) => {
-                self.usb.lock()?.unexport_file(id)?;
+                self.usb
+                    .lock()?
+                    .unexport_file(id)
+                    .chain_err(|| "failed to unmount external")?;
             }
         }
         self.state = MountState::Unmounted;
@@ -150,12 +156,33 @@ impl VirtualDrive {
         self.state = MountState::Unmounted;
         Ok(())
     }
+
+    pub fn toggle_mount(&mut self) -> Result<()> {
+        match self.state {
+            // For now, just switch to external if unmounted
+            MountState::Unmounted => self.mount_external(),
+            MountState::Internal(_) => {
+                self.unmount_internal()?;
+                self.mount_external()
+            }
+            MountState::External(_) => {
+                self.unmount_external()?;
+                self.mount_internal()
+            }
+        }
+    }
 }
 
 impl render::Render for VirtualDrive {
     fn render(&self, window: &Window) -> Result<bitmap::Bitmap> {
         let mut base = bitmap::Bitmap::new(10, 1);
-        base.blit(font::render_text(self.name()), (10, 0));
+        base.blit(font::render_text(self.name()), (12, 0));
+        match self.state {
+            MountState::External(_) => {
+                base.blit(bitmap::Bitmap::from_slice(font::SQUARE), (6, 0));
+            }
+            _ => (),
+        };
         if window.focus {
             base.blit(bitmap::Bitmap::from_slice(font::ARROW), (0, 0));
         }
@@ -165,11 +192,22 @@ impl render::Render for VirtualDrive {
 
 impl input::Input for VirtualDrive {
     fn on_event(&self, event: &controller::Event) -> (bool, Vec<action::Action>) {
-        (false, vec![])
+        match *event {
+            controller::Event::Select => {
+                (true, vec![action::Action::ToggleVDriveMount(self.window)])
+            }
+            _ => (false, vec![]),
+        }
     }
 
     fn do_action(&mut self, disp: &mut DisplayManager, action: &action::Action) -> Result<bool> {
-        Ok(false)
+        match *action {
+            action::Action::ToggleVDriveMount(id) if id == self.window => {
+                self.toggle_mount()?;
+                Ok(true)
+            }
+            _ => Ok(false),
+        }
     }
 }
 

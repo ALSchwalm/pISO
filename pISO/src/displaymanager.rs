@@ -3,6 +3,7 @@ use bitmap;
 use controller;
 use display;
 use error::{Result, ResultExt};
+use error_chain::ChainedError;
 use input;
 use render;
 use std::collections::BTreeMap;
@@ -304,7 +305,11 @@ impl DisplayManager {
             actions.retain(|action| match widget.do_action(manager, action) {
                 Ok(handled) => !handled,
                 Err(e) => {
-                    println!("Error while processing '{:?}': {}", action, e);
+                    println!(
+                        "Error while processing '{:?}': {}",
+                        action,
+                        e.display_chain()
+                    );
                     true
                 }
             });
