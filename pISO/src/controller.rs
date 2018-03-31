@@ -68,8 +68,8 @@ impl Controller {
     }
 
     pub fn start(mut self) -> error::Result<()> {
-        let debounce_delay = time::Duration::from_millis(2);
-        let debounce_min_hold = time::Duration::from_millis(1);
+        let debounce_delay = time::Duration::from_millis(100);
+        let debounce_min_hold = time::Duration::from_millis(40);
         let mut last_event = time::SystemTime::now();
 
         loop {
