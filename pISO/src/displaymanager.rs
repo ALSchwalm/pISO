@@ -296,7 +296,7 @@ impl DisplayManager {
             if actions.len() == 0 {
                 return Ok(());
             }
-            actions.retain(|action| match widget.do_action(action) {
+            actions.retain(|action| match widget.do_action(manager, action) {
                 Ok(handled) => !handled,
                 Err(e) => {
                     println!("Error while processing '{:?}': {}", action, e);

@@ -1,5 +1,6 @@
 use action;
 use controller;
+use displaymanager::DisplayManager;
 use error;
 
 pub trait Input {
@@ -7,7 +8,11 @@ pub trait Input {
         (true, vec![])
     }
 
-    fn do_action(&mut self, action: &action::Action) -> error::Result<bool> {
+    fn do_action(
+        &mut self,
+        disp: &mut DisplayManager,
+        action: &action::Action,
+    ) -> error::Result<bool> {
         Ok(false)
     }
 }

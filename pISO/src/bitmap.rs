@@ -31,7 +31,7 @@ impl Bitmap {
         if width > self.width() {
             let self_width = self.width();
             for row in self.contents.iter_mut() {
-                row.extend((0..).take(width - self_width));
+                row.extend(vec![0; width - self_width]);
             }
         } else {
             for row in self.contents.iter_mut() {

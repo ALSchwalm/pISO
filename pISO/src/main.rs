@@ -23,6 +23,7 @@ mod error;
 mod font;
 mod input;
 mod lvm;
+mod newdrive;
 mod piso;
 mod render;
 mod usb;
@@ -69,24 +70,22 @@ fn run() -> error::Result<()> {
     println!("Building controller");
     let mut controller = controller::Controller::new()?;
     controller.on_event(Box::new(move |event| {
-        match event {
-            controller::Event::Up => {}
-            controller::Event::Down => {}
-            controller::Event::Select => {
-                piso.add_drive(12 * 1024 * 1024);
-            }
-        }
-
         let mut manager = manager.lock().unwrap();
+
+        println!("Handling event: {:?}", event);
         let actions = manager
             .on_event(&mut piso, &event)
             .expect("Event handling failed");
 
+        println!("Doing actions: {:?}", actions);
         manager
             .do_actions(&mut piso, actions)
             .expect("Doing actions failed");
 
+        println!("Rendering");
         manager.render(&piso).expect("Render failed");
+
+        println!("Event loop finished");
     }));
 
     controller.start().expect("controller failed");

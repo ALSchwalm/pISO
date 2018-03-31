@@ -26,24 +26,22 @@ pub struct VirtualDrive {
     pub state: MountState,
     pub usb: Arc<Mutex<usb::UsbGadget>>,
     pub volume: lvm::LogicalVolume,
-    pub disp: Arc<Mutex<DisplayManager>>,
     pub window: WindowId,
 }
 
 impl VirtualDrive {
     pub fn new(
         parent: WindowId,
-        disp: Arc<Mutex<DisplayManager>>,
+        disp: &mut DisplayManager,
         usb: Arc<Mutex<usb::UsbGadget>>,
         volume: lvm::LogicalVolume,
     ) -> Result<VirtualDrive> {
-        let our_window = disp.lock()?.add_child(parent, Position::Normal)?;
+        let our_window = disp.add_child(parent, Position::Normal)?;
         Ok(VirtualDrive {
             window: our_window,
             state: MountState::Unmounted,
             usb: usb,
             volume: volume,
-            disp: disp,
         })
     }
 
@@ -170,7 +168,7 @@ impl input::Input for VirtualDrive {
         (false, vec![])
     }
 
-    fn do_action(&mut self, action: &action::Action) -> Result<bool> {
+    fn do_action(&mut self, disp: &mut DisplayManager, action: &action::Action) -> Result<bool> {
         Ok(false)
     }
 }

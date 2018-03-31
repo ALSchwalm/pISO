@@ -5,6 +5,7 @@ use displaymanager::{DisplayManager, Position, Widget, Window, WindowId};
 use error::Result;
 use input;
 use lvm;
+use newdrive;
 use usb;
 use std::sync::{Arc, Mutex};
 use render;
@@ -12,68 +13,58 @@ use vdrive;
 
 pub struct PIso {
     pub drives: Vec<vdrive::VirtualDrive>,
+    newdrive: newdrive::NewDrive,
     usb: Arc<Mutex<usb::UsbGadget>>,
-    disp: Arc<Mutex<DisplayManager>>,
     vg: lvm::VolumeGroup,
     window: WindowId,
 }
 
 impl PIso {
     pub fn new(disp: Arc<Mutex<DisplayManager>>, usb: Arc<Mutex<usb::UsbGadget>>) -> Result<PIso> {
-        let window = {
-            let mut manager = disp.lock()?;
-            let root = manager.root();
-            manager.add_child(root, Position::Normal)?
-        };
-        let vg = lvm::VolumeGroup::from_path("/dev/VolGroup00")?;
-        let drives = Self::build_drives_from_vg(window, &disp, &vg, &usb)?;
+        let mut manager = disp.lock()?;
+        let root = manager.root();
+        let window = manager.add_child(root, Position::Normal)?;
 
-        // Focus the first drive
-        drives.iter().next().map(|drive| {
-            disp.lock().map(|mut disp| disp.shift_focus(drive.window));
-        });
+        let vg = lvm::VolumeGroup::from_path("/dev/VolGroup00")?;
+        let drives = Self::build_drives_from_vg(window, &mut manager, &vg, &usb)?;
+        let ndrive = newdrive::NewDrive::new(&mut manager, window)?;
+
+        if drives.len() > 0 {
+            // Focus the first drive
+            drives.iter().next().map(|drive| {
+                manager.shift_focus(drive.window);
+            });
+        } else {
+            manager.shift_focus(ndrive.window);
+        }
 
         Ok(PIso {
             drives: drives,
+            newdrive: ndrive,
             usb: usb,
             vg: vg,
             window: window,
-            disp: disp.clone(),
         })
     }
 
     fn build_drives_from_vg(
         window: WindowId,
-        disp: &Arc<Mutex<DisplayManager>>,
+        disp: &mut DisplayManager,
         vg: &lvm::VolumeGroup,
         usb: &Arc<Mutex<usb::UsbGadget>>,
     ) -> Result<Vec<vdrive::VirtualDrive>> {
         let mut drives: Vec<vdrive::VirtualDrive> = vec![];
         for vol in vg.volumes()?.into_iter() {
-            drives.push(vdrive::VirtualDrive::new(
-                window,
-                disp.clone(),
-                usb.clone(),
-                vol,
-            )?)
+            drives.push(vdrive::VirtualDrive::new(window, disp, usb.clone(), vol)?)
         }
         Ok(drives)
     }
 
-    pub fn add_drive(&mut self, size: u64) -> Result<&vdrive::VirtualDrive> {
+    fn add_drive(&mut self, disp: &mut DisplayManager, size: u64) -> Result<&vdrive::VirtualDrive> {
         let volume = self.vg
             .create_volume(&format!("Drive{}", self.drives.len()), size)?;
-        let vdrive =
-            vdrive::VirtualDrive::new(self.window, self.disp.clone(), self.usb.clone(), volume)?;
+        let vdrive = vdrive::VirtualDrive::new(self.window, disp, self.usb.clone(), volume)?;
         self.drives.push(vdrive);
-
-        // Focus the first drive
-        if self.drives.len() == 1 {
-            let drive = self.drives.iter().next().unwrap();
-            self.disp
-                .lock()
-                .map(|mut disp| disp.shift_focus(drive.window));
-        }
 
         Ok(self.drives
             .last()
@@ -92,10 +83,10 @@ impl input::Input for PIso {
         (false, vec![])
     }
 
-    fn do_action(&mut self, action: &action::Action) -> Result<bool> {
+    fn do_action(&mut self, disp: &mut DisplayManager, action: &action::Action) -> Result<bool> {
         match *action {
             action::Action::CreateDrive(size) => {
-                self.add_drive(size)?;
+                self.add_drive(disp, size)?;
                 Ok(true)
             }
             _ => Ok(false),
@@ -105,14 +96,21 @@ impl input::Input for PIso {
 
 impl Widget for PIso {
     fn mut_children(&mut self) -> Vec<&mut Widget> {
-        self.drives
+        let mut children = self.drives
             .iter_mut()
             .map(|vdrive| vdrive as &mut Widget)
-            .collect()
+            .collect::<Vec<&mut Widget>>();
+        children.push(&mut self.newdrive as &mut Widget);
+        children
     }
 
     fn children(&self) -> Vec<&Widget> {
-        self.drives.iter().map(|vdrive| vdrive as &Widget).collect()
+        let mut children = self.drives
+            .iter()
+            .map(|vdrive| vdrive as &Widget)
+            .collect::<Vec<&Widget>>();
+        children.push(&self.newdrive as &Widget);
+        children
     }
 
     fn windowid(&self) -> WindowId {
