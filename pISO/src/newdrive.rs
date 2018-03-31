@@ -31,7 +31,7 @@ impl render::Render for NewDrive {
 }
 
 impl input::Input for NewDrive {
-    fn on_event(&mut self, event: &controller::Event) -> (bool, Vec<action::Action>) {
+    fn on_event(&self, event: &controller::Event) -> (bool, Vec<action::Action>) {
         match *event {
             controller::Event::Select => {
                 (true, vec![action::Action::CreateDrive(12 * 1024 * 1024)])

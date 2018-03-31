@@ -79,7 +79,7 @@ impl render::Render for PIso {
 }
 
 impl input::Input for PIso {
-    fn on_event(&mut self, event: &controller::Event) -> (bool, Vec<action::Action>) {
+    fn on_event(&self, event: &controller::Event) -> (bool, Vec<action::Action>) {
         (false, vec![])
     }
 

@@ -85,47 +85,53 @@ impl DisplayManager {
         self.windows.get_mut(&id)
     }
 
-    fn children(&self, target: &Window) -> Vec<&Window> {
-        self.windows
-            .iter()
-            .filter_map(|(_, ref window)| {
-                if window.parent == target.id {
-                    Some(*window)
-                } else {
-                    None
+    fn parent_widget<'a>(&'a self, root: &'a Widget, target: &'a Widget) -> Option<&'a Widget> {
+        fn visit<'a>(current: &'a Widget, target: &'a Widget) -> Option<&'a Widget> {
+            if current.windowid() == target.windowid() {
+                return None;
+            } else {
+                for child in current.children() {
+                    if child.windowid() == target.windowid() {
+                        return Some(current);
+                    }
+                    let res = visit(child, target);
+                    if res.is_some() {
+                        return res;
+                    }
                 }
-            })
-            .collect()
+                return None;
+            }
+        }
+        visit(root, target)
     }
 
-    fn parent_window(&self, window: &Window) -> Option<&Window> {
-        self.windows
-            .values()
-            .filter(|win| win.id == window.parent)
-            .next()
-    }
-
-    fn position_from_parent(&self, parent: &Window, child: &Window) -> (usize, usize) {
-        let height = self.children(parent)
+    fn position_from_parent(&self, parent: &Widget, child: &Widget) -> (usize, usize) {
+        let height = parent
+            .children()
             .iter()
-            .take_while(|win| win.id != child.id)
-            .filter_map(|win| match win.position {
-                Position::Normal => Some(win.size.1),
-                _ => None,
+            .take_while(|widget| widget.windowid() != child.windowid())
+            .filter_map(|widget| {
+                let win = self.get(widget.windowid()).expect("widget has no window");
+                match win.position {
+                    Position::Normal => Some(win.size.1),
+                    _ => None,
+                }
             })
             .sum();
 
         (0, height)
     }
 
-    fn calculate_position(&self, window: &Window) -> (usize, usize) {
-        let parent_win = self.parent_window(window);
-        let normal_offset = parent_win
-            .map(|parent| self.position_from_parent(parent, window))
+    fn calculate_position(&self, root: &Widget, widget: &Widget) -> (usize, usize) {
+        let parent_widget = self.parent_widget(root, widget);
+        let normal_offset = parent_widget
+            .map(|parent| self.position_from_parent(parent, widget))
             .unwrap_or((0, 0));
-        let parent_pos = parent_win
-            .map(|win| self.calculate_position(win))
+        let parent_pos = parent_widget
+            .map(|widget| self.calculate_position(root, widget))
             .unwrap_or((0, 0));
+
+        let window = self.get(widget.windowid()).expect("widget has no window");
 
         match window.position {
             Position::Fixed(x, y) => (x, y),
@@ -140,41 +146,43 @@ impl DisplayManager {
         }
     }
 
-    fn first_descendant<'a>(&'a self, window: &'a Window) -> &'a Window {
-        self.children(window)
+    fn first_descendant<'a>(&'a self, widget: &'a Widget) -> &'a Widget {
+        widget
+            .children()
             .first()
-            .map(|win| self.first_descendant(win))
-            .unwrap_or(window)
+            .map(|child| self.first_descendant(*child))
+            .unwrap_or(widget)
     }
 
-    fn last_descendant<'a>(&'a self, window: &'a Window) -> &'a Window {
-        self.children(window)
+    fn last_descendant<'a>(&'a self, widget: &'a Widget) -> &'a Widget {
+        widget
+            .children()
             .last()
-            .map(|win| self.first_descendant(win))
-            .unwrap_or(window)
+            .map(|child| self.first_descendant(*child))
+            .unwrap_or(widget)
     }
 
-    fn next_window(&self, window: &Window) -> Option<&Window> {
-        if let Some(parent) = self.parent_window(window) {
-            let children = self.children(parent);
+    fn next_widget<'a>(&'a self, root: &'a Widget, widget: &'a Widget) -> Option<&'a Widget> {
+        if let Some(parent) = self.parent_widget(root, widget) {
+            let children = parent.children();
             children
                 .iter()
-                .position(|win| win.id == window.id)
+                .position(|child| widget.windowid() == child.windowid())
                 .and_then(|pos| children.into_iter().nth(pos + 1))
-                .map(|win| self.first_descendant(win))
+                .map(|widget| self.first_descendant(widget))
         } else {
             None
         }
     }
 
-    fn prev_window(&self, window: &Window) -> Option<&Window> {
-        if let Some(parent) = self.parent_window(window) {
-            let children = self.children(parent);
+    fn prev_widget<'a>(&'a self, root: &'a Widget, widget: &'a Widget) -> Option<&'a Widget> {
+        if let Some(parent) = self.parent_widget(root, widget) {
+            let children = parent.children();
             children
                 .iter()
-                .position(|win| win.id == window.id)
+                .position(|child| widget.windowid() == child.windowid())
                 .and_then(|pos| children.into_iter().nth(pos - 1))
-                .map(|win| self.last_descendant(win))
+                .map(|widget| self.last_descendant(widget))
         } else {
             None
         }
@@ -193,7 +201,7 @@ impl DisplayManager {
 
     pub fn on_event(
         &mut self,
-        root: &mut Widget,
+        root: &Widget,
         event: &controller::Event,
     ) -> Result<Vec<action::Action>> {
         let mut actions = vec![];
@@ -204,7 +212,8 @@ impl DisplayManager {
         }
         fn visit(
             manager: &mut DisplayManager,
-            widget: &mut Widget,
+            root: &Widget,
+            widget: &Widget,
             event: &controller::Event,
             actions: &mut Vec<action::Action>,
         ) -> Result<VisitState> {
@@ -226,13 +235,13 @@ impl DisplayManager {
                 }
             } else {
                 // If we don't have focus, try to find out what does
-                let mut res = (0, VisitState::NotFound);
-                for child in widget.mut_children().iter_mut() {
-                    match visit(manager, *child, event, actions)? {
+                let mut res = (None, VisitState::NotFound);
+                for child in widget.children().into_iter() {
+                    match visit(manager, root, child, event, actions)? {
                         VisitState::FoundHandled => return Ok(VisitState::FoundHandled),
                         VisitState::FoundNotHandled => {
                             println!("Child in focus but did not handle event");
-                            res = (child.windowid(), VisitState::FoundNotHandled);
+                            res = (Some(child), VisitState::FoundNotHandled);
                             break;
                         }
                         VisitState::NotFound => (),
@@ -242,32 +251,28 @@ impl DisplayManager {
                 //TODO: if one of our children was in focus but couldn't handle the event,
                 //      shift focus to the 'next' window
                 match (res.0, res.1, event) {
-                    (id, VisitState::FoundNotHandled, &controller::Event::Down) => {
-                        let next_window = {
-                            let window = manager
-                                .get(id)
-                                .ok_or(format!("failed to find window id={}", id))?;
-                            manager.next_window(window).map(|win| win.id)
+                    (Some(widget), VisitState::FoundNotHandled, &controller::Event::Down) => {
+                        let next_window_id = {
+                            let next = manager.next_widget(root, widget);
+                            next.map(|next| next.windowid())
                         };
 
                         //TODO: should we focus ourselves if there is not next window?
-                        if let Some(id) = next_window {
-                            manager.shift_focus(id);
+                        if let Some(next) = next_window_id {
+                            manager.shift_focus(next);
                             return Ok(VisitState::FoundHandled);
                         } else {
                             println!("No 'next window' from this window id={}", widget.windowid());
                         }
                     }
-                    (id, VisitState::FoundNotHandled, &controller::Event::Up) => {
-                        let prev_window = {
-                            let window = manager
-                                .get(id)
-                                .ok_or(format!("failed to find window id={}", id))?;
-                            manager.prev_window(window).map(|win| win.id)
+                    (Some(widget), VisitState::FoundNotHandled, &controller::Event::Up) => {
+                        let prev_window_id = {
+                            let prev = manager.prev_widget(root, widget);
+                            prev.map(|prev| prev.windowid())
                         };
 
-                        if let Some(id) = prev_window {
-                            manager.shift_focus(id);
+                        if let Some(prev) = prev_window_id {
+                            manager.shift_focus(prev);
                             return Ok(VisitState::FoundHandled);
                         } else {
                             println!("No 'prev window' from this window id={}", widget.windowid());
@@ -279,7 +284,7 @@ impl DisplayManager {
             Ok(VisitState::NotFound)
         }
 
-        visit(self, root, event, &mut actions)?;
+        visit(self, root, root, event, &mut actions)?;
         Ok(actions)
     }
 
@@ -318,17 +323,12 @@ impl DisplayManager {
         fn render_window(
             manager: &mut DisplayManager,
             base: &mut bitmap::Bitmap,
+            root: &Widget,
             widget: &Widget,
         ) -> Result<()> {
             println!("Rendering windowid={}", widget.windowid());
             //TODO: make this less terrible
-            let pos = {
-                let window = manager
-                    .get(widget.windowid())
-                    .ok_or(format!("failed to find window id={}", widget.windowid()))?;
-
-                manager.calculate_position(window)
-            };
+            let pos = manager.calculate_position(root, widget);
             let bmap = {
                 let mut window = manager
                     .get_mut(widget.windowid())
@@ -343,14 +343,14 @@ impl DisplayManager {
             base.blit(bmap, pos);
 
             for child in widget.children() {
-                render_window(manager, base, child)?
+                render_window(manager, base, root, child)?
             }
 
             Ok(())
         };
 
         let mut bitmap = bitmap::Bitmap::new(0, 0);
-        render_window(self, &mut bitmap, root)?;
+        render_window(self, &mut bitmap, root, root)?;
 
         println!(
             "Update display with bitmap: {} by {}",
