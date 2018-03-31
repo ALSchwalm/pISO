@@ -13,8 +13,8 @@ pub struct NewDrive {
 }
 
 impl NewDrive {
-    pub fn new(disp: &mut DisplayManager, parent: WindowId) -> error::Result<NewDrive> {
-        let our_window = disp.add_child(parent, Position::Normal)?;
+    pub fn new(disp: &mut DisplayManager) -> error::Result<NewDrive> {
+        let our_window = disp.add_child(Position::Normal)?;
         Ok(NewDrive { window: our_window })
     }
 }

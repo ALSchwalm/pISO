@@ -23,7 +23,6 @@ pub struct Window {
     pub z: u32,
     pub focus: bool,
     pub id: WindowId,
-    pub parent: WindowId,
 }
 
 pub struct DisplayManager {
@@ -48,7 +47,7 @@ impl DisplayManager {
         0
     }
 
-    pub fn add_child(&mut self, parent: WindowId, pos: Position) -> Result<WindowId> {
+    pub fn add_child(&mut self, pos: Position) -> Result<WindowId> {
         let id = self.nextid;
         self.nextid += 1;
 
@@ -65,7 +64,6 @@ impl DisplayManager {
                 //TODO: this should probably be the parent z + 1
                 z: 0,
                 focus: false,
-                parent: parent,
             },
         );
 
@@ -73,7 +71,6 @@ impl DisplayManager {
     }
 
     pub fn remove_child(&mut self, id: WindowId) -> Result<()> {
-        //TODO: remove children recursively
         self.windows.remove(&id);
         Ok(())
     }

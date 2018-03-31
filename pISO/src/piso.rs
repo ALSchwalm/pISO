@@ -22,12 +22,11 @@ pub struct PIso {
 impl PIso {
     pub fn new(disp: Arc<Mutex<DisplayManager>>, usb: Arc<Mutex<usb::UsbGadget>>) -> Result<PIso> {
         let mut manager = disp.lock()?;
-        let root = manager.root();
-        let window = manager.add_child(root, Position::Normal)?;
+        let window = manager.add_child(Position::Normal)?;
 
         let vg = lvm::VolumeGroup::from_path("/dev/VolGroup00")?;
-        let drives = Self::build_drives_from_vg(window, &mut manager, &vg, &usb)?;
-        let ndrive = newdrive::NewDrive::new(&mut manager, window)?;
+        let drives = Self::build_drives_from_vg(&mut manager, &vg, &usb)?;
+        let ndrive = newdrive::NewDrive::new(&mut manager)?;
 
         if drives.len() > 0 {
             // Focus the first drive
@@ -48,14 +47,13 @@ impl PIso {
     }
 
     fn build_drives_from_vg(
-        window: WindowId,
         disp: &mut DisplayManager,
         vg: &lvm::VolumeGroup,
         usb: &Arc<Mutex<usb::UsbGadget>>,
     ) -> Result<Vec<vdrive::VirtualDrive>> {
         let mut drives: Vec<vdrive::VirtualDrive> = vec![];
         for vol in vg.volumes()?.into_iter() {
-            drives.push(vdrive::VirtualDrive::new(window, disp, usb.clone(), vol)?)
+            drives.push(vdrive::VirtualDrive::new(disp, usb.clone(), vol)?)
         }
         Ok(drives)
     }
@@ -63,7 +61,7 @@ impl PIso {
     fn add_drive(&mut self, disp: &mut DisplayManager, size: u64) -> Result<&vdrive::VirtualDrive> {
         let volume = self.vg
             .create_volume(&format!("Drive{}", self.drives.len()), size)?;
-        let vdrive = vdrive::VirtualDrive::new(self.window, disp, self.usb.clone(), volume)?;
+        let vdrive = vdrive::VirtualDrive::new(disp, self.usb.clone(), volume)?;
         self.drives.push(vdrive);
 
         Ok(self.drives

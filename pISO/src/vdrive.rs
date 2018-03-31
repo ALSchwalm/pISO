@@ -31,12 +31,11 @@ pub struct VirtualDrive {
 
 impl VirtualDrive {
     pub fn new(
-        parent: WindowId,
         disp: &mut DisplayManager,
         usb: Arc<Mutex<usb::UsbGadget>>,
         volume: lvm::LogicalVolume,
     ) -> Result<VirtualDrive> {
-        let our_window = disp.add_child(parent, Position::Normal)?;
+        let our_window = disp.add_child(Position::Normal)?;
         Ok(VirtualDrive {
             window: our_window,
             state: MountState::Unmounted,
