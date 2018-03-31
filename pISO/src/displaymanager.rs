@@ -1,3 +1,4 @@
+use action;
 use bitmap;
 use controller;
 use display;
@@ -190,7 +191,12 @@ impl DisplayManager {
         }
     }
 
-    pub fn on_event(&mut self, root: &mut Widget, event: &controller::Event) -> Result<()> {
+    pub fn on_event(
+        &mut self,
+        root: &mut Widget,
+        event: &controller::Event,
+    ) -> Result<Vec<action::Action>> {
+        let mut actions = vec![];
         enum VisitState {
             NotFound,
             FoundHandled,
@@ -200,6 +206,7 @@ impl DisplayManager {
             manager: &mut DisplayManager,
             widget: &mut Widget,
             event: &controller::Event,
+            actions: &mut Vec<action::Action>,
         ) -> Result<VisitState> {
             let focus = manager
                 .get(widget.windowid())
@@ -208,7 +215,9 @@ impl DisplayManager {
 
             if focus {
                 // If we have focus, try to handle the event
-                if widget.on_event(event) {
+                let (handled, new_actions) = widget.on_event(event);
+                actions.extend(new_actions);
+                if handled {
                     println!("Focused window handled event");
                     return Ok(VisitState::FoundHandled);
                 } else {
@@ -219,7 +228,7 @@ impl DisplayManager {
                 // If we don't have focus, try to find out what does
                 let mut res = (0, VisitState::NotFound);
                 for child in widget.mut_children().iter_mut() {
-                    match visit(manager, *child, event)? {
+                    match visit(manager, *child, event, actions)? {
                         VisitState::FoundHandled => return Ok(VisitState::FoundHandled),
                         VisitState::FoundNotHandled => {
                             println!("Child in focus but did not handle event");
@@ -241,6 +250,7 @@ impl DisplayManager {
                             manager.next_window(window).map(|win| win.id)
                         };
 
+                        //TODO: should we focus ourselves if there is not next window?
                         if let Some(id) = next_window {
                             manager.shift_focus(id);
                             return Ok(VisitState::FoundHandled);
@@ -269,8 +279,39 @@ impl DisplayManager {
             Ok(VisitState::NotFound)
         }
 
-        visit(self, root, event)?;
-        Ok(())
+        visit(self, root, event, &mut actions)?;
+        Ok(actions)
+    }
+
+    pub fn do_actions(
+        &mut self,
+        root: &mut Widget,
+        mut actions: Vec<action::Action>,
+    ) -> Result<()> {
+        fn visit(
+            manager: &mut DisplayManager,
+            widget: &mut Widget,
+            actions: &mut Vec<action::Action>,
+        ) -> Result<()> {
+            if actions.len() == 0 {
+                return Ok(());
+            }
+            actions.retain(|action| match widget.do_action(action) {
+                Ok(handled) => !handled,
+                Err(e) => {
+                    println!("Error while processing '{:?}': {}", action, e);
+                    true
+                }
+            });
+
+            for child in widget.mut_children() {
+                visit(manager, child, actions)?;
+            }
+
+            Ok(())
+        }
+
+        visit(self, root, &mut actions)
     }
 
     pub fn render(&mut self, root: &Widget) -> Result<()> {

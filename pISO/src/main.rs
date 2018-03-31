@@ -14,6 +14,7 @@ extern crate sysfs_gpio;
 
 use std::thread;
 
+mod action;
 mod bitmap;
 mod controller;
 mod display;
@@ -77,9 +78,13 @@ fn run() -> error::Result<()> {
         }
 
         let mut manager = manager.lock().unwrap();
-        manager
+        let actions = manager
             .on_event(&mut piso, &event)
             .expect("Event handling failed");
+
+        manager
+            .do_actions(&mut piso, actions)
+            .expect("Doing actions failed");
 
         manager.render(&piso).expect("Render failed");
     }));

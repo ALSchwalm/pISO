@@ -1,3 +1,4 @@
+use action;
 use bitmap;
 use controller;
 use displaymanager::{DisplayManager, Position, Widget, Window, WindowId};
@@ -87,8 +88,18 @@ impl render::Render for PIso {
 }
 
 impl input::Input for PIso {
-    fn on_event(&mut self, event: &controller::Event) -> bool {
-        false
+    fn on_event(&mut self, event: &controller::Event) -> (bool, Vec<action::Action>) {
+        (false, vec![])
+    }
+
+    fn do_action(&mut self, action: &action::Action) -> Result<bool> {
+        match *action {
+            action::Action::CreateDrive(size) => {
+                self.add_drive(size)?;
+                Ok(true)
+            }
+            _ => Ok(false),
+        }
     }
 }
 
