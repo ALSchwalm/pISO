@@ -51,7 +51,7 @@ impl Bitmap {
         }
     }
 
-    pub fn blit(&mut self, other: Bitmap, position: (usize, usize)) {
+    pub fn blit(&mut self, other: &Bitmap, position: (usize, usize)) {
         // If the current contents are empty, then set_width/height don't do anything,
         // (as expected), so create a 1x1 bitmap and expand that.
         if self.width() == 0 {

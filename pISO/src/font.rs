@@ -12,7 +12,7 @@ where
             FONT[letter as usize]
         };
         let current_width = text_map.width();
-        text_map.blit(Bitmap::from_slice(letter_map), (current_width, 0));
+        text_map.blit(&Bitmap::from_slice(letter_map), (current_width, 0));
 
         // Add a 1 pixel space between the letters
         let current_width = text_map.width();

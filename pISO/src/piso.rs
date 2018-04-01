@@ -31,10 +31,10 @@ impl PIso {
         if drives.len() > 0 {
             // Focus the first drive
             drives.iter().next().map(|drive| {
-                manager.shift_focus(drive.window);
+                manager.shift_focus(drive as &Widget);
             });
         } else {
-            manager.shift_focus(ndrive.window);
+            manager.shift_focus(&ndrive);
         }
 
         Ok(PIso {

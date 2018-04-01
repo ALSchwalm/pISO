@@ -1,12 +1,12 @@
 use error::{ErrorKind, Result, ResultExt};
-use std::fs::{create_dir_all, read_dir, remove_file, File};
+use std::fs::{create_dir_all, read_dir, remove_dir_all, remove_file, File};
 use std::io::Read;
 use std::path::{Path, PathBuf};
 use std::io::Write;
 use std::os::unix::fs::symlink;
 use std::time::{Duration, Instant};
 use std::thread;
-use utils::wait_for_path;
+use utils::{run_check_output, wait_for_path};
 
 pub struct GadgetConfig {
     pub vendor_id: &'static str,
@@ -177,6 +177,18 @@ impl UsbGadget {
             .chain_err(|| "failed to deactivate UDC")?;
 
         remove_file(self.root.join(format!("configs/c.1/mass_storage.{}", id.0)))?;
+
+        // Shell out here so we can actually rm the function. We can't use standard functions
+        // because the directory isn't empty and rm on the subfolders will fail
+        let _ = run_check_output(
+            "rm",
+            &[
+                "-r",
+                &self.root
+                    .join(format!("functions/mass_storage.{}", id.0))
+                    .to_string_lossy(),
+            ],
+        );
 
         self.activate_udc_if_ready()
             .chain_err(|| "failed to activate UDC")?;

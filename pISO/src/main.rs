@@ -22,6 +22,7 @@ mod displaymanager;
 mod error;
 mod font;
 mod input;
+mod iso;
 mod lvm;
 mod newdrive;
 mod piso;

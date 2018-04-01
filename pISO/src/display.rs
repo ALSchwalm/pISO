@@ -147,7 +147,7 @@ impl Display {
 
     pub fn update(&mut self, bitmap: Bitmap) -> error::Result<()> {
         self.contents = Bitmap::new(self.contents.width(), self.contents.height());
-        self.contents.blit(bitmap, (0, 0));
+        self.contents.blit(&bitmap, (0, 0));
 
         let width = self.contents.width() as u8;
         self.send_spi_command(SSD1306Command::ColumnAddr)?;

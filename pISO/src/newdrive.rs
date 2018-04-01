@@ -6,7 +6,6 @@ use error;
 use font;
 use input;
 use render;
-use std::sync::{Arc, Mutex};
 
 pub struct NewDrive {
     pub window: WindowId,
@@ -22,9 +21,9 @@ impl NewDrive {
 impl render::Render for NewDrive {
     fn render(&self, window: &Window) -> error::Result<bitmap::Bitmap> {
         let mut base = bitmap::Bitmap::new(10, 1);
-        base.blit(font::render_text("New Drive"), (12, 0));
+        base.blit(&font::render_text("New Drive"), (12, 0));
         if window.focus {
-            base.blit(bitmap::Bitmap::from_slice(font::ARROW), (0, 0));
+            base.blit(&bitmap::Bitmap::from_slice(font::ARROW), (0, 0));
         }
         Ok(base)
     }
@@ -34,7 +33,7 @@ impl input::Input for NewDrive {
     fn on_event(&self, event: &controller::Event) -> (bool, Vec<action::Action>) {
         match *event {
             controller::Event::Select => {
-                (true, vec![action::Action::CreateDrive(12 * 1024 * 1024)])
+                (true, vec![action::Action::CreateDrive(100 * 1024 * 1024)])
             }
             _ => (false, vec![]),
         }
