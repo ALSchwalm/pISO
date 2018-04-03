@@ -26,7 +26,7 @@ impl PIso {
 
         let vg = lvm::VolumeGroup::from_path("/dev/VolGroup00")?;
         let drives = Self::build_drives_from_vg(&mut manager, &vg, &usb)?;
-        let ndrive = newdrive::NewDrive::new(&mut manager)?;
+        let ndrive = newdrive::NewDrive::new(&mut manager, usb.clone(), vg.clone())?;
 
         if drives.len() > 0 {
             // Focus the first drive

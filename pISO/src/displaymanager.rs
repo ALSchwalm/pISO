@@ -42,10 +42,6 @@ impl DisplayManager {
         })))
     }
 
-    pub fn root(&self) -> WindowId {
-        0
-    }
-
     pub fn add_child(&mut self, pos: Position) -> Result<WindowId> {
         let id = self.nextid;
         self.nextid += 1;
