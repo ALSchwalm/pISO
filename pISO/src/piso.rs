@@ -58,9 +58,11 @@ impl PIso {
         Ok(drives)
     }
 
-    fn add_drive(&mut self, disp: &mut DisplayManager, size: u64) -> Result<&vdrive::VirtualDrive> {
-        let volume = self.vg
-            .create_volume(&format!("Drive{}", self.drives.len()), size)?;
+    fn add_drive(
+        &mut self,
+        disp: &mut DisplayManager,
+        volume: lvm::LogicalVolume,
+    ) -> Result<&vdrive::VirtualDrive> {
         let vdrive = vdrive::VirtualDrive::new(disp, self.usb.clone(), volume)?;
         self.drives.push(vdrive);
 
@@ -71,20 +73,20 @@ impl PIso {
 }
 
 impl render::Render for PIso {
-    fn render(&self, window: &Window) -> Result<bitmap::Bitmap> {
+    fn render(&self, _: &Window) -> Result<bitmap::Bitmap> {
         Ok(bitmap::Bitmap::new(0, 0))
     }
 }
 
 impl input::Input for PIso {
-    fn on_event(&self, event: &controller::Event) -> (bool, Vec<action::Action>) {
-        (false, vec![])
+    fn on_event(&mut self, _: &controller::Event) -> Result<(bool, Vec<action::Action>)> {
+        Ok((false, vec![]))
     }
 
     fn do_action(&mut self, disp: &mut DisplayManager, action: &action::Action) -> Result<bool> {
         match *action {
-            action::Action::CreateDrive(size) => {
-                self.add_drive(disp, size)?;
+            action::Action::CreateDrive(ref volume) => {
+                self.add_drive(disp, volume.clone())?;
                 Ok(true)
             }
             _ => Ok(false),

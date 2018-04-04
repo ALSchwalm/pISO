@@ -1,6 +1,8 @@
+use lvm;
+
 #[derive(Debug)]
 pub enum Action {
-    CreateDrive(u64),
+    CreateDrive(lvm::LogicalVolume),
     ToggleVDriveMount(u32),
     ToggleIsoMount(u32),
 
@@ -8,4 +10,9 @@ pub enum Action {
     CloseSizeMenu,
     IncDriveSize,
     DecDriveSize,
+
+    OpenFormatMenu,
+    CloseFormatMenu,
+    NextFormat,
+    PrevFormat,
 }

@@ -216,12 +216,12 @@ impl render::Render for VirtualDrive {
 }
 
 impl input::Input for VirtualDrive {
-    fn on_event(&self, event: &controller::Event) -> (bool, Vec<action::Action>) {
+    fn on_event(&mut self, event: &controller::Event) -> Result<(bool, Vec<action::Action>)> {
         match *event {
             controller::Event::Select => {
-                (true, vec![action::Action::ToggleVDriveMount(self.window)])
+                Ok((true, vec![action::Action::ToggleVDriveMount(self.window)]))
             }
-            _ => (false, vec![]),
+            _ => Ok((false, vec![])),
         }
     }
 

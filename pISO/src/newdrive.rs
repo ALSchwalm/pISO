@@ -50,10 +50,13 @@ impl render::Render for NewDrive {
 }
 
 impl input::Input for NewDrive {
-    fn on_event(&self, event: &controller::Event) -> (bool, Vec<action::Action>) {
+    fn on_event(
+        &mut self,
+        event: &controller::Event,
+    ) -> error::Result<(bool, Vec<action::Action>)> {
         match *event {
-            controller::Event::Select => (true, vec![action::Action::OpenSizeMenu]),
-            _ => (false, vec![]),
+            controller::Event::Select => Ok((true, vec![action::Action::OpenSizeMenu])),
+            _ => Ok((false, vec![])),
         }
     }
 
@@ -69,7 +72,7 @@ impl input::Input for NewDrive {
                 self.state = NewDriveState::PickingSize(menu);
                 Ok(true)
             }
-            action::Action::CloseSizeMenu => {
+            action::Action::CloseFormatMenu => {
                 disp.shift_focus(self);
                 self.state = NewDriveState::Unselected;
                 Ok(true)
@@ -99,11 +102,17 @@ impl Widget for NewDrive {
     }
 }
 
+enum DriveSizeState {
+    Unselected,
+    Selected(DriveFormat),
+}
+
 struct DriveSize {
     pub window: WindowId,
     pub current_percent: u32,
     pub usb: Arc<Mutex<usb::UsbGadget>>,
     vg: lvm::VolumeGroup,
+    state: DriveSizeState,
 }
 
 impl DriveSize {
@@ -117,6 +126,7 @@ impl DriveSize {
             current_percent: 50,
             usb: usb,
             vg: vg,
+            state: DriveSizeState::Unselected,
         })
     }
 
@@ -142,17 +152,14 @@ impl render::Render for DriveSize {
 }
 
 impl input::Input for DriveSize {
-    fn on_event(&self, event: &controller::Event) -> (bool, Vec<action::Action>) {
+    fn on_event(
+        &mut self,
+        event: &controller::Event,
+    ) -> error::Result<(bool, Vec<action::Action>)> {
         match *event {
-            controller::Event::Select => (
-                true,
-                vec![
-                    action::Action::CreateDrive(self.current_size()),
-                    action::Action::CloseSizeMenu,
-                ],
-            ),
-            controller::Event::Up => (true, vec![action::Action::IncDriveSize]),
-            controller::Event::Down => (true, vec![action::Action::DecDriveSize]),
+            controller::Event::Select => Ok((true, vec![action::Action::OpenFormatMenu])),
+            controller::Event::Up => Ok((true, vec![action::Action::IncDriveSize])),
+            controller::Event::Down => Ok((true, vec![action::Action::DecDriveSize])),
         }
     }
 
@@ -170,12 +177,107 @@ impl input::Input for DriveSize {
                 self.current_percent -= 5;
                 Ok(true)
             }
+            action::Action::OpenFormatMenu => {
+                let menu = DriveFormat::new(disp, self.vg.clone(), self.current_size())?;
+                disp.shift_focus(&menu);
+                self.state = DriveSizeState::Selected(menu);
+                Ok(true)
+            }
+            action::Action::CloseFormatMenu => {
+                self.state = DriveSizeState::Unselected;
+                Ok(true)
+            }
             _ => Ok(false),
         }
     }
 }
 
 impl Widget for DriveSize {
+    fn mut_children(&mut self) -> Vec<&mut Widget> {
+        match self.state {
+            DriveSizeState::Selected(ref mut menu) => vec![menu],
+            DriveSizeState::Unselected => vec![],
+        }
+    }
+
+    fn children(&self) -> Vec<&Widget> {
+        match self.state {
+            DriveSizeState::Selected(ref menu) => vec![menu],
+            DriveSizeState::Unselected => vec![],
+        }
+    }
+
+    fn windowid(&self) -> WindowId {
+        self.window
+    }
+}
+
+struct DriveFormat {
+    pub windowid: WindowId,
+    vg: lvm::VolumeGroup,
+    size: u64,
+}
+
+impl DriveFormat {
+    fn new(
+        disp: &mut DisplayManager,
+        vg: lvm::VolumeGroup,
+        size: u64,
+    ) -> error::Result<DriveFormat> {
+        Ok(DriveFormat {
+            windowid: disp.add_child(Position::Fixed(0, 0))?,
+            vg: vg,
+            size: size,
+        })
+    }
+}
+
+impl render::Render for DriveFormat {
+    fn render(&self, window: &Window) -> error::Result<bitmap::Bitmap> {
+        let mut base = bitmap::Bitmap::new(0, 0);
+        base.blit(&font::render_text("Select Format:"), (0, 0));
+        Ok(base)
+    }
+}
+
+impl input::Input for DriveFormat {
+    fn on_event(
+        &mut self,
+        event: &controller::Event,
+    ) -> error::Result<(bool, Vec<action::Action>)> {
+        match *event {
+            //TODO: create volume
+            controller::Event::Select => {
+                let count = self.vg.volumes()?.len();
+
+                let volume = self.vg
+                    .create_volume(&format!("Drive{}", count), self.size)?;
+
+                Ok((
+                    true,
+                    vec![
+                        action::Action::CloseFormatMenu,
+                        action::Action::CreateDrive(volume),
+                    ],
+                ))
+            }
+            controller::Event::Up => Ok((true, vec![action::Action::NextFormat])),
+            controller::Event::Down => Ok((true, vec![action::Action::PrevFormat])),
+        }
+    }
+
+    fn do_action(
+        &mut self,
+        disp: &mut DisplayManager,
+        action: &action::Action,
+    ) -> error::Result<bool> {
+        match *action {
+            _ => Ok(false),
+        }
+    }
+}
+
+impl Widget for DriveFormat {
     fn mut_children(&mut self) -> Vec<&mut Widget> {
         vec![]
     }
@@ -185,6 +287,6 @@ impl Widget for DriveSize {
     }
 
     fn windowid(&self) -> WindowId {
-        self.window
+        self.windowid
     }
 }

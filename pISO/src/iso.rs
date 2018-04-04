@@ -92,10 +92,15 @@ impl render::Render for Iso {
 }
 
 impl input::Input for Iso {
-    fn on_event(&self, event: &controller::Event) -> (bool, Vec<action::Action>) {
+    fn on_event(
+        &mut self,
+        event: &controller::Event,
+    ) -> error::Result<(bool, Vec<action::Action>)> {
         match *event {
-            controller::Event::Select => (true, vec![action::Action::ToggleIsoMount(self.window)]),
-            _ => (false, vec![]),
+            controller::Event::Select => {
+                Ok((true, vec![action::Action::ToggleIsoMount(self.window)]))
+            }
+            _ => Ok((false, vec![])),
         }
     }
 

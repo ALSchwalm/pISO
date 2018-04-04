@@ -119,7 +119,7 @@ pub fn vgs() -> Result<Vec<VolumeGroupReport>> {
         .chain_err(|| "failed to convert vgs json to struct")
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct VolumeGroup {
     pub name: String,
     pub path: PathBuf,
@@ -184,6 +184,7 @@ impl VolumeGroup {
     }
 }
 
+#[derive(Clone, Debug)]
 pub struct LogicalVolume {
     pub name: String,
     pub path: PathBuf,
