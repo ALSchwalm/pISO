@@ -13,6 +13,5 @@ pub enum Action {
 
     OpenFormatMenu,
     CloseFormatMenu,
-    NextFormat,
-    PrevFormat,
+    FormatDrive,
 }

@@ -15,7 +15,7 @@ pub trait Input {
         &mut self,
         disp: &mut DisplayManager,
         action: &action::Action,
-    ) -> error::Result<bool> {
-        Ok(false)
+    ) -> error::Result<(bool, Vec<action::Action>)> {
+        Ok((false, vec![]))
     }
 }

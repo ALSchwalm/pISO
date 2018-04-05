@@ -108,13 +108,13 @@ impl input::Input for Iso {
         &mut self,
         disp: &mut DisplayManager,
         action: &action::Action,
-    ) -> error::Result<bool> {
+    ) -> error::Result<(bool, Vec<action::Action>)> {
         match *action {
             action::Action::ToggleIsoMount(id) if id == self.window => {
                 self.toggle_mount()?;
-                Ok(true)
+                Ok((true, vec![]))
             }
-            _ => Ok(false),
+            _ => Ok((false, vec![])),
         }
     }
 }

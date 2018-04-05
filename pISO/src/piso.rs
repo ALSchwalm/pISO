@@ -83,13 +83,17 @@ impl input::Input for PIso {
         Ok((false, vec![]))
     }
 
-    fn do_action(&mut self, disp: &mut DisplayManager, action: &action::Action) -> Result<bool> {
+    fn do_action(
+        &mut self,
+        disp: &mut DisplayManager,
+        action: &action::Action,
+    ) -> Result<(bool, Vec<action::Action>)> {
         match *action {
             action::Action::CreateDrive(ref volume) => {
                 self.add_drive(disp, volume.clone())?;
-                Ok(true)
+                Ok((true, vec![]))
             }
-            _ => Ok(false),
+            _ => Ok((false, vec![])),
         }
     }
 }

@@ -74,17 +74,21 @@ fn run() -> error::Result<()> {
         let mut manager = manager.lock().unwrap();
 
         println!("Handling event: {:?}", event);
-        let actions = manager
+        let mut actions = manager
             .on_event(&mut piso, &event)
             .expect("Event handling failed");
 
-        println!("Doing actions: {:?}", actions);
-        manager
-            .do_actions(&mut piso, actions)
-            .expect("Doing actions failed");
+        // Keep processing until all actions are finished
+        while {
+            println!("Doing actions: {:?}", actions);
+            manager
+                .do_actions(&mut piso, &mut actions)
+                .expect("Doing actions failed");
 
-        println!("Rendering");
-        manager.render(&piso).expect("Render failed");
+            println!("Rendering");
+            manager.render(&piso).expect("Render failed");
+            actions.len() > 0
+        } {}
 
         println!("Event loop finished");
     }));

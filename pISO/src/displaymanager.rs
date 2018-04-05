@@ -273,36 +273,43 @@ impl DisplayManager {
     pub fn do_actions(
         &mut self,
         root: &mut Widget,
-        mut actions: Vec<action::Action>,
+        actions: &mut Vec<action::Action>,
     ) -> Result<()> {
+        let mut new_actions = vec![];
         fn visit(
             manager: &mut DisplayManager,
             widget: &mut Widget,
             actions: &mut Vec<action::Action>,
+            new_actions: &mut Vec<action::Action>,
         ) -> Result<()> {
             if actions.len() == 0 {
                 return Ok(());
             }
             actions.retain(|action| match widget.do_action(manager, action) {
-                Ok(handled) => !handled,
+                Ok((handled, new)) => {
+                    new_actions.extend(new);
+                    !handled
+                }
                 Err(e) => {
                     println!(
                         "Error while processing '{:?}': {}",
                         action,
                         e.display_chain()
                     );
-                    true
+                    false
                 }
             });
 
             for child in widget.mut_children() {
-                visit(manager, child, actions)?;
+                visit(manager, child, actions, new_actions)?;
             }
 
             Ok(())
         }
 
-        visit(self, root, &mut actions)
+        visit(self, root, actions, &mut new_actions)?;
+        actions.extend(new_actions);
+        Ok(())
     }
 
     // First, render everything so we know the sizes to position things

@@ -225,13 +225,17 @@ impl input::Input for VirtualDrive {
         }
     }
 
-    fn do_action(&mut self, disp: &mut DisplayManager, action: &action::Action) -> Result<bool> {
+    fn do_action(
+        &mut self,
+        disp: &mut DisplayManager,
+        action: &action::Action,
+    ) -> Result<(bool, Vec<action::Action>)> {
         match *action {
             action::Action::ToggleVDriveMount(id) if id == self.window => {
                 self.toggle_mount(disp)?;
-                Ok(true)
+                Ok((true, vec![]))
             }
-            _ => Ok(false),
+            _ => Ok((false, vec![])),
         }
     }
 }
