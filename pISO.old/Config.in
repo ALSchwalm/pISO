@@ -1,7 +1,0 @@
-config BR2_PACKAGE_PISO
-	bool "pISO"
-	depends on BR2_PACKAGE_WIRINGPI
-	help
-	  pISO application
-
-	  http://example.com
