@@ -53,8 +53,12 @@ pub struct LogicalVolumeReport {
 
     pub pool_lv: String,
     pub origin: String,
-    pub data_percent: String,
-    pub metadata_percent: String,
+
+    #[serde(deserialize_with = "from_str")]
+    pub data_percent: f64,
+
+    #[serde(deserialize_with = "from_str")]
+    pub metadata_percent: f64,
     pub move_pv: String,
     pub copy_percent: String,
     pub mirror_log: String,
@@ -156,6 +160,15 @@ impl VolumeGroup {
             .filter(|lv| lv.vg_name == self.name && !lv.lv_attr.starts_with("t"))
             .map(|lv| LogicalVolume::from_report(&self, lv))
             .collect())
+    }
+
+    pub fn pool(&self) -> Result<LogicalVolumeReport> {
+        let report = lvs()?;
+        report
+            .into_iter()
+            .filter(|lv| lv.vg_name == self.name && lv.lv_attr.starts_with("t"))
+            .next()
+            .ok_or("Unable to locate thin pool".into())
     }
 
     pub fn create_volume(&mut self, name: &str, size: u64) -> Result<LogicalVolume> {

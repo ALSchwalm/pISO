@@ -1,4 +1,9 @@
-use std::ops::{Deref, DerefMut, Index};
+use std::ops::{Deref, DerefMut, Index, IndexMut};
+
+pub enum Direction {
+    Left,
+    Right,
+}
 
 pub struct Bitmap {
     contents: Vec<Vec<u8>>,
@@ -17,6 +22,23 @@ impl Bitmap {
         contents.extend(slice.iter().map(|s| s.to_vec()));
 
         Bitmap { contents: contents }
+    }
+
+    pub fn rotate(&self, dir: Direction) -> Bitmap {
+        let mut out = Bitmap::new(self.height(), self.width());
+        for (y, row) in self.contents.iter().enumerate() {
+            for (x, pixel) in row.iter().enumerate() {
+                match dir {
+                    Direction::Left => {
+                        out[self.width() - x - 1][y] = *pixel;
+                    }
+                    Direction::Right => {
+                        out[x][self.height() - y - 1] = *pixel;
+                    }
+                }
+            }
+        }
+        out
     }
 
     pub fn width(&self) -> usize {
@@ -79,6 +101,15 @@ where
     type Output = Vec<u8>;
     fn index(&self, index: Idx) -> &Self::Output {
         &self.contents[index.into()]
+    }
+}
+
+impl<Idx> IndexMut<Idx> for Bitmap
+where
+    Idx: Into<usize>,
+{
+    fn index_mut(&mut self, index: Idx) -> &mut Vec<u8> {
+        &mut self.contents[index.into()]
     }
 }
 

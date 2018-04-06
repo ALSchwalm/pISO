@@ -27,6 +27,7 @@ mod lvm;
 mod newdrive;
 mod piso;
 mod render;
+mod stats;
 mod usb;
 mod utils;
 mod vdrive;
