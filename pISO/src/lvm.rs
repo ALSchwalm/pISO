@@ -8,12 +8,16 @@ use std::process::Command;
 
 fn from_str<'de, T, D>(deserializer: D) -> ::std::result::Result<T, D::Error>
 where
-    T: FromStr,
+    T: FromStr + Default,
     T::Err: Display,
     D: Deserializer<'de>,
 {
     let s = String::deserialize(deserializer)?;
-    T::from_str(&s).map_err(de::Error::custom)
+    if s.len() > 0 {
+        T::from_str(&s).map_err(de::Error::custom)
+    } else {
+        Ok(T::default())
+    }
 }
 
 fn from_str_strip_unit<'de, T, D>(deserializer: D) -> ::std::result::Result<T, D::Error>
