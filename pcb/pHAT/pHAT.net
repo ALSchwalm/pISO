@@ -1,7 +1,7 @@
 (export (version D)
   (design
     (source C:/Users/James/Desktop/pISO/pcb/pHAT/pHAT.sch)
-    (date "3/22/2018 6:30:53 PM")
+    (date "4/7/2018 1:50:22 PM")
     (tool "Eeschema 4.0.7")
     (sheet (number 1) (name /) (tstamps /)
       (title_block
@@ -431,10 +431,10 @@
         (pin (num 4) (name GND) (type power_in))
         (pin (num 5) (name shield) (type passive)))))
   (libraries
-    (library (logical pISO)
-      (uri C:\Users\James\Desktop\pISO\pcb\pISO.lib))
     (library (logical switches)
-      (uri "C:\\Program Files\\KiCad\\share\\kicad\\library\\switches.lib")))
+      (uri "C:\\Program Files\\KiCad\\share\\kicad\\library\\switches.lib"))
+    (library (logical pISO)
+      (uri C:\Users\James\Desktop\pISO\pcb\pISO.lib)))
   (nets
     (net (code 1) (name "Net-(P2-Pad1)")
       (node (ref W5) (pin 1))
