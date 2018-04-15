@@ -1,3 +1,0 @@
-https://www.kernel.org/doc/Documentation/usb/gadget_multi.txt
-https://www.kernel.org/doc/Documentation/usb/gadget_configfs.txt
-https://www.kernel.org/doc/Documentation/ABI/testing/
