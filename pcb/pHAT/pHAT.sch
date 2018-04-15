@@ -2,7 +2,6 @@ EESchema Schematic File Version 2
 LIBS:pHAT-rescue
 LIBS:analog_switches
 LIBS:switches
-LIBS:pISO
 LIBS:pHAT-cache
 EELAYER 25 0
 EELAYER END
@@ -10,10 +9,10 @@ $Descr A 11000 8500
 encoding utf-8
 Sheet 1 1
 Title "pISO"
-Date ""
-Rev "Rev2"
-Comp ""
-Comment1 "proto"
+Date "2018-04-15"
+Rev "Rev1.2"
+Comp "Schwalm & Tate LLC"
+Comment1 "Beta V1.2 pre-production "
 Comment2 ""
 Comment3 ""
 Comment4 ""

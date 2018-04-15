@@ -5,7 +5,7 @@
     (no_connects 1)
     (area 109.424999 79.424999 174.575001 109.575001)
     (thickness 1.6)
-    (drawings 25)
+    (drawings 28)
     (tracks 333)
     (zones 0)
     (modules 38)
@@ -21,7 +21,7 @@
     (34 B.Paste user)
     (35 F.Paste user)
     (36 B.SilkS user)
-    (37 F.SilkS user hide)
+    (37 F.SilkS user)
     (38 B.Mask user)
     (39 F.Mask user)
     (40 Dwgs.User user)
@@ -37,7 +37,7 @@
   )
 
   (setup
-    (last_trace_width 0.254)
+    (last_trace_width 0.2)
     (user_trace_width 0.2)
     (user_trace_width 0.25)
     (user_trace_width 0.6)
@@ -848,10 +848,10 @@
     )
   )
 
-  (module pISO:SLP (layer F.Cu) (tedit 5AC923CD) (tstamp 5AB43D22)
+  (module pISO:SLP (layer F.Cu) (tedit 5AD3B225) (tstamp 5AB43D22)
     (at 167.41188 105.75942)
     (path /5AB445A1)
-    (fp_text reference W1 (at 0.04 5.3) (layer F.SilkS) hide
+    (fp_text reference W1 (at 11.5 -24.5) (layer F.SilkS) hide
       (effects (font (size 1 1) (thickness 0.15)))
     )
     (fp_text value ExtraPOGO (at 0 -1.8) (layer F.Fab)
@@ -860,10 +860,10 @@
     (pad 1 smd circle (at 0 0) (size 1.85 1.85) (layers B.Cu B.Paste B.Mask))
   )
 
-  (module pISO:SLP (layer F.Cu) (tedit 5AC923D7) (tstamp 5AB43D27)
+  (module pISO:SLP (layer F.Cu) (tedit 5AD3B234) (tstamp 5AB43D27)
     (at 116.41188 105.75942)
     (path /5AB441ED)
-    (fp_text reference W2 (at 0.01 5.31) (layer F.SilkS) hide
+    (fp_text reference W2 (at 62.5 -18.5) (layer F.SilkS) hide
       (effects (font (size 1 1) (thickness 0.15)))
     )
     (fp_text value ExtraPOGO (at 0 -1.8) (layer F.Fab)
@@ -1277,10 +1277,10 @@
       (xy 0.559057 -0.993159)) (layer F.SilkS) (width 0.01))
   )
 
-  (module pISO:SLP (layer B.Cu) (tedit 5AC923D3) (tstamp 5AC91D4D)
+  (module pISO:SLP (layer B.Cu) (tedit 5AD3B22E) (tstamp 5AC91D4D)
     (at 134.21188 107.70942)
     (path /5A114174)
-    (fp_text reference W14 (at 0.2 3.47) (layer B.SilkS) hide
+    (fp_text reference W14 (at 44.7 -22.45) (layer B.SilkS) hide
       (effects (font (size 1 1) (thickness 0.15)) (justify mirror))
     )
     (fp_text value D_N (at 0 1.8) (layer B.Fab)
@@ -1290,10 +1290,10 @@
       (net 15 /DM1_N))
   )
 
-  (module pISO:SLP (layer B.Cu) (tedit 5AC923D1) (tstamp 5AC91D52)
+  (module pISO:SLP (layer B.Cu) (tedit 5AD3B231) (tstamp 5AC91D52)
     (at 132.15188 107.70942)
     (path /5A114230)
-    (fp_text reference W15 (at -0.77 3.65) (layer B.SilkS) hide
+    (fp_text reference W15 (at 46.76 -21.45) (layer B.SilkS) hide
       (effects (font (size 1 1) (thickness 0.15)) (justify mirror))
     )
     (fp_text value D_P (at 0 1.8) (layer B.Fab)
@@ -1303,10 +1303,10 @@
       (net 16 /DM1_P))
   )
 
-  (module pISO:SLP (layer B.Cu) (tedit 5AC923BE) (tstamp 5AC91EFF)
+  (module pISO:SLP (layer B.Cu) (tedit 5AD3B22B) (tstamp 5AC91EFF)
     (at 148.44188 84.19942)
     (path /5A11EBC7)
-    (fp_text reference A1 (at 0.13 -5.8) (layer B.SilkS) hide
+    (fp_text reference A1 (at 30.47 0.06) (layer B.SilkS) hide
       (effects (font (size 1 1) (thickness 0.15)) (justify mirror))
     )
     (fp_text value VDD5 (at 0 1.8) (layer B.Fab)
@@ -1316,10 +1316,10 @@
       (net 17 "Net-(A1-Pad1)"))
   )
 
-  (module pISO:SLP (layer B.Cu) (tedit 5AC923C3) (tstamp 5AC91F04)
+  (module pISO:SLP (layer B.Cu) (tedit 5AD3B229) (tstamp 5AC91F04)
     (at 153.52188 84.20942)
     (path /5A11EC65)
-    (fp_text reference B1 (at 0.14 -5.71) (layer B.SilkS) hide
+    (fp_text reference B1 (at 25.39 -0.95) (layer B.SilkS) hide
       (effects (font (size 1 1) (thickness 0.15)) (justify mirror))
     )
     (fp_text value VDD5 (at 0 1.8) (layer B.Fab)
@@ -1329,10 +1329,10 @@
       (net 18 "Net-(B1-Pad1)"))
   )
 
-  (module pISO:SLP (layer B.Cu) (tedit 5AC923C1) (tstamp 5AC91F09)
+  (module pISO:SLP (layer B.Cu) (tedit 5AD3B227) (tstamp 5AC91F09)
     (at 150.98188 84.20942)
     (path /5A11EB0C)
-    (fp_text reference NO1 (at 0.17 -6.2) (layer B.SilkS) hide
+    (fp_text reference NO1 (at 27.93 -1.95) (layer B.SilkS) hide
       (effects (font (size 1 1) (thickness 0.15)) (justify mirror))
     )
     (fp_text value VDD5 (at 0 1.8) (layer B.Fab)
@@ -1342,10 +1342,10 @@
       (net 19 "Net-(NO1-Pad1)"))
   )
 
-  (module pISO:SLP (layer B.Cu) (tedit 5AC923C9) (tstamp 5AC91F0E)
+  (module pISO:SLP (layer B.Cu) (tedit 5AD3B221) (tstamp 5AC91F0E)
     (at 166.21188 81.70942)
     (path /59A9707C)
-    (fp_text reference W5 (at 0.03 -4.9) (layer B.SilkS) hide
+    (fp_text reference W5 (at 12.7 -2.45) (layer B.SilkS) hide
       (effects (font (size 1 1) (thickness 0.15)) (justify mirror))
     )
     (fp_text value POWER (at 0 1.8) (layer B.Fab)
@@ -1355,10 +1355,10 @@
       (net 9 "Net-(P2-Pad1)"))
   )
 
-  (module pISO:SLP (layer B.Cu) (tedit 5AC923B9) (tstamp 5AC91F13)
+  (module pISO:SLP (layer B.Cu) (tedit 5AD3B238) (tstamp 5AC91F13)
     (at 140.81188 81.66942)
     (path /5A110B08)
-    (fp_text reference W7 (at 0.01 -5.09) (layer B.SilkS) hide
+    (fp_text reference W7 (at 38.1 7.59) (layer B.SilkS) hide
       (effects (font (size 1 1) (thickness 0.15)) (justify mirror))
     )
     (fp_text value RST (at 0 1.8) (layer B.Fab)
@@ -1368,10 +1368,10 @@
       (net 6 /RST))
   )
 
-  (module pISO:SLP (layer B.Cu) (tedit 5AC923B6) (tstamp 5AC91F18)
+  (module pISO:SLP (layer B.Cu) (tedit 5AD3B23E) (tstamp 5AC91F18)
     (at 138.27188 81.65942)
     (path /5A110B8D)
-    (fp_text reference W8 (at 0.31 -5.52) (layer B.SilkS) hide
+    (fp_text reference W8 (at 40.64 9.6) (layer B.SilkS) hide
       (effects (font (size 1 1) (thickness 0.15)) (justify mirror))
     )
     (fp_text value CS (at 0 1.8) (layer B.Fab)
@@ -1381,10 +1381,10 @@
       (net 8 /CS))
   )
 
-  (module pISO:SLP (layer B.Cu) (tedit 5AC923BB) (tstamp 5AC91F1D)
+  (module pISO:SLP (layer B.Cu) (tedit 5AD3B236) (tstamp 5AC91F1D)
     (at 143.35188 84.20942)
     (path /5A110E5E)
-    (fp_text reference W9 (at -0.22 -6.82) (layer B.SilkS) hide
+    (fp_text reference W9 (at 35.56 4.05) (layer B.SilkS) hide
       (effects (font (size 1 1) (thickness 0.15)) (justify mirror))
     )
     (fp_text value MOSI (at 0 1.8) (layer B.Fab)
@@ -1394,10 +1394,10 @@
       (net 5 /MOSI))
   )
 
-  (module pISO:SLP (layer B.Cu) (tedit 5AC923B2) (tstamp 5AC91F22)
+  (module pISO:SLP (layer B.Cu) (tedit 5AD3B23B) (tstamp 5AC91F22)
     (at 138.27188 84.21942)
     (path /5A110EF5)
-    (fp_text reference W10 (at 0.17 -6.35) (layer B.SilkS) hide
+    (fp_text reference W10 (at 40.64 6.04) (layer B.SilkS) hide
       (effects (font (size 1 1) (thickness 0.15)) (justify mirror))
     )
     (fp_text value SCLK (at 0 1.8) (layer B.Fab)
@@ -1407,10 +1407,10 @@
       (net 7 /SCLK))
   )
 
-  (module pISO:SLP (layer B.Cu) (tedit 5AC923AF) (tstamp 5AC91F27)
+  (module pISO:SLP (layer B.Cu) (tedit 5AD3B240) (tstamp 5AC91F27)
     (at 123.03188 84.20942)
     (path /5A110F69)
-    (fp_text reference W11 (at 0 -6.64) (layer B.SilkS) hide
+    (fp_text reference W11 (at 55.88 8.05) (layer B.SilkS) hide
       (effects (font (size 1 1) (thickness 0.15)) (justify mirror))
     )
     (fp_text value DC (at 0 1.8) (layer B.Fab)
@@ -1420,10 +1420,10 @@
       (net 20 /DC))
   )
 
-  (module pISO:SLP (layer B.Cu) (tedit 5AC923AC) (tstamp 5AC91F2C)
+  (module pISO:SLP (layer B.Cu) (tedit 5AD3B242) (tstamp 5AC91F2C)
     (at 117.96188 84.20942)
     (path /5A111097)
-    (fp_text reference W12 (at 0.33 -6.99) (layer B.SilkS) hide
+    (fp_text reference W12 (at 60.95 9.05) (layer B.SilkS) hide
       (effects (font (size 1 1) (thickness 0.15)) (justify mirror))
     )
     (fp_text value GND (at 0 1.8) (layer B.Fab)
@@ -1433,10 +1433,10 @@
       (net 1 GND))
   )
 
-  (module pISO:SLP (layer B.Cu) (tedit 5AC923C7) (tstamp 5AC91F31)
+  (module pISO:SLP (layer B.Cu) (tedit 5AD3B224) (tstamp 5AC91F31)
     (at 166.21188 84.25942)
     (path /5A110919)
-    (fp_text reference W13 (at 0.03 -5.69) (layer B.SilkS) hide
+    (fp_text reference W13 (at 12.7 -4) (layer B.SilkS) hide
       (effects (font (size 1 1) (thickness 0.15)) (justify mirror))
     )
     (fp_text value 3V3 (at 0 1.8) (layer B.Fab)
@@ -1798,6 +1798,15 @@
       (xy 1.060052 9.972623) (xy 1.248305 8.97404)) (layer B.SilkS) (width 0.01))
   )
 
+  (gr_text SELECT (at 167.71188 95.25942) (layer F.SilkS)
+    (effects (font (size 1 1) (thickness 0.25)))
+  )
+  (gr_text DOWN (at 155.21188 99.85942) (layer F.SilkS)
+    (effects (font (size 1 1) (thickness 0.25)))
+  )
+  (gr_text UP (at 155.41188 90.65942) (layer F.SilkS)
+    (effects (font (size 1 1) (thickness 0.25)))
+  )
   (gr_text V1.0 (at 146.81188 108.05942) (layer F.SilkS)
     (effects (font (size 1 1) (thickness 0.25)))
   )
