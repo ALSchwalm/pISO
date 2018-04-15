@@ -10,7 +10,7 @@ Building without docker
 -----------------------
 
 Without docker, you will need to first ensure you have all of the appropriate
-dependencies installed (see [this list](https://buildroot.org/downloads/manual/manual.html#requirement)).
+dependencies installed (see [this list](https://buildroot.org/downloads/manual/manual.html#requirement) ).
 
     cd buildroot
     make xconfig
@@ -18,4 +18,11 @@ dependencies installed (see [this list](https://buildroot.org/downloads/manual/m
     # save
     make
 
-Either approach should produce a file in `buildroot/output/images/sdcard.img`.
+Either approach should produce a file in `buildroot/output/images/sdcard.img`. This file can
+be written directly to an SD card (e.x., with `dd`).
+
+License
+-------
+
+The pISO source is licensed under the terms of the GNU General Public License 3.0.
+For additional information see the LICENSE file.
