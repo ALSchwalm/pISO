@@ -11,11 +11,13 @@ extern crate serde_derive;
 extern crate serde_json;
 extern crate spidev;
 extern crate sysfs_gpio;
+extern crate toml;
 
 use std::thread;
 
 mod action;
 mod bitmap;
+mod config;
 mod controller;
 mod display;
 mod displaymanager;
@@ -31,6 +33,7 @@ mod stats;
 mod usb;
 mod utils;
 mod vdrive;
+mod wifi;
 
 use error::ResultExt;
 use std::sync::{Arc, Mutex};
