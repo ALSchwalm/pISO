@@ -1,26 +1,26 @@
 use toml;
 
-#[derive(Debug, Deserialize)]
-struct WifiApConfig {
-    ssid: String,
-    password: String,
+#[derive(Clone, Debug, Deserialize)]
+pub struct WifiApConfig {
+    pub ssid: String,
+    pub password: String,
 }
 
-#[derive(Debug, Deserialize)]
-struct WifiClientNetworkConfig {
-    ssid: String,
-    password: String,
+#[derive(Clone, Debug, Deserialize)]
+pub struct WifiClientNetworkConfig {
+    pub ssid: String,
+    pub password: String,
 }
 
-#[derive(Debug, Deserialize)]
-struct WifiConfig {
-    client: Vec<WifiClientNetworkConfig>,
-    ap: WifiApConfig,
+#[derive(Clone, Debug, Deserialize)]
+pub struct WifiConfig {
+    pub client: Vec<WifiClientNetworkConfig>,
+    pub ap: WifiApConfig,
 }
 
-#[derive(Debug, Deserialize)]
-struct Config {
-    wifi: WifiConfig,
+#[derive(Clone, Debug, Deserialize)]
+pub struct Config {
+    pub wifi: WifiConfig,
 }
 
 #[cfg(test)]

@@ -13,6 +13,7 @@ extern crate spidev;
 extern crate sysfs_gpio;
 extern crate toml;
 
+use std::fs;
 use std::thread;
 
 mod action;
@@ -37,12 +38,21 @@ mod wifi;
 
 use error::ResultExt;
 use std::sync::{Arc, Mutex};
+use std::io::Read;
 
 quick_main!(run);
 
 fn run() -> error::Result<()> {
+    let mut f = fs::File::open("/boot/piso.config").expect("config file not found");
+    let mut config_contents = String::new();
+    f.read_to_string(&mut config_contents)
+        .expect("unable to read config");
+    let config: config::Config = toml::from_str(&config_contents)?;
+
+    let display = display::LedDisplay::new()?;
+
     println!("Building display manager");
-    let mut manager = displaymanager::DisplayManager::new()?;
+    let mut manager = displaymanager::DisplayManager::new(display)?;
 
     println!("Building USB gadget");
     let mut gadget = Arc::new(Mutex::new(usb::UsbGadget::new(
@@ -67,7 +77,7 @@ fn run() -> error::Result<()> {
     )?));
 
     println!("Building pISO");
-    let mut piso = piso::PIso::new(manager.clone(), gadget)?;
+    let mut piso = piso::PIso::new(manager.clone(), gadget, config)?;
 
     println!("Rendering pISO");
     manager.lock()?.render(&piso)?;
