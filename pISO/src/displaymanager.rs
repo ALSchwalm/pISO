@@ -25,14 +25,13 @@ pub struct Window {
 }
 
 pub struct DisplayManager {
-    display: display::Display,
+    display: Box<display::Display>,
     windows: BTreeMap<WindowId, Window>,
     nextid: u32,
 }
 
 impl DisplayManager {
-    pub fn new() -> Result<Arc<Mutex<DisplayManager>>> {
-        let mut disp = display::Display::new().chain_err(|| "Failed to create display")?;
+    pub fn new(mut disp: Box<display::Display>) -> Result<Arc<Mutex<DisplayManager>>> {
         disp.on().chain_err(|| "Failed to activate display")?;
 
         Ok(Arc::new(Mutex::new(DisplayManager {
@@ -96,6 +95,47 @@ impl DisplayManager {
         visit(root, target)
     }
 
+    fn nearest_fixed_position_ancestor<'a, 'b>(
+        &'a self,
+        root: &'b Widget,
+        target: &'b Widget,
+    ) -> Result<&'b Widget> {
+        fn visit<'a, 'b>(
+            disp: &'a DisplayManager,
+            current: &'b Widget,
+            target: &'b Widget,
+        ) -> (bool, Option<&'b Widget>) {
+            if current.windowid() == target.windowid() {
+                (true, None)
+            } else {
+                let window = disp.get(current.windowid()).expect("widget has no window");
+
+                for child in current.children() {
+                    let res = visit(disp, child, target);
+                    if res.0 {
+                        if res.1.is_some() {
+                            return res;
+                        }
+
+                        match window.position {
+                            Position::Normal => return res,
+                            Position::Fixed(_, _) => return (true, Some(current)),
+                        }
+                    }
+                }
+                (false, None)
+            }
+        }
+
+        let window = self.get(target.windowid()).expect("widget has no window");
+        match window.position {
+            Position::Normal => visit(self, root, target)
+                .1
+                .ok_or("Failed to find fixed position parent".into()),
+            Position::Fixed(_, _) => Ok(target),
+        }
+    }
+
     fn normal_position(&self, root: &Widget, widget: &Widget) -> (usize, usize) {
         fn visit(
             disp: &DisplayManager,
@@ -106,13 +146,19 @@ impl DisplayManager {
             if current.windowid() == target.windowid() {
                 (true, pos.0, pos.1)
             } else {
-                let window = disp.get(target.windowid()).expect("widget has no window");
+                let window = disp.get(current.windowid()).expect("widget has no window");
                 let height = match window.position {
                     Position::Fixed(_, _) => 0,
                     Position::Normal => window.bitmap.height(),
                 };
-                pos = (pos.0, pos.1 + height);
                 for child in current.children() {
+                    // Skip other fixed position windows
+                    let window = disp.get(child.windowid()).expect("widget has no window");
+                    match window.position {
+                        Position::Fixed(_, _) => continue,
+                        _ => (),
+                    };
+
                     let res = visit(disp, child, target, pos);
                     if res.0 {
                         return res;
@@ -120,10 +166,19 @@ impl DisplayManager {
                         pos = (res.1, res.2);
                     }
                 }
+                pos = (pos.0, pos.1 + height);
                 (false, pos.0, pos.1)
             }
         }
-        let res = visit(self, root, widget, (0, 0));
+        let parent = self.nearest_fixed_position_ancestor(root, widget)
+            .expect("Widget has no fixed position parent");
+        let parent_window = self.get(parent.windowid()).expect("widget has no window");
+        let parent_offset = match parent_window.position {
+            Position::Fixed(x, y) => (x, y),
+            Position::Normal => panic!("nearest fixed position parent is Normal position"),
+        };
+
+        let res = visit(self, parent, widget, parent_offset);
         if !res.0 {
             panic!("Unable to find widget with id={}", widget.windowid());
         } else {
@@ -131,12 +186,22 @@ impl DisplayManager {
         }
     }
 
-    fn calculate_position(&self, root: &Widget, widget: &Widget) -> (usize, usize) {
+    pub fn calculate_position(&self, root: &Widget, widget: &Widget) -> (usize, usize) {
         let window = self.get(widget.windowid()).expect("widget has no window");
 
         match window.position {
             Position::Fixed(x, y) => (x, y),
             Position::Normal => self.normal_position(root, widget),
+        }
+    }
+
+    fn is_fixed_position(&self, widget: &Widget) -> bool {
+        match self.get(widget.windowid())
+            .expect("widget has no window")
+            .position
+        {
+            Position::Fixed(_, _) => true,
+            _ => false,
         }
     }
 
@@ -156,16 +221,47 @@ impl DisplayManager {
             .unwrap_or(widget)
     }
 
-    fn next_widget<'a>(root: &Widget, target: WindowId) -> Option<&Widget> {
-        fn visit<'a>(current: &Widget, target: WindowId) -> (bool, Option<&Widget>) {
-            if current.windowid() == target {
+    fn nearest_widget<'a, 'b>(
+        &'a self,
+        root: &'b Widget,
+        target: &'b Widget,
+        next: bool,
+    ) -> Option<&'b Widget> {
+        fn visit<'a, 'b>(
+            disp: &'a DisplayManager,
+            current: &'b Widget,
+            target: &'b Widget,
+            next: bool,
+        ) -> (bool, Option<&'b Widget>) {
+            if current.windowid() == target.windowid() {
                 return (true, current.children().first().map(|n| *n));
             } else {
-                for (idx, child) in current.children().iter().enumerate() {
-                    let res = visit(*child, target);
+                let children = if next {
+                    current.children()
+                } else {
+                    current
+                        .children()
+                        .iter()
+                        .rev()
+                        .map(|c| *c)
+                        .collect::<Vec<_>>()
+                };
+                for (idx, child) in children.iter().enumerate() {
+                    if disp.is_fixed_position(*child) {
+                        continue;
+                    }
+                    let res = visit(disp, *child, target, next);
                     if res.0 {
                         if res.1.is_none() {
-                            return (true, current.children().get(idx + 1).map(|n| *n));
+                            return (
+                                true,
+                                children
+                                    .iter()
+                                    .skip(idx + 1)
+                                    .filter(|child| !disp.is_fixed_position(**child))
+                                    .next()
+                                    .map(|n| *n),
+                            );
                         } else {
                             return res;
                         }
@@ -174,21 +270,18 @@ impl DisplayManager {
                 return (false, None);
             }
         }
-        visit(root, target).1
+
+        let parent = self.nearest_fixed_position_ancestor(root, target)
+            .expect("Widget has no fixed position parent");
+        visit(self, parent, target, next).1
     }
 
-    fn prev_widget<'a>(root: &Widget, target: WindowId) -> Option<&Widget> {
-        if let Some(parent) = Self::parent_widget(root, target) {
-            let children = parent.children();
-            children
-                .iter()
-                .position(|child| target == child.windowid())
-                .and_then(|pos| children.into_iter().nth(pos - 1))
-                .map(|widget| Self::last_descendant(widget))
-                .or(Some(parent))
-        } else {
-            None
-        }
+    fn next_widget<'a, 'b>(&'a self, root: &'b Widget, target: &'b Widget) -> Option<&'b Widget> {
+        self.nearest_widget(root, target, true)
+    }
+
+    fn prev_widget<'a, 'b>(&'a self, root: &'b Widget, target: &'b Widget) -> Option<&'b Widget> {
+        self.nearest_widget(root, target, false)
     }
 
     fn find_mut_widget(root: &mut Widget, target: WindowId) -> Option<&mut Widget> {
@@ -216,7 +309,7 @@ impl DisplayManager {
         }
     }
 
-    fn find_focused_widget<'a>(&self, current: &'a mut Widget) -> Option<&'a mut Widget> {
+    fn find_focused_widget_mut<'a>(&self, current: &'a mut Widget) -> Option<&'a mut Widget> {
         let focus = self.get(current.windowid())
             .expect("Unable to find focused window")
             .focus;
@@ -224,6 +317,21 @@ impl DisplayManager {
             return Some(current);
         }
         for child in current.mut_children().into_iter() {
+            if let Some(child) = self.find_focused_widget_mut(child) {
+                return Some(child);
+            }
+        }
+        None
+    }
+
+    fn find_focused_widget<'a>(&self, current: &'a Widget) -> Option<&'a Widget> {
+        let focus = self.get(current.windowid())
+            .expect("Unable to find focused window")
+            .focus;
+        if focus {
+            return Some(current);
+        }
+        for child in current.children().into_iter() {
             if let Some(child) = self.find_focused_widget(child) {
                 return Some(child);
             }
@@ -236,32 +344,32 @@ impl DisplayManager {
         root: &mut Widget,
         event: &controller::Event,
     ) -> Result<Vec<action::Action>> {
-        let focus_id = {
-            let focused = self.find_focused_widget(root).expect("No focused window");
-            let mut event_res = focused.on_event(event)?;
+        {
+            let focused = self.find_focused_widget_mut(root)
+                .expect("No focused window");
+            let event_res = focused.on_event(event)?;
             if event_res.0 {
                 return Ok(event_res.1);
-            } else {
-                focused.windowid()
             }
-        };
+        }
+        let focused = self.find_focused_widget(root).expect("No focused window");
 
         match event {
             &controller::Event::Up => {
-                if let Some(prev) = DisplayManager::prev_widget(root, focus_id) {
+                if let Some(prev) = self.prev_widget(root, focused) {
                     // Special case, do not focus the root
                     if prev.windowid() != root.windowid() {
                         self.shift_focus(prev);
                     }
                 } else {
-                    println!("No previous widget for window id={}", focus_id);
+                    println!("No previous widget for window id={}", focused.windowid());
                 }
             }
             &controller::Event::Down => {
-                if let Some(next) = DisplayManager::next_widget(root, focus_id) {
+                if let Some(next) = self.next_widget(root, focused) {
                     self.shift_focus(next);
                 } else {
-                    println!("No next widget for window id={}", focus_id);
+                    println!("No next widget for window id={}", focused.windowid());
                 }
             }
             _ => (),
@@ -313,7 +421,7 @@ impl DisplayManager {
     }
 
     // First, render everything so we know the sizes to position things
-    fn do_render(&mut self, root: &Widget) -> Result<()> {
+    pub fn do_render(&mut self, root: &Widget) -> Result<()> {
         fn visit(manager: &mut DisplayManager, widget: &Widget) -> Result<()> {
             {
                 let window = manager
@@ -381,7 +489,279 @@ impl DisplayManager {
 }
 
 pub trait Widget: render::Render + input::Input {
-    fn mut_children(&mut self) -> Vec<&mut Widget>;
-    fn children(&self) -> Vec<&Widget>;
+    fn mut_children(&mut self) -> Vec<&mut Widget> {
+        vec![]
+    }
+    fn children(&self) -> Vec<&Widget> {
+        vec![]
+    }
     fn windowid(&self) -> WindowId;
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[derive(Clone)]
+    struct TestWidget {
+        pub windowid: WindowId,
+        pub size: (usize, usize),
+        pub children: Vec<TestWidget>,
+    }
+
+    impl render::Render for TestWidget {
+        fn render(&self, window: &Window) -> Result<bitmap::Bitmap> {
+            Ok(bitmap::Bitmap::new(self.size.0, self.size.1))
+        }
+    }
+
+    impl input::Input for TestWidget {
+        fn on_event(&mut self, event: &controller::Event) -> Result<(bool, Vec<action::Action>)> {
+            Ok((false, vec![]))
+        }
+    }
+
+    impl Widget for TestWidget {
+        fn mut_children(&mut self) -> Vec<&mut Widget> {
+            self.children
+                .iter_mut()
+                .map(|widget| widget as &mut Widget)
+                .collect()
+        }
+        fn children(&self) -> Vec<&Widget> {
+            self.children
+                .iter()
+                .map(|widget| widget as &Widget)
+                .collect()
+        }
+        fn windowid(&self) -> WindowId {
+            self.windowid
+        }
+    }
+
+    impl TestWidget {
+        fn new(
+            disp: &mut DisplayManager,
+            position: Position,
+            size: (usize, usize),
+            children: Vec<TestWidget>,
+        ) -> Result<TestWidget> {
+            Ok(TestWidget {
+                windowid: disp.add_child(position)?,
+                size: size,
+                children: children,
+            })
+        }
+    }
+
+    #[test]
+    // Test that a bunch of normally positioned windows just line up vertically
+    fn test_calc_basic_position() {
+        let display = Box::new(display::test::TestDisplay {});
+        let disp = DisplayManager::new(display).expect("Failed to create displaymanager");
+        let mut manager = disp.lock().expect("Failed to lock display manager mutext");
+
+        let child1 = TestWidget::new(&mut manager, Position::Normal, (0, 10), vec![])
+            .expect("Failed to create test widget");
+        let child2 = TestWidget::new(&mut manager, Position::Normal, (0, 10), vec![])
+            .expect("Failed to create test widget");
+        let root = TestWidget::new(
+            &mut manager,
+            Position::Fixed(0, 0),
+            (0, 0),
+            vec![child1.clone(), child2.clone()],
+        ).expect("Failed to create test widget");
+
+        manager.do_render(&root).expect("Failed to do_render");
+        assert_eq!(manager.calculate_position(&root, &root), (0, 0));
+        assert_eq!(manager.calculate_position(&root, &child1), (0, 0));
+        assert_eq!(manager.calculate_position(&root, &child2), (0, 10));
+    }
+
+    #[test]
+    // Test that focus moves up and down normal positioned windows as expected
+    fn test_basic_focus() {
+        let display = Box::new(display::test::TestDisplay {});
+        let disp = DisplayManager::new(display).expect("Failed to create displaymanager");
+        let mut manager = disp.lock().expect("Failed to lock display manager mutext");
+
+        let mut child1 = TestWidget::new(&mut manager, Position::Normal, (0, 0), vec![])
+            .expect("Failed to create test widget");
+        let mut child2 = TestWidget::new(&mut manager, Position::Normal, (0, 0), vec![])
+            .expect("Failed to create test widget");
+        let mut root = TestWidget::new(
+            &mut manager,
+            Position::Fixed(0, 0),
+            (0, 0),
+            vec![child1.clone(), child2.clone()],
+        ).expect("Failed to create test widget");
+
+        manager.shift_focus(&child1);
+        assert_eq!(
+            manager.find_focused_widget(&mut root).unwrap().windowid(),
+            child1.windowid()
+        );
+        manager.on_event(&mut root, &controller::Event::Up).unwrap();
+        assert_eq!(
+            manager.find_focused_widget(&mut root).unwrap().windowid(),
+            child1.windowid()
+        );
+        manager
+            .on_event(&mut root, &controller::Event::Down)
+            .unwrap();
+        assert_eq!(
+            manager.find_focused_widget(&mut root).unwrap().windowid(),
+            child2.windowid()
+        );
+        manager.on_event(&mut root, &controller::Event::Up).unwrap();
+        assert_eq!(
+            manager.find_focused_widget(&mut root).unwrap().windowid(),
+            child1.windowid()
+        );
+    }
+
+    #[test]
+    // Test that fixed position windows are ignored in the flow of normal positioned windows
+    fn test_calc_normal_with_fixed_position() {
+        let display = Box::new(display::test::TestDisplay {});
+        let disp = DisplayManager::new(display).expect("Failed to create displaymanager");
+        let mut manager = disp.lock().expect("Failed to lock display manager mutext");
+
+        let child1 = TestWidget::new(&mut manager, Position::Normal, (0, 10), vec![])
+            .expect("Failed to create test widget");
+        let child2 = TestWidget::new(&mut manager, Position::Fixed(20, 20), (50, 50), vec![])
+            .expect("Failed to create test widget");
+        let child3 = TestWidget::new(&mut manager, Position::Normal, (0, 10), vec![])
+            .expect("Failed to create test widget");
+        let root = TestWidget::new(
+            &mut manager,
+            Position::Fixed(0, 0),
+            (0, 0),
+            vec![child1.clone(), child2.clone(), child3.clone()],
+        ).expect("Failed to create test widget");
+
+        manager.do_render(&root).expect("Failed to do_render");
+        assert_eq!(manager.calculate_position(&root, &root), (0, 0));
+        assert_eq!(manager.calculate_position(&root, &child1), (0, 0));
+        assert_eq!(manager.calculate_position(&root, &child2), (20, 20));
+        assert_eq!(manager.calculate_position(&root, &child3), (0, 10));
+    }
+
+    #[test]
+    // Test that fixed position windows are ignored when shifting focus
+    fn test_normal_focus_with_fixed_position() {
+        let display = Box::new(display::test::TestDisplay {});
+        let disp = DisplayManager::new(display).expect("Failed to create displaymanager");
+        let mut manager = disp.lock().expect("Failed to lock display manager mutext");
+
+        let child1 = TestWidget::new(&mut manager, Position::Normal, (0, 0), vec![])
+            .expect("Failed to create test widget");
+        let child2 = TestWidget::new(&mut manager, Position::Fixed(20, 20), (0, 0), vec![])
+            .expect("Failed to create test widget");
+        let child3 = TestWidget::new(&mut manager, Position::Normal, (0, 0), vec![])
+            .expect("Failed to create test widget");
+        let mut root = TestWidget::new(
+            &mut manager,
+            Position::Fixed(0, 0),
+            (0, 0),
+            vec![child1.clone(), child2.clone(), child3.clone()],
+        ).expect("Failed to create test widget");
+
+        manager.shift_focus(&child1);
+        manager
+            .on_event(&mut root, &controller::Event::Down)
+            .unwrap();
+        assert_eq!(
+            manager.find_focused_widget(&mut root).unwrap().windowid(),
+            child3.windowid()
+        );
+        manager.on_event(&mut root, &controller::Event::Up).unwrap();
+        assert_eq!(
+            manager.find_focused_widget(&mut root).unwrap().windowid(),
+            child1.windowid()
+        );
+    }
+
+    #[test]
+    // Test that windows are aligned vertically with their nearest fixed position parent
+    fn test_calc_normal_within_fixed() {
+        let display = Box::new(display::test::TestDisplay {});
+        let disp = DisplayManager::new(display).expect("Failed to create displaymanager");
+        let mut manager = disp.lock().expect("Failed to lock display manager mutext");
+
+        let child1 = TestWidget::new(&mut manager, Position::Normal, (0, 10), vec![])
+            .expect("Failed to create test widget");
+
+        let child2_1 = TestWidget::new(&mut manager, Position::Normal, (50, 50), vec![])
+            .expect("Failed to create test widget");
+        let child2 = TestWidget::new(
+            &mut manager,
+            Position::Fixed(20, 20),
+            (0, 0),
+            vec![child2_1.clone()],
+        ).expect("Failed to create test widget");
+
+        let child3 = TestWidget::new(&mut manager, Position::Normal, (0, 10), vec![])
+            .expect("Failed to create test widget");
+        let root = TestWidget::new(
+            &mut manager,
+            Position::Fixed(0, 0),
+            (0, 0),
+            vec![child1.clone(), child2.clone(), child3.clone()],
+        ).expect("Failed to create test widget");
+
+        manager.do_render(&root).expect("Failed to do_render");
+        assert_eq!(manager.calculate_position(&root, &root), (0, 0));
+        assert_eq!(manager.calculate_position(&root, &child1), (0, 0));
+        assert_eq!(manager.calculate_position(&root, &child2), (20, 20));
+        assert_eq!(manager.calculate_position(&root, &child2_1), (20, 20));
+        assert_eq!(manager.calculate_position(&root, &child3), (0, 10));
+    }
+
+    #[test]
+    // Test that focus moves within the nearest fixed position parent
+    fn test_normal_within_fixed_focus() {
+        let display = Box::new(display::test::TestDisplay {});
+        let disp = DisplayManager::new(display).expect("Failed to create displaymanager");
+        let mut manager = disp.lock().expect("Failed to lock display manager mutext");
+
+        let child1 = TestWidget::new(&mut manager, Position::Normal, (0, 0), vec![])
+            .expect("Failed to create test widget");
+
+        let child2_1 = TestWidget::new(&mut manager, Position::Normal, (0, 0), vec![])
+            .expect("Failed to create test widget");
+        let child2_2 = TestWidget::new(&mut manager, Position::Normal, (0, 0), vec![])
+            .expect("Failed to create test widget");
+        let child2 = TestWidget::new(
+            &mut manager,
+            Position::Fixed(20, 20),
+            (0, 0),
+            vec![child2_1.clone(), child2_2.clone()],
+        ).expect("Failed to create test widget");
+
+        let child3 = TestWidget::new(&mut manager, Position::Normal, (0, 0), vec![])
+            .expect("Failed to create test widget");
+        let mut root = TestWidget::new(
+            &mut manager,
+            Position::Fixed(0, 0),
+            (0, 0),
+            vec![child1.clone(), child2.clone(), child3.clone()],
+        ).expect("Failed to create test widget");
+
+        manager.shift_focus(&child2_1);
+        manager
+            .on_event(&mut root, &controller::Event::Down)
+            .unwrap();
+        assert_eq!(
+            manager.find_focused_widget(&mut root).unwrap().windowid(),
+            child2_2.windowid()
+        );
+        manager
+            .on_event(&mut root, &controller::Event::Down)
+            .unwrap();
+        assert_eq!(
+            manager.find_focused_widget(&mut root).unwrap().windowid(),
+            child2_2.windowid()
+        );
+    }
 }

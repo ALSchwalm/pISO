@@ -14,4 +14,6 @@ pub enum Action {
     OpenFormatMenu,
     CloseFormatMenu,
     FormatDrive,
+
+    OpenWifiMenu,
 }

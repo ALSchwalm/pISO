@@ -1,5 +1,6 @@
 use action;
 use bitmap;
+use config;
 use controller;
 use displaymanager::{DisplayManager, Position, Widget, Window, WindowId};
 use error::Result;
@@ -11,25 +12,33 @@ use std::sync::{Arc, Mutex};
 use render;
 use stats;
 use vdrive;
+use wifi;
 
 pub struct PIso {
+    config: config::Config,
     pub drives: Vec<vdrive::VirtualDrive>,
     newdrive: newdrive::NewDrive,
     stats: stats::Stats,
     usb: Arc<Mutex<usb::UsbGadget>>,
     vg: lvm::VolumeGroup,
     window: WindowId,
+    wifi: wifi::WifiMenu,
 }
 
 impl PIso {
-    pub fn new(disp: Arc<Mutex<DisplayManager>>, usb: Arc<Mutex<usb::UsbGadget>>) -> Result<PIso> {
+    pub fn new(
+        disp: Arc<Mutex<DisplayManager>>,
+        usb: Arc<Mutex<usb::UsbGadget>>,
+        config: config::Config,
+    ) -> Result<PIso> {
         let mut manager = disp.lock()?;
-        let window = manager.add_child(Position::Normal)?;
+        let window = manager.add_child(Position::Fixed(0, 0))?;
 
         let vg = lvm::VolumeGroup::from_path("/dev/VolGroup00")?;
         let drives = Self::build_drives_from_vg(&mut manager, &vg, &usb)?;
         let ndrive = newdrive::NewDrive::new(&mut manager, usb.clone(), vg.clone())?;
         let stats = stats::Stats::new(&mut manager, vg.clone())?;
+        let wifi = wifi::WifiMenu::new(&mut manager, &config)?;
 
         if drives.len() > 0 {
             // Focus the first drive
@@ -41,12 +50,14 @@ impl PIso {
         }
 
         Ok(PIso {
+            config: config,
             drives: drives,
             newdrive: ndrive,
             usb: usb,
             vg: vg,
             window: window,
             stats: stats,
+            wifi: wifi,
         })
     }
 
@@ -109,6 +120,7 @@ impl Widget for PIso {
             .map(|vdrive| vdrive as &mut Widget)
             .collect::<Vec<&mut Widget>>();
         children.push(&mut self.newdrive as &mut Widget);
+        children.push(&mut self.wifi as &mut Widget);
         children.push(&mut self.stats as &mut Widget);
         children
     }
@@ -119,6 +131,7 @@ impl Widget for PIso {
             .map(|vdrive| vdrive as &Widget)
             .collect::<Vec<&Widget>>();
         children.push(&self.newdrive as &Widget);
+        children.push(&self.wifi as &Widget);
         children.push(&self.stats as &Widget);
         children
     }

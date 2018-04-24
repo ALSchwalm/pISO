@@ -1,9 +1,13 @@
 use std;
 use std::io;
 use sysfs_gpio;
+use toml;
 
 #[derive(Debug, ErrorChain)]
 pub enum ErrorKind {
+    #[error_chain(foreign)]
+    Toml(toml::de::Error),
+
     #[error_chain(custom)]
     SyncPoisonError(String),
 

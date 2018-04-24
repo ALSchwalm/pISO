@@ -8,7 +8,7 @@ pub trait Input {
         &mut self,
         event: &controller::Event,
     ) -> error::Result<(bool, Vec<action::Action>)> {
-        Ok((true, vec![]))
+        Ok((false, vec![]))
     }
 
     fn do_action(

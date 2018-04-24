@@ -51,7 +51,7 @@ impl Into<u8> for SSD1306Command {
     }
 }
 
-pub struct Display {
+pub struct LedDisplay {
     inverted: bool,
     contents: Bitmap,
     dc_pin: Pin,
@@ -59,8 +59,15 @@ pub struct Display {
     bus: Spidev,
 }
 
-impl Display {
-    pub fn new() -> error::Result<Display> {
+pub trait Display {
+    fn on(&mut self) -> error::Result<()>;
+    fn reset(&mut self) -> error::Result<()>;
+    fn update(&mut self, bitmap: Bitmap) -> error::Result<()>;
+    fn flip_display(&mut self);
+}
+
+impl LedDisplay {
+    pub fn new() -> error::Result<Box<Display>> {
         let mut spi = Spidev::open("/dev/spidev0.0")?;
         let options = SpidevOptions::new()
             .bits_per_word(8)
@@ -77,13 +84,13 @@ impl Display {
         rst_pin.export()?;
         rst_pin.set_direction(Direction::Out)?;
 
-        Ok(Display {
+        Ok(Box::new(LedDisplay {
             inverted: true,
             contents: Bitmap::new(128, 64),
             dc_pin: dc_pin,
             rst_pin: rst_pin,
             bus: spi,
-        })
+        }))
     }
 
     fn send_spi_command<Cmd>(&mut self, cmd: Cmd) -> error::Result<()>
@@ -100,8 +107,10 @@ impl Display {
         self.bus.write(data)?;
         Ok(())
     }
+}
 
-    pub fn on(&mut self) -> error::Result<()> {
+impl Display for LedDisplay {
+    fn on(&mut self) -> error::Result<()> {
         self.reset()?;
 
         self.send_spi_command(SSD1306Command::DisplayOff)?;
@@ -132,7 +141,7 @@ impl Display {
         self.send_spi_command(SSD1306Command::DisplayOn)
     }
 
-    pub fn reset(&mut self) -> error::Result<()> {
+    fn reset(&mut self) -> error::Result<()> {
         self.rst_pin.set_value(1)?;
         thread::sleep(time::Duration::from_millis(1));
         self.rst_pin.set_value(0)?;
@@ -141,11 +150,11 @@ impl Display {
         Ok(())
     }
 
-    pub fn flip_display(&mut self) {
+    fn flip_display(&mut self) {
         self.inverted = !self.inverted;
     }
 
-    pub fn update(&mut self, bitmap: Bitmap) -> error::Result<()> {
+    fn update(&mut self, bitmap: Bitmap) -> error::Result<()> {
         self.contents = Bitmap::new(self.contents.width(), self.contents.height());
         self.contents.blit(&bitmap, (0, 0));
 
@@ -188,11 +197,24 @@ impl Display {
 }
 
 #[cfg(test)]
-mod test {
+pub mod test {
     use super::*;
 
-    #[test]
-    fn test_display() {
-        let disp = Display::new();
+    pub struct TestDisplay {}
+
+    impl Display for TestDisplay {
+        fn on(&mut self) -> error::Result<()> {
+            Ok(())
+        }
+
+        fn reset(&mut self) -> error::Result<()> {
+            Ok(())
+        }
+
+        fn update(&mut self, bitmap: Bitmap) -> error::Result<()> {
+            Ok(())
+        }
+
+        fn flip_display(&mut self) {}
     }
 }
