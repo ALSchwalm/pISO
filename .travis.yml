@@ -1,0 +1,8 @@
+language: rust
+sudo: false
+cache: cargo
+rust:
+  - stable
+before_script: cd pISO
+script:
+  - cargo test
