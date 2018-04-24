@@ -2,13 +2,14 @@ pISO
 ====
 
 [![Build Status](https://travis-ci.org/ALSchwalm/pISO.svg?branch=master)](https://travis-ci.org/ALSchwalm/pISO)
+[![pipeline status](https://gitlab.com/ALSchwalm/pISO/badges/master/pipeline.svg)](https://gitlab.com/ALSchwalm/pISO/commits/master)
 
 Building with docker
 --------------------
 
-Just have docker installed and run:
+Just have make and docker installed and run:
 
-    ./build.sh
+    make sdimage
 
 Building without docker
 -----------------------

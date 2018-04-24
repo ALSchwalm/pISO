@@ -1,0 +1,26 @@
+image: docker:stable
+
+variables:
+  DOCKER_DRIVER: overlay2
+  GIT_SUBMODULE_STRATEGY: recursive
+
+services:
+- docker:dind
+
+before_script:
+  - apk update
+  - apk add make
+
+rust-tests:
+  script:
+  - make test-ci &> build.log
+  artifacts:
+    name: "sdimage-$CI_COMMIT_REF_NAME"
+    paths:
+    - buildroot/output/images/sdcard.img
+    - build.log
+    when: always
+
+make-image:
+  script:
+  - make sdimage-ci
