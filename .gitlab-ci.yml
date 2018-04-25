@@ -3,6 +3,7 @@ image: docker:stable
 variables:
   DOCKER_DRIVER: overlay2
   GIT_SUBMODULE_STRATEGY: recursive
+  CARGO_HOME: $CI_PROJECT_DIR/cargo
 
 services:
 - docker:dind
@@ -13,14 +14,18 @@ before_script:
 
 rust-tests:
   script:
-  - make test-ci &> build.log
+  - make test-ci
+  cache:
+    paths:
+      - pISO/target/
+      - pISO/cargo/
+
+make-image:
+  script:
+  - make sdimage-ci &> build.log
   artifacts:
     name: "sdimage-$CI_COMMIT_REF_NAME"
     paths:
     - buildroot/output/images/sdcard.img
     - build.log
     when: always
-
-make-image:
-  script:
-  - make sdimage-ci
