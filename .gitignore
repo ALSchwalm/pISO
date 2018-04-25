@@ -1,2 +1,3 @@
 build/
-pISO-rs/target/
+pISO/target/
+pISO/.cargo/

@@ -6,6 +6,7 @@ test:
 
 test-ci:
 	docker run --rm \
+     -e CARGO_HOME='$(CARGO_HOME)'\
      --user $(CURRENT_USER):$(CURRENT_GROUP) \
      -v "$(PWD)":$(PWD) -w $(PWD)/pISO rust:1 cargo test
 
