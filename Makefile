@@ -17,11 +17,11 @@ sdimage: update-config
 
 sdimage-ci: update-config
 ifeq ("$(shell cd buildroot && ./utils/should-rebuild)","rebuild")
-	sudo docker run -v $(CURDIR):/pISO -w /pISO/buildroot \
+	docker run -v $(CURDIR):/pISO -w /pISO/buildroot \
 			--user $(CURRENT_USER):$(CURRENT_GROUP) \
 			--rm  adamschwalm/piso:latest /bin/bash -c "make clean && make"
 else
-		sudo docker run -v $(CURDIR):/pISO -w /pISO/buildroot \
+	docker run -v $(CURDIR):/pISO -w /pISO/buildroot \
 			--user $(CURRENT_USER):$(CURRENT_GROUP) \
 			--rm  adamschwalm/piso:latest /bin/bash -c "make piso-reconfigure && make"
 endif
