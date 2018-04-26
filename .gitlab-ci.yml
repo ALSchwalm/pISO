@@ -10,7 +10,7 @@ services:
 
 before_script:
   - apk update
-  - apk add make
+  - apk add make tar
 
 rust-tests:
   script:
@@ -24,8 +24,11 @@ make-image:
   script:
   - make sdimage-ci &> build.log
   artifacts:
-    name: "sdimage-$CI_COMMIT_REF_NAME"
+    name: "sdimage-$CI_COMMIT_SHA"
     paths:
-    - buildroot/output/images/sdcard.img
+    - sdcard.img.tar.gz
     - build.log
     when: always
+  cache:
+    paths:
+      - buildroot/output/
