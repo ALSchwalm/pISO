@@ -16,6 +16,7 @@ rust-tests:
   script:
   - make test-ci
   cache:
+    key: "$CI_JOB_NAME-$CI_COMMIT_REF_SLUG"
     paths:
       - pISO/target/
       - pISO/.cargo/
@@ -31,5 +32,6 @@ make-image:
     - build.log
     when: always
   cache:
+    key: "$CI_JOB_NAME-$CI_COMMIT_REF_SLUG"
     paths:
       - buildroot/output/
