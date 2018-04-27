@@ -10,7 +10,7 @@ services:
 
 before_script:
   - apk update
-  - apk add make tar
+  - apk add make tar git
 
 rust-tests:
   script:
