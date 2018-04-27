@@ -23,7 +23,6 @@ rust-tests:
 
 make-image:
   script:
-  - chmod +x buildroot/utils/should-rebuild
   - make sdimage-ci &> build.log
   artifacts:
     name: "sdimage-$CI_COMMIT_SHA"
