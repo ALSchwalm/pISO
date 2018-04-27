@@ -2,7 +2,6 @@ pISO
 ====
 
 [![Build Status](https://travis-ci.org/ALSchwalm/pISO.svg?branch=master)](https://travis-ci.org/ALSchwalm/pISO)
-[![pipeline status](https://gitlab.com/ALSchwalm/pISO/badges/master/pipeline.svg)](https://gitlab.com/ALSchwalm/pISO/commits/master)
 
 Building with docker
 --------------------
