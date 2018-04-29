@@ -8,6 +8,7 @@ use error;
 use font;
 use input;
 use render;
+use utils;
 
 enum WifiMenuState {
     Closed,
@@ -199,6 +200,7 @@ impl Widget for WifiClient {
 pub struct WifiAp {
     pub windowid: WindowId,
     config: config::WifiApConfig,
+    active: bool,
 }
 
 impl WifiAp {
@@ -206,6 +208,7 @@ impl WifiAp {
         Ok(WifiAp {
             windowid: disp.add_child(Position::Normal)?,
             config: config,
+            active: false,
         })
     }
 }
@@ -213,7 +216,17 @@ impl WifiAp {
 impl render::Render for WifiAp {
     fn render(&self, window: &Window) -> error::Result<bitmap::Bitmap> {
         let mut base = bitmap::Bitmap::new(10, 1);
-        base.blit(&font::render_text("Activate AP"), (12, 0));
+        base.blit(
+            &bitmap::with_border(
+                font::render_text("Activate AP"),
+                bitmap::BorderStyle::Top,
+                2,
+            ),
+            (12, 0),
+        );
+        if self.active {
+            base.blit(&bitmap::Bitmap::from_slice(font::SQUARE), (6, 0));
+        }
         if window.focus {
             base.blit(&bitmap::Bitmap::from_slice(font::ARROW), (0, 0));
         }
@@ -221,7 +234,30 @@ impl render::Render for WifiAp {
     }
 }
 
-impl input::Input for WifiAp {}
+impl input::Input for WifiAp {
+    fn on_event(
+        &mut self,
+        event: &controller::Event,
+    ) -> error::Result<(bool, Vec<action::Action>)> {
+        match *event {
+            controller::Event::Select => {
+                //TODO: pull values from config into hostapd.conf
+                utils::run_check_output("hostapd", &["-B", "/etc/hostapd.conf"])?;
+                self.active = true;
+                Ok((true, vec![]))
+            }
+            _ => Ok((false, vec![])),
+        }
+    }
+
+    fn do_action(
+        &mut self,
+        disp: &mut DisplayManager,
+        action: &action::Action,
+    ) -> error::Result<(bool, Vec<action::Action>)> {
+        Ok((false, vec![]))
+    }
+}
 
 impl Widget for WifiAp {
     fn windowid(&self) -> WindowId {
