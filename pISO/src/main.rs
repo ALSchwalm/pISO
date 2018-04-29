@@ -18,6 +18,7 @@ use std::thread;
 
 mod action;
 mod bitmap;
+mod buttons;
 mod config;
 mod controller;
 mod display;

@@ -1,6 +1,6 @@
 use lvm;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Action {
     CreateDrive(lvm::LogicalVolume),
     ToggleVDriveMount(u32),
@@ -16,4 +16,5 @@ pub enum Action {
     FormatDrive,
 
     OpenWifiMenu,
+    CloseWifiMenu,
 }

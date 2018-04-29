@@ -1,5 +1,6 @@
 use action;
 use bitmap;
+use buttons;
 use config;
 use controller;
 use displaymanager::{DisplayManager, Position, Widget, Window, WindowId};
@@ -62,6 +63,10 @@ impl input::Input for WifiMenu {
                 self.state = WifiMenuState::Open(menu);
                 Ok((true, vec![]))
             }
+            action::Action::CloseWifiMenu => {
+                self.state = WifiMenuState::Closed;
+                Ok((true, vec![]))
+            }
             _ => Ok((false, vec![])),
         }
     }
@@ -91,6 +96,7 @@ pub struct SelectWifiMenu {
     pub windowid: WindowId,
     clients: Vec<WifiClient>,
     // ap: WifiAp,
+    back: buttons::back::BackButton,
     config: config::Config,
 }
 
@@ -112,6 +118,7 @@ impl SelectWifiMenu {
         Ok(SelectWifiMenu {
             windowid: window,
             config: config.clone(),
+            back: buttons::back::BackButton::new(disp, action::Action::CloseWifiMenu)?,
             clients: clients,
         })
     }
