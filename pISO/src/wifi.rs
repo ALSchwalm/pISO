@@ -95,7 +95,7 @@ impl Widget for WifiMenu {
 pub struct SelectWifiMenu {
     pub windowid: WindowId,
     clients: Vec<WifiClient>,
-    // ap: WifiAp,
+    ap: WifiAp,
     back: buttons::back::BackButton,
     config: config::Config,
 }
@@ -113,35 +113,46 @@ impl SelectWifiMenu {
             })
             .collect::<Vec<_>>();
 
-        //TODO: there may not be any clients
-        disp.shift_focus(clients.first().unwrap());
+        let ap = WifiAp::new(disp, config.wifi.ap.clone())?;
+
+        disp.shift_focus(
+            clients
+                .first()
+                .map(|client| client as &Widget)
+                .unwrap_or(&ap),
+        );
         Ok(SelectWifiMenu {
             windowid: window,
             config: config.clone(),
             back: buttons::back::BackButton::new(disp, action::Action::CloseWifiMenu)?,
             clients: clients,
+            ap: ap,
         })
     }
 }
 
-impl<'a> render::Render for SelectWifiMenu {
-    fn render(&self, window: &Window) -> error::Result<bitmap::Bitmap> {
-        Ok(bitmap::Bitmap::new(0, 0))
-    }
-}
-
+impl<'a> render::Render for SelectWifiMenu {}
 impl<'a> input::Input for SelectWifiMenu {}
 
 impl<'a> Widget for SelectWifiMenu {
     fn mut_children(&mut self) -> Vec<&mut Widget> {
-        self.clients
+        let mut children = self.clients
             .iter_mut()
             .map(|item| item as &mut Widget)
-            .collect()
+            .collect::<Vec<_>>();
+        children.push(&mut self.ap as &mut Widget);
+        children.push(&mut self.back as &mut Widget);
+        children
     }
 
     fn children(&self) -> Vec<&Widget> {
-        self.clients.iter().map(|item| item as &Widget).collect()
+        let mut children = self.clients
+            .iter()
+            .map(|item| item as &Widget)
+            .collect::<Vec<_>>();
+        children.push(&self.ap as &Widget);
+        children.push(&self.back as &Widget);
+        children
     }
 
     fn windowid(&self) -> WindowId {
@@ -188,4 +199,32 @@ impl Widget for WifiClient {
 pub struct WifiAp {
     pub windowid: WindowId,
     config: config::WifiApConfig,
+}
+
+impl WifiAp {
+    fn new(disp: &mut DisplayManager, config: config::WifiApConfig) -> error::Result<WifiAp> {
+        Ok(WifiAp {
+            windowid: disp.add_child(Position::Normal)?,
+            config: config,
+        })
+    }
+}
+
+impl render::Render for WifiAp {
+    fn render(&self, window: &Window) -> error::Result<bitmap::Bitmap> {
+        let mut base = bitmap::Bitmap::new(10, 1);
+        base.blit(&font::render_text("Activate AP"), (12, 0));
+        if window.focus {
+            base.blit(&bitmap::Bitmap::from_slice(font::ARROW), (0, 0));
+        }
+        Ok(base)
+    }
+}
+
+impl input::Input for WifiAp {}
+
+impl Widget for WifiAp {
+    fn windowid(&self) -> WindowId {
+        self.windowid
+    }
 }
