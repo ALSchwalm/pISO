@@ -125,3 +125,55 @@ impl DerefMut for Bitmap {
         &mut self.contents
     }
 }
+
+pub enum BorderStyle {
+    Top,
+    Bottom,
+    Left,
+    Right,
+    All,
+}
+
+pub fn with_border(bitmap: Bitmap, style: BorderStyle, mut padding: usize) -> Bitmap {
+    padding += 1;
+    match style {
+        BorderStyle::Top => {
+            let mut top_added = Bitmap::new(bitmap.width(), bitmap.height() + padding);
+            top_added.blit(&bitmap, (0, padding));
+            for pixel in top_added[0 as usize].iter_mut() {
+                *pixel = 1;
+            }
+            top_added
+        }
+        BorderStyle::Bottom => {
+            let mut bottom_added = Bitmap::new(bitmap.width(), bitmap.height() + padding);
+            bottom_added.blit(&bitmap, (0, 0));
+            for pixel in bottom_added.iter_mut().last().unwrap().iter_mut() {
+                *pixel = 1;
+            }
+            bottom_added
+        }
+        BorderStyle::Left => {
+            let mut left_added = Bitmap::new(bitmap.width() + padding, bitmap.height());
+            left_added.blit(&bitmap, (padding, 0));
+            for row in left_added.iter_mut() {
+                row[0] = 1;
+            }
+            left_added
+        }
+        BorderStyle::Right => {
+            let mut right_added = Bitmap::new(bitmap.width() + padding, bitmap.height());
+            right_added.blit(&bitmap, (0, 0));
+            for row in right_added.iter_mut() {
+                *row.last_mut().unwrap() = 1;
+            }
+            right_added
+        }
+        BorderStyle::All => {
+            let top_added = with_border(bitmap, BorderStyle::Top, padding);
+            let bottom_added = with_border(top_added, BorderStyle::Bottom, padding);
+            let left_added = with_border(bottom_added, BorderStyle::Left, padding);
+            with_border(left_added, BorderStyle::Right, padding)
+        }
+    }
+}
