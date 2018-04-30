@@ -31,14 +31,14 @@ pub struct DisplayManager {
 }
 
 impl DisplayManager {
-    pub fn new(mut disp: Box<display::Display>) -> Result<Arc<Mutex<DisplayManager>>> {
+    pub fn new(mut disp: Box<display::Display>) -> Result<DisplayManager> {
         disp.on().chain_err(|| "Failed to activate display")?;
 
-        Ok(Arc::new(Mutex::new(DisplayManager {
+        Ok(DisplayManager {
             display: disp,
             windows: BTreeMap::new(),
             nextid: 1,
-        })))
+        })
     }
 
     pub fn add_child(&mut self, pos: Position) -> Result<WindowId> {
@@ -558,8 +558,7 @@ mod test {
     // Test that a bunch of normally positioned windows just line up vertically
     fn test_calc_basic_position() {
         let display = Box::new(display::test::TestDisplay {});
-        let disp = DisplayManager::new(display).expect("Failed to create displaymanager");
-        let mut manager = disp.lock().expect("Failed to lock display manager mutext");
+        let mut manager = DisplayManager::new(display).expect("Failed to create displaymanager");
 
         let child1 = TestWidget::new(&mut manager, Position::Normal, (0, 10), vec![])
             .expect("Failed to create test widget");
@@ -582,8 +581,7 @@ mod test {
     // Test that focus moves up and down normal positioned windows as expected
     fn test_basic_focus() {
         let display = Box::new(display::test::TestDisplay {});
-        let disp = DisplayManager::new(display).expect("Failed to create displaymanager");
-        let mut manager = disp.lock().expect("Failed to lock display manager mutext");
+        let mut manager = DisplayManager::new(display).expect("Failed to create displaymanager");
 
         let mut child1 = TestWidget::new(&mut manager, Position::Normal, (0, 0), vec![])
             .expect("Failed to create test widget");
@@ -624,8 +622,7 @@ mod test {
     // Test that fixed position windows are ignored in the flow of normal positioned windows
     fn test_calc_normal_with_fixed_position() {
         let display = Box::new(display::test::TestDisplay {});
-        let disp = DisplayManager::new(display).expect("Failed to create displaymanager");
-        let mut manager = disp.lock().expect("Failed to lock display manager mutext");
+        let mut manager = DisplayManager::new(display).expect("Failed to create displaymanager");
 
         let child1 = TestWidget::new(&mut manager, Position::Normal, (0, 10), vec![])
             .expect("Failed to create test widget");
@@ -651,8 +648,7 @@ mod test {
     // Test that fixed position windows are ignored when shifting focus
     fn test_normal_focus_with_fixed_position() {
         let display = Box::new(display::test::TestDisplay {});
-        let disp = DisplayManager::new(display).expect("Failed to create displaymanager");
-        let mut manager = disp.lock().expect("Failed to lock display manager mutext");
+        let mut manager = DisplayManager::new(display).expect("Failed to create displaymanager");
 
         let child1 = TestWidget::new(&mut manager, Position::Normal, (0, 0), vec![])
             .expect("Failed to create test widget");
@@ -686,8 +682,7 @@ mod test {
     // Test that windows are aligned vertically with their nearest fixed position parent
     fn test_calc_normal_within_fixed() {
         let display = Box::new(display::test::TestDisplay {});
-        let disp = DisplayManager::new(display).expect("Failed to create displaymanager");
-        let mut manager = disp.lock().expect("Failed to lock display manager mutext");
+        let mut manager = DisplayManager::new(display).expect("Failed to create displaymanager");
 
         let child1 = TestWidget::new(&mut manager, Position::Normal, (0, 10), vec![])
             .expect("Failed to create test widget");
@@ -722,8 +717,7 @@ mod test {
     // Test that focus moves within the nearest fixed position parent
     fn test_normal_within_fixed_focus() {
         let display = Box::new(display::test::TestDisplay {});
-        let disp = DisplayManager::new(display).expect("Failed to create displaymanager");
-        let mut manager = disp.lock().expect("Failed to lock display manager mutext");
+        let mut manager = DisplayManager::new(display).expect("Failed to create displaymanager");
 
         let child1 = TestWidget::new(&mut manager, Position::Normal, (0, 0), vec![])
             .expect("Failed to create test widget");

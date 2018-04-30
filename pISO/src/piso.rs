@@ -27,26 +27,25 @@ pub struct PIso {
 
 impl PIso {
     pub fn new(
-        disp: Arc<Mutex<DisplayManager>>,
+        disp: &mut DisplayManager,
         usb: Arc<Mutex<usb::UsbGadget>>,
         config: config::Config,
     ) -> Result<PIso> {
-        let mut manager = disp.lock()?;
-        let window = manager.add_child(Position::Fixed(0, 0))?;
+        let window = disp.add_child(Position::Fixed(0, 0))?;
 
         let vg = lvm::VolumeGroup::from_path("/dev/VolGroup00")?;
-        let drives = Self::build_drives_from_vg(&mut manager, &vg, &usb)?;
-        let ndrive = newdrive::NewDrive::new(&mut manager, usb.clone(), vg.clone())?;
-        let stats = stats::Stats::new(&mut manager, vg.clone())?;
-        let wifi = wifi::WifiMenu::new(&mut manager, &config)?;
+        let drives = Self::build_drives_from_vg(disp, &vg, &usb)?;
+        let ndrive = newdrive::NewDrive::new(disp, usb.clone(), vg.clone())?;
+        let stats = stats::Stats::new(disp, vg.clone())?;
+        let wifi = wifi::WifiMenu::new(disp, &config)?;
 
         if drives.len() > 0 {
             // Focus the first drive
             drives.iter().next().map(|drive| {
-                manager.shift_focus(drive as &Widget);
+                disp.shift_focus(drive as &Widget);
             });
         } else {
-            manager.shift_focus(&ndrive);
+            disp.shift_focus(&ndrive);
         }
 
         Ok(PIso {

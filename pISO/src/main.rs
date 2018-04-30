@@ -78,16 +78,14 @@ fn run() -> error::Result<()> {
     )?));
 
     println!("Building pISO");
-    let mut piso = piso::PIso::new(manager.clone(), gadget, config)?;
+    let mut piso = piso::PIso::new(&mut manager, gadget, config)?;
 
     println!("Rendering pISO");
-    manager.lock()?.render(&piso)?;
+    manager.render(&piso)?;
 
     println!("Building controller");
-    let mut controller = controller::Controller::new()?;
-    controller.on_event(Box::new(move |event| {
-        let mut manager = manager.lock().unwrap();
-
+    let controller = controller::Controller::new()?;
+    for event in controller {
         println!("Handling event: {:?}", event);
         let mut actions = manager
             .on_event(&mut piso, &event)
@@ -106,9 +104,7 @@ fn run() -> error::Result<()> {
         } {}
 
         println!("Event loop finished");
-    }));
-
-    controller.start().expect("controller failed");
+    }
 
     Ok(())
 }
