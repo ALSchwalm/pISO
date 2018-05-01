@@ -15,12 +15,12 @@ use vdrive;
 use wifi;
 
 pub struct PIso {
-    config: config::Config,
+    _config: config::Config,
     pub drives: Vec<vdrive::VirtualDrive>,
     newdrive: newdrive::NewDrive,
     stats: stats::Stats,
     usb: Arc<Mutex<usb::UsbGadget>>,
-    vg: lvm::VolumeGroup,
+    _vg: lvm::VolumeGroup,
     window: WindowId,
     wifi: wifi::WifiMenu,
 }
@@ -49,11 +49,11 @@ impl PIso {
         }
 
         Ok(PIso {
-            config: config,
+            _config: config,
             drives: drives,
             newdrive: ndrive,
             usb: usb,
-            vg: vg,
+            _vg: vg,
             window: window,
             stats: stats,
             wifi: wifi,

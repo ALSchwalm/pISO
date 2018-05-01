@@ -1,20 +1,19 @@
+#![allow(non_snake_case)]
+
 #[macro_use]
 extern crate error_chain;
 #[macro_use]
 extern crate derive_error_chain;
 extern crate mio;
-#[macro_use]
 extern crate serde;
 #[macro_use]
 extern crate serde_derive;
-#[macro_use]
 extern crate serde_json;
 extern crate spidev;
 extern crate sysfs_gpio;
 extern crate toml;
 
 use std::fs;
-use std::thread;
 
 mod action;
 mod bitmap;
@@ -37,7 +36,6 @@ mod utils;
 mod vdrive;
 mod wifi;
 
-use error::ResultExt;
 use std::sync::{Arc, Mutex};
 use std::io::Read;
 
@@ -56,7 +54,7 @@ fn run() -> error::Result<()> {
     let mut manager = displaymanager::DisplayManager::new(display)?;
 
     println!("Building USB gadget");
-    let mut gadget = Arc::new(Mutex::new(usb::UsbGadget::new(
+    let gadget = Arc::new(Mutex::new(usb::UsbGadget::new(
         "/sys/kernel/config/usb_gadget/g1",
         usb::GadgetConfig {
             vendor_id: "0x1d6b",

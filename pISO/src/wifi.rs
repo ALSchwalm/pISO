@@ -98,7 +98,7 @@ pub struct SelectWifiMenu {
     clients: Vec<WifiClient>,
     ap: WifiAp,
     back: buttons::back::BackButton,
-    config: config::Config,
+    _config: config::Config,
 }
 
 impl SelectWifiMenu {
@@ -124,7 +124,7 @@ impl SelectWifiMenu {
         );
         Ok(SelectWifiMenu {
             windowid: window,
-            config: config.clone(),
+            _config: config.clone(),
             back: buttons::back::BackButton::new(disp, action::Action::CloseWifiMenu)?,
             clients: clients,
             ap: ap,
@@ -199,7 +199,7 @@ impl Widget for WifiClient {
 
 pub struct WifiAp {
     pub windowid: WindowId,
-    config: config::WifiApConfig,
+    _config: config::WifiApConfig,
     active: bool,
 }
 
@@ -207,7 +207,7 @@ impl WifiAp {
     fn new(disp: &mut DisplayManager, config: config::WifiApConfig) -> error::Result<WifiAp> {
         Ok(WifiAp {
             windowid: disp.add_child(Position::Normal)?,
-            config: config,
+            _config: config,
             active: false,
         })
     }
@@ -252,8 +252,8 @@ impl input::Input for WifiAp {
 
     fn do_action(
         &mut self,
-        disp: &mut DisplayManager,
-        action: &action::Action,
+        _disp: &mut DisplayManager,
+        _action: &action::Action,
     ) -> error::Result<(bool, Vec<action::Action>)> {
         Ok((false, vec![]))
     }

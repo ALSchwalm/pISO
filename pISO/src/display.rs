@@ -1,11 +1,12 @@
 use bitmap::Bitmap;
-use spidev::{SPI_MODE_0, Spidev, SpidevOptions, SpidevTransfer};
+use spidev::{SPI_MODE_0, Spidev, SpidevOptions};
 use std::io::Write;
 use std::thread;
 use std::time;
 use sysfs_gpio::{Direction, Pin};
 use error;
 
+#[allow(unused)]
 enum SSD1306Command {
     // Constants
     I2CAddress = 0x3C, // 011110+SA0+RW - 0x3C or 0x3D

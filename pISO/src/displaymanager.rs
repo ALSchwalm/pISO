@@ -7,7 +7,6 @@ use error_chain::ChainedError;
 use input;
 use render;
 use std::collections::BTreeMap;
-use std::sync::{Arc, Mutex};
 
 pub type WindowId = u32;
 
@@ -61,38 +60,12 @@ impl DisplayManager {
         Ok(id)
     }
 
-    pub fn remove_child(&mut self, id: WindowId) -> Result<()> {
-        //TODO: deal with focus
-        self.windows.remove(&id);
-        Ok(())
-    }
-
     pub fn get(&self, id: WindowId) -> Option<&Window> {
         self.windows.get(&id)
     }
 
     pub fn get_mut(&mut self, id: WindowId) -> Option<&mut Window> {
         self.windows.get_mut(&id)
-    }
-
-    fn parent_widget<'a>(root: &Widget, target: WindowId) -> Option<&Widget> {
-        fn visit<'a>(current: &Widget, target: WindowId) -> Option<&Widget> {
-            if current.windowid() == target {
-                return None;
-            } else {
-                for child in current.children() {
-                    if child.windowid() == target {
-                        return Some(current);
-                    }
-                    let res = visit(child, target);
-                    if res.is_some() {
-                        return res;
-                    }
-                }
-                return None;
-            }
-        }
-        visit(root, target)
     }
 
     fn nearest_fixed_position_ancestor<'a, 'b>(
@@ -205,22 +178,6 @@ impl DisplayManager {
         }
     }
 
-    fn first_descendant(widget: &Widget) -> &Widget {
-        widget
-            .children()
-            .first()
-            .map(|child| Self::first_descendant(*child))
-            .unwrap_or(widget)
-    }
-
-    fn last_descendant(widget: &Widget) -> &Widget {
-        widget
-            .children()
-            .last()
-            .map(|child| Self::first_descendant(*child))
-            .unwrap_or(widget)
-    }
-
     fn nearest_widget<'a, 'b>(
         &'a self,
         root: &'b Widget,
@@ -282,20 +239,6 @@ impl DisplayManager {
 
     fn prev_widget<'a, 'b>(&'a self, root: &'b Widget, target: &'b Widget) -> Option<&'b Widget> {
         self.nearest_widget(root, target, false)
-    }
-
-    fn find_mut_widget(root: &mut Widget, target: WindowId) -> Option<&mut Widget> {
-        if root.windowid() == target {
-            return Some(root);
-        } else {
-            for child in root.mut_children() {
-                let res = DisplayManager::find_mut_widget(child, target);
-                if res.is_some() {
-                    return res;
-                }
-            }
-        }
-        None
     }
 
     pub fn shift_focus(&mut self, widget: &Widget) {
@@ -453,7 +396,7 @@ impl DisplayManager {
             //TODO: make this less terrible
             let pos = manager.calculate_position(root, widget);
             {
-                let mut window = manager
+                let window = manager
                     .get_mut(widget.windowid())
                     .ok_or(format!("failed to find window id={}", widget.windowid()))?;
 

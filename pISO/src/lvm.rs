@@ -208,20 +208,6 @@ pub struct LogicalVolume {
 }
 
 impl LogicalVolume {
-    pub fn from_path<P>(path: P) -> Result<LogicalVolume>
-    where
-        P: AsRef<Path>,
-    {
-        Ok(LogicalVolume {
-            name: path.as_ref()
-                .file_name()
-                .ok_or(ErrorKind::Msg("LogicalVolume path has no filename".into()))?
-                .to_string_lossy()
-                .into(),
-            path: path.as_ref().to_path_buf(),
-        })
-    }
-
     fn from_report(vg: &VolumeGroup, report: LogicalVolumeReport) -> LogicalVolume {
         LogicalVolume {
             path: vg.path.join(&report.lv_name).to_path_buf(),

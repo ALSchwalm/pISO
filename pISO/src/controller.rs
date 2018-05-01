@@ -11,6 +11,7 @@ pub enum Event {
     Select,
 }
 
+#[allow(unused)]
 pub struct Controller {
     poll: Poll,
     events: <Events as IntoIterator>::IntoIter,
@@ -93,7 +94,7 @@ impl Iterator for Controller {
             {
                 thread::sleep(self.debounce_min_hold);
 
-                match event.token() {
+                let res = match event.token() {
                     Token(1) => {
                         if self.up_input
                             .get_value()
@@ -101,7 +102,7 @@ impl Iterator for Controller {
                         {
                             continue;
                         }
-                        return Some(Event::Up);
+                        Some(Event::Up)
                     }
                     Token(2) => {
                         if self.down_input
@@ -110,7 +111,7 @@ impl Iterator for Controller {
                         {
                             continue;
                         }
-                        return Some(Event::Down);
+                        Some(Event::Down)
                     }
                     Token(3) => {
                         if self.select_input
@@ -119,11 +120,12 @@ impl Iterator for Controller {
                         {
                             continue;
                         }
-                        return Some(Event::Select);
+                        Some(Event::Select)
                     }
                     Token(_) => unreachable!(),
-                }
+                };
                 self.last_event = time::SystemTime::now();
+                return res;
             }
         }
     }

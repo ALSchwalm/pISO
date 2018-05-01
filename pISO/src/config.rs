@@ -1,5 +1,3 @@
-use toml;
-
 #[derive(Clone, Debug, Deserialize)]
 pub struct WifiApConfig {
     pub ssid: String,
@@ -25,6 +23,7 @@ pub struct Config {
 
 #[cfg(test)]
 mod tests {
+    use toml;
     use super::*;
     #[test]
     fn load_test() {

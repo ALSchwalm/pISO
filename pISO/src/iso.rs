@@ -106,7 +106,7 @@ impl input::Input for Iso {
 
     fn do_action(
         &mut self,
-        disp: &mut DisplayManager,
+        _disp: &mut DisplayManager,
         action: &action::Action,
     ) -> error::Result<(bool, Vec<action::Action>)> {
         match *action {

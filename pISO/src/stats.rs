@@ -24,7 +24,7 @@ impl Stats {
 }
 
 impl render::Render for Stats {
-    fn render(&self, window: &Window) -> error::Result<bitmap::Bitmap> {
+    fn render(&self, _window: &Window) -> error::Result<bitmap::Bitmap> {
         let mut base = bitmap::Bitmap::new(0, 0);
         let percent_free = 100.0 - self.vg.pool()?.data_percent;
         let contents = font::render_text(format!("{}% Free", percent_free));
@@ -36,15 +36,15 @@ impl render::Render for Stats {
 impl input::Input for Stats {
     fn on_event(
         &mut self,
-        event: &controller::Event,
+        _event: &controller::Event,
     ) -> error::Result<(bool, Vec<action::Action>)> {
         Ok((false, vec![]))
     }
 
     fn do_action(
         &mut self,
-        disp: &mut DisplayManager,
-        action: &action::Action,
+        _disp: &mut DisplayManager,
+        _action: &action::Action,
     ) -> error::Result<(bool, Vec<action::Action>)> {
         Ok((false, vec![]))
     }

@@ -144,7 +144,7 @@ impl DriveSize {
 }
 
 impl render::Render for DriveSize {
-    fn render(&self, window: &Window) -> error::Result<bitmap::Bitmap> {
+    fn render(&self, _window: &Window) -> error::Result<bitmap::Bitmap> {
         let mut base = bitmap::Bitmap::new(0, 0);
         base.blit(&font::render_text("New drive capacity:"), (0, 0));
 
@@ -308,13 +308,6 @@ impl DriveFormat {
         let volume_path = &volume.path.to_string_lossy();
         let loopback_path =
             PathBuf::from(utils::run_check_output("losetup", &["-f"])?.trim_right());
-        let loopback_name: String = loopback_path
-            .file_name()
-            .ok_or(error::ErrorKind::Msg(
-                "loopback path has no file name".into(),
-            ))?
-            .to_string_lossy()
-            .into();
 
         utils::run_check_output("losetup", &["-fPL", volume_path])?;
         utils::wait_for_path(&loopback_path, Duration::from_millis(1000))?;
@@ -342,7 +335,7 @@ impl DriveFormat {
 }
 
 impl render::Render for DriveFormat {
-    fn render(&self, window: &Window) -> error::Result<bitmap::Bitmap> {
+    fn render(&self, _window: &Window) -> error::Result<bitmap::Bitmap> {
         // TODO: this should pull from Display
         let mut base = bitmap::Bitmap::new(128, 64);
 
@@ -390,7 +383,7 @@ impl input::Input for DriveFormat {
 
     fn do_action(
         &mut self,
-        disp: &mut DisplayManager,
+        _disp: &mut DisplayManager,
         action: &action::Action,
     ) -> error::Result<(bool, Vec<action::Action>)> {
         match *action {

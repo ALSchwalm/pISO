@@ -6,15 +6,15 @@ use error;
 pub trait Input {
     fn on_event(
         &mut self,
-        event: &controller::Event,
+        _event: &controller::Event,
     ) -> error::Result<(bool, Vec<action::Action>)> {
         Ok((false, vec![]))
     }
 
     fn do_action(
         &mut self,
-        disp: &mut DisplayManager,
-        action: &action::Action,
+        _disp: &mut DisplayManager,
+        _action: &action::Action,
     ) -> error::Result<(bool, Vec<action::Action>)> {
         Ok((false, vec![]))
     }

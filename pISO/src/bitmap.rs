@@ -1,5 +1,6 @@
 use std::ops::{Deref, DerefMut, Index, IndexMut};
 
+#[allow(unused)]
 pub enum Direction {
     Left,
     Right,
@@ -126,6 +127,7 @@ impl DerefMut for Bitmap {
     }
 }
 
+#[allow(unused)]
 pub enum BorderStyle {
     Top,
     Bottom,

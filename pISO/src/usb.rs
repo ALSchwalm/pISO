@@ -1,11 +1,10 @@
 use error::{ErrorKind, Result, ResultExt};
-use std::fs::{create_dir_all, read_dir, remove_dir_all, remove_file, File};
+use std::fs::{create_dir_all, read_dir, remove_file, File};
 use std::io::Read;
 use std::path::{Path, PathBuf};
 use std::io::Write;
 use std::os::unix::fs::symlink;
-use std::time::{Duration, Instant};
-use std::thread;
+use std::time::Duration;
 use utils::{run_check_output, wait_for_path};
 
 pub struct GadgetConfig {

@@ -1,5 +1,6 @@
 use lvm;
 
+#[allow(unused)]
 #[derive(Debug, Clone)]
 pub enum Action {
     CreateDrive(lvm::LogicalVolume),
