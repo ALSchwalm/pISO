@@ -420,17 +420,17 @@ impl DisplayManager {
             );
 
             base.blit(&window.bitmap, pos);
-            for child in widget.children().iter().rev() {
-                position_window(manager, base, real_root, root, *child, fixed_pos_windows)?;
-
+            for child in widget.children() {
                 let window = manager
                     .get(child.windowid())
                     .ok_or(format!("failed to find window id={}", child.windowid()))?;
                 match window.position {
                     Position::Fixed(_, _) => {
-                        fixed_pos_windows.push(*child);
+                        fixed_pos_windows.push(child);
                     }
-                    _ => (),
+                    _ => {
+                        position_window(manager, base, real_root, root, child, fixed_pos_windows)?;
+                    }
                 };
             }
 
