@@ -67,7 +67,7 @@ impl Iso {
 }
 
 impl render::Render for Iso {
-    fn render(&self, window: &Window) -> error::Result<bitmap::Bitmap> {
+    fn render(&self, _manager: &DisplayManager, window: &Window) -> error::Result<bitmap::Bitmap> {
         let mut base = bitmap::Bitmap::new(10, 1);
         base.blit(
             &font::render_text(

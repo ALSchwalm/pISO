@@ -87,7 +87,7 @@ impl PIso {
 }
 
 impl render::Render for PIso {
-    fn render(&self, _: &Window) -> Result<bitmap::Bitmap> {
+    fn render(&self, _manager: &DisplayManager, _: &Window) -> Result<bitmap::Bitmap> {
         Ok(bitmap::Bitmap::new(0, 0))
     }
 }

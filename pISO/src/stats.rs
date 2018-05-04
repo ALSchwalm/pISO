@@ -24,7 +24,7 @@ impl Stats {
 }
 
 impl render::Render for Stats {
-    fn render(&self, _window: &Window) -> error::Result<bitmap::Bitmap> {
+    fn render(&self, _manager: &DisplayManager, _window: &Window) -> error::Result<bitmap::Bitmap> {
         let mut base = bitmap::Bitmap::new(0, 0);
         let percent_free = 100.0 - self.vg.pool()?.data_percent;
         let contents = font::render_text(format!("{}% Free", percent_free));

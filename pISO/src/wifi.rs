@@ -32,7 +32,7 @@ impl WifiMenu {
 }
 
 impl render::Render for WifiMenu {
-    fn render(&self, window: &Window) -> error::Result<bitmap::Bitmap> {
+    fn render(&self, _manager: &DisplayManager, window: &Window) -> error::Result<bitmap::Bitmap> {
         let mut base = bitmap::Bitmap::new(10, 1);
         base.blit(&font::render_text("WiFi"), (12, 0));
         if window.focus {
@@ -66,6 +66,7 @@ impl input::Input for WifiMenu {
             }
             action::Action::CloseWifiMenu => {
                 self.state = WifiMenuState::Closed;
+                disp.shift_focus(self);
                 Ok((true, vec![]))
             }
             _ => Ok((false, vec![])),
@@ -132,7 +133,14 @@ impl SelectWifiMenu {
     }
 }
 
-impl<'a> render::Render for SelectWifiMenu {}
+impl<'a> render::Render for SelectWifiMenu {
+    fn render(&self, manager: &DisplayManager, _window: &Window) -> error::Result<bitmap::Bitmap> {
+        Ok(bitmap::Bitmap::new(
+            manager.display.width(),
+            manager.display.height(),
+        ))
+    }
+}
 impl<'a> input::Input for SelectWifiMenu {}
 
 impl<'a> Widget for SelectWifiMenu {
@@ -179,7 +187,7 @@ impl WifiClient {
 }
 
 impl render::Render for WifiClient {
-    fn render(&self, window: &Window) -> error::Result<bitmap::Bitmap> {
+    fn render(&self, _manager: &DisplayManager, window: &Window) -> error::Result<bitmap::Bitmap> {
         let mut base = bitmap::Bitmap::new(10, 1);
         base.blit(&font::render_text(&self.config.ssid), (12, 0));
         if window.focus {
@@ -214,7 +222,7 @@ impl WifiAp {
 }
 
 impl render::Render for WifiAp {
-    fn render(&self, window: &Window) -> error::Result<bitmap::Bitmap> {
+    fn render(&self, _manager: &DisplayManager, window: &Window) -> error::Result<bitmap::Bitmap> {
         let mut base = bitmap::Bitmap::new(10, 1);
         base.blit(
             &bitmap::with_border(

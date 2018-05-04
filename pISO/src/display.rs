@@ -65,6 +65,8 @@ pub trait Display {
     fn reset(&mut self) -> error::Result<()>;
     fn update(&mut self, bitmap: Bitmap) -> error::Result<()>;
     fn flip_display(&mut self);
+    fn width(&self) -> usize;
+    fn height(&self) -> usize;
 }
 
 impl LedDisplay {
@@ -111,6 +113,14 @@ impl LedDisplay {
 }
 
 impl Display for LedDisplay {
+    fn width(&self) -> usize {
+        self.contents.first().map(|row| row.len()).unwrap_or(0)
+    }
+
+    fn height(&self) -> usize {
+        self.contents.len()
+    }
+
     fn on(&mut self) -> error::Result<()> {
         self.reset()?;
 
@@ -212,10 +222,18 @@ pub mod test {
             Ok(())
         }
 
-        fn update(&mut self, bitmap: Bitmap) -> error::Result<()> {
+        fn update(&mut self, _bitmap: Bitmap) -> error::Result<()> {
             Ok(())
         }
 
         fn flip_display(&mut self) {}
+
+        fn width(&self) -> usize {
+            0
+        }
+
+        fn height(&self) -> usize {
+            0
+        }
     }
 }

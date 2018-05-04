@@ -24,7 +24,7 @@ pub struct Window {
 }
 
 pub struct DisplayManager {
-    display: Box<display::Display>,
+    pub display: Box<display::Display>,
     windows: BTreeMap<WindowId, Window>,
     nextid: u32,
 }
@@ -366,13 +366,20 @@ impl DisplayManager {
     // First, render everything so we know the sizes to position things
     pub fn do_render(&mut self, root: &Widget) -> Result<()> {
         fn visit(manager: &mut DisplayManager, widget: &Widget) -> Result<()> {
+            let bitmap = {
+                let window = manager
+                    .get(widget.windowid())
+                    .ok_or(format!("failed to find window id={}", widget.windowid()))?;
+                widget.render(manager, window)?
+            };
             {
                 let window = manager
                     .get_mut(widget.windowid())
                     .ok_or(format!("failed to find window id={}", widget.windowid()))?;
-                window.bitmap = widget.render(window)?;
+                window.bitmap = bitmap;
             }
 
+            // Render from the bottom up
             for child in widget.children() {
                 visit(manager, child)?;
             }
@@ -383,50 +390,74 @@ impl DisplayManager {
         visit(self, root)
     }
 
-    pub fn render(&mut self, root: &Widget) -> Result<()> {
-        self.do_render(root)?;
-
-        fn position_window(
-            manager: &mut DisplayManager,
+    fn do_blit(
+        &mut self,
+        real_root: &Widget,
+        root: &Widget,
+        bitmap: &mut bitmap::Bitmap,
+    ) -> Result<()> {
+        fn position_window<'a>(
+            manager: &DisplayManager,
             base: &mut bitmap::Bitmap,
+            real_root: &Widget,
             root: &Widget,
-            widget: &Widget,
+            widget: &'a Widget,
+            fixed_pos_windows: &mut Vec<&'a Widget>,
         ) -> Result<()> {
             println!("Positioning windowid={}", widget.windowid());
-            //TODO: make this less terrible
-            let pos = manager.calculate_position(root, widget);
-            {
+
+            let pos = manager.calculate_position(real_root, widget);
+            let window = manager
+                .get(widget.windowid())
+                .ok_or(format!("failed to find window id={}", widget.windowid()))?;
+
+            println!(
+                "Blitting to ({}, {}, size=({}, {}))",
+                pos.0,
+                pos.1,
+                window.bitmap.width(),
+                window.bitmap.height()
+            );
+
+            base.blit(&window.bitmap, pos);
+            for child in widget.children().iter().rev() {
+                position_window(manager, base, real_root, root, *child, fixed_pos_windows)?;
+
                 let window = manager
-                    .get_mut(widget.windowid())
-                    .ok_or(format!("failed to find window id={}", widget.windowid()))?;
-
-                println!(
-                    "Blitting to ({}, {}, size=({}, {}))",
-                    pos.0,
-                    pos.1,
-                    window.bitmap.width(),
-                    window.bitmap.height()
-                );
-                base.blit(&window.bitmap, pos);
-            }
-
-            for child in widget.children() {
-                position_window(manager, base, root, child)?
+                    .get(child.windowid())
+                    .ok_or(format!("failed to find window id={}", child.windowid()))?;
+                match window.position {
+                    Position::Fixed(_, _) => {
+                        fixed_pos_windows.push(*child);
+                    }
+                    _ => (),
+                };
             }
 
             Ok(())
         };
 
-        let mut bitmap = bitmap::Bitmap::new(0, 0);
-        position_window(self, &mut bitmap, root, root)?;
+        let mut fixed_pos_windows = vec![];
+        position_window(self, bitmap, real_root, root, root, &mut fixed_pos_windows)?;
 
+        for fixed in fixed_pos_windows {
+            self.do_blit(real_root, fixed, bitmap)?;
+        }
+
+        Ok(())
+    }
+
+    pub fn render(&mut self, root: &Widget) -> Result<()> {
+        self.do_render(root)?;
+
+        let mut bitmap = bitmap::Bitmap::new(0, 0);
+        self.do_blit(root, root, &mut bitmap)?;
         println!(
             "Update display with bitmap: {} by {}",
             bitmap.width(),
             bitmap.height()
         );
         self.display.update(bitmap)?;
-
         Ok(())
     }
 }
@@ -453,13 +484,13 @@ mod test {
     }
 
     impl render::Render for TestWidget {
-        fn render(&self, window: &Window) -> Result<bitmap::Bitmap> {
+        fn render(&self, _manager: &DisplayManager, _window: &Window) -> Result<bitmap::Bitmap> {
             Ok(bitmap::Bitmap::new(self.size.0, self.size.1))
         }
     }
 
     impl input::Input for TestWidget {
-        fn on_event(&mut self, event: &controller::Event) -> Result<(bool, Vec<action::Action>)> {
+        fn on_event(&mut self, _event: &controller::Event) -> Result<(bool, Vec<action::Action>)> {
             Ok((false, vec![]))
         }
     }
@@ -526,9 +557,9 @@ mod test {
         let display = Box::new(display::test::TestDisplay {});
         let mut manager = DisplayManager::new(display).expect("Failed to create displaymanager");
 
-        let mut child1 = TestWidget::new(&mut manager, Position::Normal, (0, 0), vec![])
+        let child1 = TestWidget::new(&mut manager, Position::Normal, (0, 0), vec![])
             .expect("Failed to create test widget");
-        let mut child2 = TestWidget::new(&mut manager, Position::Normal, (0, 0), vec![])
+        let child2 = TestWidget::new(&mut manager, Position::Normal, (0, 0), vec![])
             .expect("Failed to create test widget");
         let mut root = TestWidget::new(
             &mut manager,
@@ -635,7 +666,7 @@ mod test {
         let child2 = TestWidget::new(
             &mut manager,
             Position::Fixed(20, 20),
-            (0, 0),
+            (100, 100),
             vec![child2_1.clone()],
         ).expect("Failed to create test widget");
 

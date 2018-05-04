@@ -199,7 +199,7 @@ impl VirtualDrive {
 }
 
 impl render::Render for VirtualDrive {
-    fn render(&self, window: &Window) -> Result<bitmap::Bitmap> {
+    fn render(&self, _manager: &DisplayManager, window: &Window) -> Result<bitmap::Bitmap> {
         let mut base = bitmap::Bitmap::new(10, 1);
         base.blit(&font::render_text(self.name()), (12, 0));
         match self.state {

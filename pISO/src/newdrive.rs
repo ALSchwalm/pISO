@@ -42,7 +42,7 @@ impl NewDrive {
 }
 
 impl render::Render for NewDrive {
-    fn render(&self, window: &Window) -> error::Result<bitmap::Bitmap> {
+    fn render(&self, _manager: &DisplayManager, window: &Window) -> error::Result<bitmap::Bitmap> {
         let mut base = bitmap::Bitmap::new(10, 1);
         base.blit(
             &bitmap::with_border(font::render_text("New Drive"), bitmap::BorderStyle::Top, 2),
@@ -144,7 +144,7 @@ impl DriveSize {
 }
 
 impl render::Render for DriveSize {
-    fn render(&self, _window: &Window) -> error::Result<bitmap::Bitmap> {
+    fn render(&self, _manager: &DisplayManager, _window: &Window) -> error::Result<bitmap::Bitmap> {
         let mut base = bitmap::Bitmap::new(0, 0);
         base.blit(&font::render_text("New drive capacity:"), (0, 0));
 
@@ -335,9 +335,8 @@ impl DriveFormat {
 }
 
 impl render::Render for DriveFormat {
-    fn render(&self, _window: &Window) -> error::Result<bitmap::Bitmap> {
-        // TODO: this should pull from Display
-        let mut base = bitmap::Bitmap::new(128, 64);
+    fn render(&self, manager: &DisplayManager, _window: &Window) -> error::Result<bitmap::Bitmap> {
+        let mut base = bitmap::Bitmap::new(manager.display.width(), manager.display.height());
 
         if self.state != DriveFormatState::Selecting {
             base.blit(&font::render_text("Formatting new drive"), (0, 0));
@@ -416,14 +415,6 @@ impl input::Input for DriveFormat {
 }
 
 impl Widget for DriveFormat {
-    fn mut_children(&mut self) -> Vec<&mut Widget> {
-        vec![]
-    }
-
-    fn children(&self) -> Vec<&Widget> {
-        vec![]
-    }
-
     fn windowid(&self) -> WindowId {
         self.windowid
     }
