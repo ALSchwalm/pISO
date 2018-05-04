@@ -10,6 +10,75 @@ use input;
 use render;
 use utils;
 
+use std::fs;
+use std::io::Write;
+use std::sync::{Arc, Mutex};
+use std::{thread, time};
+
+#[derive(PartialEq)]
+enum WifiState {
+    Ap,
+    Client,
+    Inactive,
+}
+
+struct WifiManager {
+    config: config::Config,
+    wifi_ready: bool,
+    pub state: WifiState,
+}
+
+impl WifiManager {
+    fn new(config: config::Config) -> Arc<Mutex<WifiManager>> {
+        Arc::new(Mutex::new(WifiManager {
+            config: config,
+            wifi_ready: false,
+            state: WifiState::Inactive,
+        }))
+    }
+
+    fn enable_wifi(&mut self) -> error::Result<()> {
+        if self.wifi_ready {
+            return Ok(());
+        }
+
+        // Now load the driver (do this here for faster boot)
+        utils::run_check_output("modprobe", &["brcmfmac"])?;
+
+        //TODO: check that the interface actually exists
+        thread::sleep(time::Duration::from_secs(2));
+
+        fs::copy("/etc/hostapd.conf", "/tmp/hostapd.conf")?;
+
+        let passphrase = format!("wpa_passphrase={}\n", self.config.wifi.ap.password);
+        let ssid = format!("ssid={}\n", self.config.wifi.ap.ssid);
+
+        let mut hostapd = fs::OpenOptions::new()
+            .append(true)
+            .open("/tmp/hostapd.conf")?;
+        hostapd.write_all(passphrase.as_bytes())?;
+        hostapd.write_all(ssid.as_bytes())?;
+
+        self.wifi_ready = true;
+        Ok(())
+    }
+
+    fn activate_host(&mut self) -> error::Result<()> {
+        match self.state {
+            WifiState::Ap => (),
+            WifiState::Client => {
+                //TODO: disable client
+            }
+            WifiState::Inactive => {
+                self.enable_wifi()?;
+                utils::run_check_output("hostapd", &["-B", "/tmp/hostapd.conf"])?;
+                self.state = WifiState::Ap;
+            }
+        }
+        Ok(())
+    }
+}
+
 enum WifiMenuState {
     Closed,
     Open(SelectWifiMenu),
@@ -18,6 +87,7 @@ enum WifiMenuState {
 pub struct WifiMenu {
     state: WifiMenuState,
     config: config::Config,
+    manager: Arc<Mutex<WifiManager>>,
     pub windowid: WindowId,
 }
 
@@ -27,6 +97,7 @@ impl WifiMenu {
             windowid: disp.add_child(Position::Normal)?,
             state: WifiMenuState::Closed,
             config: config.clone(),
+            manager: WifiManager::new(config.clone()),
         })
     }
 }
@@ -60,7 +131,7 @@ impl input::Input for WifiMenu {
     ) -> error::Result<(bool, Vec<action::Action>)> {
         match *action {
             action::Action::OpenWifiMenu => {
-                let menu = SelectWifiMenu::new(disp, &self.config.clone())?;
+                let menu = SelectWifiMenu::new(disp, &self.config.clone(), self.manager.clone())?;
                 self.state = WifiMenuState::Open(menu);
                 Ok((true, vec![]))
             }
@@ -99,11 +170,14 @@ pub struct SelectWifiMenu {
     clients: Vec<WifiClient>,
     ap: WifiAp,
     back: buttons::back::BackButton,
-    _config: config::Config,
 }
 
 impl SelectWifiMenu {
-    fn new(disp: &mut DisplayManager, config: &config::Config) -> error::Result<SelectWifiMenu> {
+    fn new(
+        disp: &mut DisplayManager,
+        config: &config::Config,
+        manager: Arc<Mutex<WifiManager>>,
+    ) -> error::Result<SelectWifiMenu> {
         let window = disp.add_child(Position::Fixed(0, 0))?;
         let clients = config
             .wifi
@@ -115,7 +189,7 @@ impl SelectWifiMenu {
             })
             .collect::<Vec<_>>();
 
-        let ap = WifiAp::new(disp, config.wifi.ap.clone())?;
+        let ap = WifiAp::new(disp, config.wifi.ap.clone(), manager.clone())?;
 
         disp.shift_focus(
             clients
@@ -125,7 +199,6 @@ impl SelectWifiMenu {
         );
         Ok(SelectWifiMenu {
             windowid: window,
-            _config: config.clone(),
             back: buttons::back::BackButton::new(disp, action::Action::CloseWifiMenu)?,
             clients: clients,
             ap: ap,
@@ -133,7 +206,7 @@ impl SelectWifiMenu {
     }
 }
 
-impl<'a> render::Render for SelectWifiMenu {
+impl render::Render for SelectWifiMenu {
     fn render(&self, manager: &DisplayManager, _window: &Window) -> error::Result<bitmap::Bitmap> {
         Ok(bitmap::Bitmap::new(
             manager.display.width(),
@@ -141,9 +214,9 @@ impl<'a> render::Render for SelectWifiMenu {
         ))
     }
 }
-impl<'a> input::Input for SelectWifiMenu {}
+impl input::Input for SelectWifiMenu {}
 
-impl<'a> Widget for SelectWifiMenu {
+impl Widget for SelectWifiMenu {
     fn mut_children(&mut self) -> Vec<&mut Widget> {
         let mut children = self.clients
             .iter_mut()
@@ -208,15 +281,19 @@ impl Widget for WifiClient {
 pub struct WifiAp {
     pub windowid: WindowId,
     _config: config::WifiApConfig,
-    active: bool,
+    manager: Arc<Mutex<WifiManager>>,
 }
 
 impl WifiAp {
-    fn new(disp: &mut DisplayManager, config: config::WifiApConfig) -> error::Result<WifiAp> {
+    fn new(
+        disp: &mut DisplayManager,
+        config: config::WifiApConfig,
+        manager: Arc<Mutex<WifiManager>>,
+    ) -> error::Result<WifiAp> {
         Ok(WifiAp {
             windowid: disp.add_child(Position::Normal)?,
             _config: config,
-            active: false,
+            manager: manager.clone(),
         })
     }
 }
@@ -232,11 +309,11 @@ impl render::Render for WifiAp {
             ),
             (12, 0),
         );
-        if self.active {
-            base.blit(&bitmap::Bitmap::from_slice(font::SQUARE), (6, 0));
+        if self.manager.lock()?.state == WifiState::Ap {
+            base.blit(&bitmap::Bitmap::from_slice(font::SQUARE), (6, 3));
         }
         if window.focus {
-            base.blit(&bitmap::Bitmap::from_slice(font::ARROW), (0, 0));
+            base.blit(&bitmap::Bitmap::from_slice(font::ARROW), (0, 3));
         }
         Ok(base)
     }
@@ -249,9 +326,7 @@ impl input::Input for WifiAp {
     ) -> error::Result<(bool, Vec<action::Action>)> {
         match *event {
             controller::Event::Select => {
-                //TODO: pull values from config into hostapd.conf
-                utils::run_check_output("hostapd", &["-B", "/etc/hostapd.conf"])?;
-                self.active = true;
+                self.manager.lock()?.activate_host()?;
                 Ok((true, vec![]))
             }
             _ => Ok((false, vec![])),
