@@ -49,7 +49,7 @@ impl render::Render for NewDrive {
             (12, 0),
         );
         if window.focus {
-            base.blit(&bitmap::Bitmap::from_slice(font::ARROW), (0, 0));
+            base.blit(&bitmap::Bitmap::from_slice(font::ARROW), (0, 3));
         }
         Ok(base)
     }
