@@ -13,18 +13,22 @@ use utils;
 use std::fs;
 use std::io::Write;
 use std::sync::{Arc, Mutex};
-use std::{thread, time};
+
+const HOSTAPD_CONF: &'static str = "/etc/hostapd.conf";
+const HOSTAPD_TMP_CONF: &'static str = "/tmp/hostapd.conf";
+const WPA_SUPPLICANT_CONF: &'static str = "/etc/wpa_supplicant.conf";
+const WPA_SUPPLICANT_TMP_CONF: &'static str = "/tmp/wpa_supplicant.conf";
 
 #[derive(PartialEq)]
 enum WifiState {
     Ap,
-    Client,
+    Client(usize),
     Inactive,
+    Uninitialized,
 }
 
 struct WifiManager {
     config: config::Config,
-    wifi_ready: bool,
     pub state: WifiState,
 }
 
@@ -32,49 +36,115 @@ impl WifiManager {
     fn new(config: config::Config) -> Arc<Mutex<WifiManager>> {
         Arc::new(Mutex::new(WifiManager {
             config: config,
-            wifi_ready: false,
-            state: WifiState::Inactive,
+            state: WifiState::Uninitialized,
         }))
     }
 
     fn enable_wifi(&mut self) -> error::Result<()> {
-        if self.wifi_ready {
+        if self.state != WifiState::Uninitialized {
             return Ok(());
         }
 
         // Now load the driver (do this here for faster boot)
         utils::run_check_output("modprobe", &["brcmfmac"])?;
 
-        //TODO: check that the interface actually exists
-        thread::sleep(time::Duration::from_secs(2));
-
-        fs::copy("/etc/hostapd.conf", "/tmp/hostapd.conf")?;
+        fs::copy(HOSTAPD_CONF, HOSTAPD_TMP_CONF)?;
 
         let passphrase = format!("wpa_passphrase={}\n", self.config.wifi.ap.password);
         let ssid = format!("ssid={}\n", self.config.wifi.ap.ssid);
 
-        let mut hostapd = fs::OpenOptions::new()
-            .append(true)
-            .open("/tmp/hostapd.conf")?;
+        let mut hostapd = fs::OpenOptions::new().append(true).open(HOSTAPD_TMP_CONF)?;
         hostapd.write_all(passphrase.as_bytes())?;
         hostapd.write_all(ssid.as_bytes())?;
 
-        self.wifi_ready = true;
+        fs::copy(WPA_SUPPLICANT_CONF, WPA_SUPPLICANT_TMP_CONF)?;
+        let mut wpa_supplicant = fs::OpenOptions::new()
+            .append(true)
+            .open(WPA_SUPPLICANT_TMP_CONF)?;
+
+        for client in self.config.wifi.client.iter() {
+            let mut output =
+                utils::run_check_output("wpa_passphrase", &[&client.ssid, &client.password])?;
+            // Remove the trailing newline and '}'
+            output.pop();
+            output.pop();
+
+            // Disable all networks by default
+            output += "\tdisabled=1\n}\n";
+
+            wpa_supplicant.write_all(output.as_bytes())?;
+        }
+
+        self.state = WifiState::Inactive;
         Ok(())
     }
 
     fn activate_host(&mut self) -> error::Result<()> {
         match self.state {
             WifiState::Ap => (),
-            WifiState::Client => {
-                //TODO: disable client
+            WifiState::Client(_) => {
+                self.deactivate_client()?;
+                self.activate_host()?;
             }
-            WifiState::Inactive => {
+            WifiState::Inactive | WifiState::Uninitialized => {
                 self.enable_wifi()?;
-                utils::run_check_output("hostapd", &["-B", "/tmp/hostapd.conf"])?;
+                utils::run_check_output("hostapd", &["-B", HOSTAPD_TMP_CONF])?;
                 self.state = WifiState::Ap;
             }
         }
+        Ok(())
+    }
+
+    fn deactivate_host(&mut self) -> error::Result<()> {
+        match self.state {
+            WifiState::Ap => {
+                utils::run_check_output("killall", &["hostapd"])?;
+                self.state = WifiState::Inactive;
+            }
+            WifiState::Client(_) => {
+                return Err("Attempt to deactivate host while in client mode".into())
+            }
+            _ => (),
+        }
+        Ok(())
+    }
+
+    fn activate_client(&mut self, network_num: usize) -> error::Result<()> {
+        match self.state {
+            WifiState::Client(_) => {
+                self.deactivate_client()?;
+                self.activate_client(network_num)?;
+            }
+            WifiState::Ap => {
+                self.deactivate_host()?;
+                self.activate_client(network_num)?;
+            }
+            WifiState::Inactive | WifiState::Uninitialized => {
+                self.enable_wifi()?;
+                utils::run_check_output(
+                    "wpa_supplicant",
+                    &["-B", "-i", "wlan0", "-c", WPA_SUPPLICANT_TMP_CONF],
+                )?;
+                utils::run_check_output(
+                    "/opt/piso_scripts/wifi_client.sh",
+                    &[network_num.to_string()],
+                )?;
+                utils::run_check_output("udhcpc", &["-i", "wlan0"])?;
+                self.state = WifiState::Client(network_num);
+            }
+        };
+        Ok(())
+    }
+
+    fn deactivate_client(&mut self) -> error::Result<()> {
+        match self.state {
+            WifiState::Client(_) => {
+                utils::run_check_output("killall", &["wpa_supplicant"])?;
+                self.state = WifiState::Inactive;
+            }
+            WifiState::Ap => return Err("Attempt to deactivate client while in host mode".into()),
+            WifiState::Inactive | WifiState::Uninitialized => (),
+        };
         Ok(())
     }
 }
@@ -183,8 +253,9 @@ impl SelectWifiMenu {
             .wifi
             .client
             .iter()
-            .map(|config| {
-                WifiClient::new(disp, config.clone())
+            .enumerate()
+            .map(|(id, config)| {
+                WifiClient::new(disp, config.clone(), manager.clone(), id + 1)
                     .expect("Failed to create WifiClient menu item")
             })
             .collect::<Vec<_>>();
@@ -245,16 +316,22 @@ impl Widget for SelectWifiMenu {
 pub struct WifiClient {
     pub windowid: WindowId,
     config: config::WifiClientNetworkConfig,
+    manager: Arc<Mutex<WifiManager>>,
+    id: usize,
 }
 
 impl WifiClient {
     fn new(
         disp: &mut DisplayManager,
         config: config::WifiClientNetworkConfig,
+        manager: Arc<Mutex<WifiManager>>,
+        id: usize,
     ) -> error::Result<WifiClient> {
         Ok(WifiClient {
             windowid: disp.add_child(Position::Normal)?,
             config: config,
+            manager: manager,
+            id: id,
         })
     }
 }
@@ -263,6 +340,14 @@ impl render::Render for WifiClient {
     fn render(&self, _manager: &DisplayManager, window: &Window) -> error::Result<bitmap::Bitmap> {
         let mut base = bitmap::Bitmap::new(10, 1);
         base.blit(&font::render_text(&self.config.ssid), (12, 0));
+        match self.manager.lock()?.state {
+            WifiState::Client(id) => {
+                if id == self.id {
+                    base.blit(&bitmap::Bitmap::from_slice(font::SQUARE), (6, 0));
+                }
+            }
+            _ => (),
+        }
         if window.focus {
             base.blit(&bitmap::Bitmap::from_slice(font::ARROW), (0, 0));
         }
@@ -270,7 +355,20 @@ impl render::Render for WifiClient {
     }
 }
 
-impl input::Input for WifiClient {}
+impl input::Input for WifiClient {
+    fn on_event(
+        &mut self,
+        event: &controller::Event,
+    ) -> error::Result<(bool, Vec<action::Action>)> {
+        match *event {
+            controller::Event::Select => {
+                self.manager.lock()?.activate_client(self.id)?;
+                Ok((true, vec![]))
+            }
+            _ => Ok((false, vec![])),
+        }
+    }
+}
 
 impl Widget for WifiClient {
     fn windowid(&self) -> WindowId {
@@ -293,7 +391,7 @@ impl WifiAp {
         Ok(WifiAp {
             windowid: disp.add_child(Position::Normal)?,
             _config: config,
-            manager: manager.clone(),
+            manager: manager,
         })
     }
 }
