@@ -57,8 +57,8 @@ fn run() -> error::Result<()> {
     let gadget = Arc::new(Mutex::new(usb::UsbGadget::new(
         "/sys/kernel/config/usb_gadget/g1",
         usb::GadgetConfig {
-            vendor_id: "0x1d6b",
-            product_id: "0x0104",
+            vendor_id: "0x1209", // pid.codes vendor id
+            product_id: "0x0256", // pISO Hat product id
             device_bcd: "0x0100",
             usb_bcd: "0x0200",
 
