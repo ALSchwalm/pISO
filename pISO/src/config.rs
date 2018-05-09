@@ -1,4 +1,10 @@
 #[derive(Clone, Debug, Deserialize)]
+pub struct UserConfig {
+    pub name: String,
+    pub password: String,
+}
+
+#[derive(Clone, Debug, Deserialize)]
 pub struct WifiApConfig {
     pub ssid: String,
     pub password: String,
@@ -18,6 +24,7 @@ pub struct WifiConfig {
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct Config {
+    pub user: UserConfig,
     pub wifi: WifiConfig,
 }
 
@@ -28,6 +35,10 @@ mod tests {
     #[test]
     fn load_test() {
         let toml_str = r#"
+          [user]
+          name="piso"
+          password="password"
+
           [[wifi.client]]
           ssid="home-ap"
           password="faz"

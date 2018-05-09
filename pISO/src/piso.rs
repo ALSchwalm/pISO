@@ -11,6 +11,7 @@ use usb;
 use std::sync::{Arc, Mutex};
 use render;
 use stats;
+use utils;
 use vdrive;
 use wifi;
 
@@ -48,6 +49,10 @@ impl PIso {
             disp.shift_focus(&ndrive);
         }
 
+        // Add the user account if it doesn't exit and ensure the password
+        // is what is expected.
+        PIso::configure_user(&config)?;
+
         Ok(PIso {
             _config: config,
             drives: drives,
@@ -58,6 +63,14 @@ impl PIso {
             stats: stats,
             wifi: wifi,
         })
+    }
+
+    fn configure_user(config: &config::Config) -> Result<()> {
+        utils::run_check_output(
+            "/opt/piso_scripts/add_user.sh",
+            &[&config.user.name, &config.user.password],
+        )?;
+        Ok(())
     }
 
     fn build_drives_from_vg(

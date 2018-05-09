@@ -13,11 +13,15 @@ use utils;
 use std::fs;
 use std::io::Write;
 use std::sync::{Arc, Mutex};
+use std::{thread, time};
 
 const HOSTAPD_CONF: &'static str = "/etc/hostapd.conf";
 const HOSTAPD_TMP_CONF: &'static str = "/tmp/hostapd.conf";
 const WPA_SUPPLICANT_CONF: &'static str = "/etc/wpa_supplicant.conf";
 const WPA_SUPPLICANT_TMP_CONF: &'static str = "/tmp/wpa_supplicant.conf";
+const SMB_CONF: &'static str = "/etc/samba/smb.conf";
+const SMB_TMP_CONF: &'static str = "/tmp/smb.conf";
+const PURE_FTPD_CONF: &'static str = "/etc/pure-ftpd.conf";
 
 #[derive(PartialEq)]
 enum WifiState {
@@ -75,6 +79,15 @@ impl WifiManager {
             wpa_supplicant.write_all(output.as_bytes())?;
         }
 
+        // TODO: determine why we need to sleep here
+        thread::sleep(time::Duration::from_secs(1));
+
+        fs::copy(SMB_CONF, SMB_TMP_CONF)?;
+        utils::run_check_output("smbd", &["-D", "-s", SMB_TMP_CONF])?;
+        utils::run_check_output("nmbd", &["-D", "-s", SMB_TMP_CONF])?;
+
+        utils::run_check_output("pure-ftpd", &[PURE_FTPD_CONF])?;
+
         self.state = WifiState::Inactive;
         Ok(())
     }
@@ -88,6 +101,7 @@ impl WifiManager {
             }
             WifiState::Inactive | WifiState::Uninitialized => {
                 self.enable_wifi()?;
+                utils::run_check_output("ip", &["addr", "add", "dev", "wlan0", "10.55.55.1/24"])?;
                 utils::run_check_output("hostapd", &["-B", HOSTAPD_TMP_CONF])?;
                 self.state = WifiState::Ap;
             }
@@ -107,6 +121,13 @@ impl WifiManager {
             _ => (),
         }
         Ok(())
+    }
+
+    fn toggle_host(&mut self) -> error::Result<()> {
+        match self.state {
+            WifiState::Ap => self.deactivate_host(),
+            _ => self.activate_host(),
+        }
     }
 
     fn activate_client(&mut self, network_num: usize) -> error::Result<()> {
@@ -146,6 +167,19 @@ impl WifiManager {
             WifiState::Inactive | WifiState::Uninitialized => (),
         };
         Ok(())
+    }
+
+    fn toggle_client(&mut self, network_num: usize) -> error::Result<()> {
+        match self.state {
+            WifiState::Client(num) => {
+                if num == network_num {
+                    self.deactivate_client()
+                } else {
+                    self.activate_client(network_num)
+                }
+            }
+            _ => self.activate_client(network_num),
+        }
     }
 }
 
@@ -362,7 +396,7 @@ impl input::Input for WifiClient {
     ) -> error::Result<(bool, Vec<action::Action>)> {
         match *event {
             controller::Event::Select => {
-                self.manager.lock()?.activate_client(self.id)?;
+                self.manager.lock()?.toggle_client(self.id)?;
                 Ok((true, vec![]))
             }
             _ => Ok((false, vec![])),
@@ -424,7 +458,7 @@ impl input::Input for WifiAp {
     ) -> error::Result<(bool, Vec<action::Action>)> {
         match *event {
             controller::Event::Select => {
-                self.manager.lock()?.activate_host()?;
+                self.manager.lock()?.toggle_host()?;
                 Ok((true, vec![]))
             }
             _ => Ok((false, vec![])),
