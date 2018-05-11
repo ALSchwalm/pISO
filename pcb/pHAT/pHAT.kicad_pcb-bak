@@ -3,10 +3,10 @@
   (general
     (links 65)
     (no_connects 1)
-    (area 109.424999 79.424999 174.575001 109.575001)
+    (area 94.236879 78.08442 180.53569 110.48442)
     (thickness 1.6)
     (drawings 28)
-    (tracks 333)
+    (tracks 335)
     (zones 0)
     (modules 38)
     (nets 22)
@@ -848,10 +848,10 @@
     )
   )
 
-  (module pISO:SLP (layer F.Cu) (tedit 5AC923CD) (tstamp 5AB43D22)
+  (module pISO:SLP (layer F.Cu) (tedit 5AD3B225) (tstamp 5AB43D22)
     (at 167.41188 105.75942)
     (path /5AB445A1)
-    (fp_text reference W1 (at 0.04 5.3) (layer F.SilkS) hide
+    (fp_text reference W1 (at 11.5 -24.5) (layer F.SilkS) hide
       (effects (font (size 1 1) (thickness 0.15)))
     )
     (fp_text value ExtraPOGO (at 0 -1.8) (layer F.Fab)
@@ -860,10 +860,10 @@
     (pad 1 smd circle (at 0 0) (size 1.85 1.85) (layers B.Cu B.Paste B.Mask))
   )
 
-  (module pISO:SLP (layer F.Cu) (tedit 5AC923D7) (tstamp 5AB43D27)
+  (module pISO:SLP (layer F.Cu) (tedit 5AD3B234) (tstamp 5AB43D27)
     (at 116.41188 105.75942)
     (path /5AB441ED)
-    (fp_text reference W2 (at 0.01 5.31) (layer F.SilkS) hide
+    (fp_text reference W2 (at 62.5 -18.5) (layer F.SilkS) hide
       (effects (font (size 1 1) (thickness 0.15)))
     )
     (fp_text value ExtraPOGO (at 0 -1.8) (layer F.Fab)
@@ -1277,10 +1277,10 @@
       (xy 0.559057 -0.993159)) (layer F.SilkS) (width 0.01))
   )
 
-  (module pISO:SLP (layer B.Cu) (tedit 5AC923D3) (tstamp 5AC91D4D)
+  (module pISO:SLP (layer B.Cu) (tedit 5AD3B22E) (tstamp 5AC91D4D)
     (at 134.21188 107.70942)
     (path /5A114174)
-    (fp_text reference W14 (at 0.2 3.47) (layer B.SilkS) hide
+    (fp_text reference W14 (at 44.7 -22.45) (layer B.SilkS) hide
       (effects (font (size 1 1) (thickness 0.15)) (justify mirror))
     )
     (fp_text value D_N (at 0 1.8) (layer B.Fab)
@@ -1290,10 +1290,10 @@
       (net 15 /DM1_N))
   )
 
-  (module pISO:SLP (layer B.Cu) (tedit 5AC923D1) (tstamp 5AC91D52)
+  (module pISO:SLP (layer B.Cu) (tedit 5AD3B231) (tstamp 5AC91D52)
     (at 132.15188 107.70942)
     (path /5A114230)
-    (fp_text reference W15 (at -0.77 3.65) (layer B.SilkS) hide
+    (fp_text reference W15 (at 46.76 -21.45) (layer B.SilkS) hide
       (effects (font (size 1 1) (thickness 0.15)) (justify mirror))
     )
     (fp_text value D_P (at 0 1.8) (layer B.Fab)
@@ -1303,10 +1303,10 @@
       (net 16 /DM1_P))
   )
 
-  (module pISO:SLP (layer B.Cu) (tedit 5AC923BE) (tstamp 5AC91EFF)
+  (module pISO:SLP (layer B.Cu) (tedit 5AD3B22B) (tstamp 5AC91EFF)
     (at 148.44188 84.19942)
     (path /5A11EBC7)
-    (fp_text reference A1 (at 0.13 -5.8) (layer B.SilkS) hide
+    (fp_text reference A1 (at 30.47 0.06) (layer B.SilkS) hide
       (effects (font (size 1 1) (thickness 0.15)) (justify mirror))
     )
     (fp_text value VDD5 (at 0 1.8) (layer B.Fab)
@@ -1316,10 +1316,10 @@
       (net 17 "Net-(A1-Pad1)"))
   )
 
-  (module pISO:SLP (layer B.Cu) (tedit 5AC923C3) (tstamp 5AC91F04)
+  (module pISO:SLP (layer B.Cu) (tedit 5AD3B229) (tstamp 5AC91F04)
     (at 153.52188 84.20942)
     (path /5A11EC65)
-    (fp_text reference B1 (at 0.14 -5.71) (layer B.SilkS) hide
+    (fp_text reference B1 (at 25.39 -0.95) (layer B.SilkS) hide
       (effects (font (size 1 1) (thickness 0.15)) (justify mirror))
     )
     (fp_text value VDD5 (at 0 1.8) (layer B.Fab)
@@ -1329,10 +1329,10 @@
       (net 18 "Net-(B1-Pad1)"))
   )
 
-  (module pISO:SLP (layer B.Cu) (tedit 5AC923C1) (tstamp 5AC91F09)
+  (module pISO:SLP (layer B.Cu) (tedit 5AD3B227) (tstamp 5AC91F09)
     (at 150.98188 84.20942)
     (path /5A11EB0C)
-    (fp_text reference NO1 (at 0.17 -6.2) (layer B.SilkS) hide
+    (fp_text reference NO1 (at 27.93 -1.95) (layer B.SilkS) hide
       (effects (font (size 1 1) (thickness 0.15)) (justify mirror))
     )
     (fp_text value VDD5 (at 0 1.8) (layer B.Fab)
@@ -1342,10 +1342,10 @@
       (net 19 "Net-(NO1-Pad1)"))
   )
 
-  (module pISO:SLP (layer B.Cu) (tedit 5AC923C9) (tstamp 5AC91F0E)
+  (module pISO:SLP (layer B.Cu) (tedit 5AD3B221) (tstamp 5AC91F0E)
     (at 166.21188 81.70942)
     (path /59A9707C)
-    (fp_text reference W5 (at 0.03 -4.9) (layer B.SilkS) hide
+    (fp_text reference W5 (at 12.7 -2.45) (layer B.SilkS) hide
       (effects (font (size 1 1) (thickness 0.15)) (justify mirror))
     )
     (fp_text value POWER (at 0 1.8) (layer B.Fab)
@@ -1355,10 +1355,10 @@
       (net 9 "Net-(P2-Pad1)"))
   )
 
-  (module pISO:SLP (layer B.Cu) (tedit 5AC923B9) (tstamp 5AC91F13)
+  (module pISO:SLP (layer B.Cu) (tedit 5AD3B238) (tstamp 5AC91F13)
     (at 140.81188 81.66942)
     (path /5A110B08)
-    (fp_text reference W7 (at 0.01 -5.09) (layer B.SilkS) hide
+    (fp_text reference W7 (at 38.1 7.59) (layer B.SilkS) hide
       (effects (font (size 1 1) (thickness 0.15)) (justify mirror))
     )
     (fp_text value RST (at 0 1.8) (layer B.Fab)
@@ -1368,10 +1368,10 @@
       (net 6 /RST))
   )
 
-  (module pISO:SLP (layer B.Cu) (tedit 5AC923B6) (tstamp 5AC91F18)
+  (module pISO:SLP (layer B.Cu) (tedit 5AD3B23E) (tstamp 5AC91F18)
     (at 138.27188 81.65942)
     (path /5A110B8D)
-    (fp_text reference W8 (at 0.31 -5.52) (layer B.SilkS) hide
+    (fp_text reference W8 (at 40.64 9.6) (layer B.SilkS) hide
       (effects (font (size 1 1) (thickness 0.15)) (justify mirror))
     )
     (fp_text value CS (at 0 1.8) (layer B.Fab)
@@ -1381,10 +1381,10 @@
       (net 8 /CS))
   )
 
-  (module pISO:SLP (layer B.Cu) (tedit 5AC923BB) (tstamp 5AC91F1D)
+  (module pISO:SLP (layer B.Cu) (tedit 5AD3B236) (tstamp 5AC91F1D)
     (at 143.35188 84.20942)
     (path /5A110E5E)
-    (fp_text reference W9 (at -0.22 -6.82) (layer B.SilkS) hide
+    (fp_text reference W9 (at 35.56 4.05) (layer B.SilkS) hide
       (effects (font (size 1 1) (thickness 0.15)) (justify mirror))
     )
     (fp_text value MOSI (at 0 1.8) (layer B.Fab)
@@ -1394,10 +1394,10 @@
       (net 5 /MOSI))
   )
 
-  (module pISO:SLP (layer B.Cu) (tedit 5AC923B2) (tstamp 5AC91F22)
+  (module pISO:SLP (layer B.Cu) (tedit 5AD3B23B) (tstamp 5AC91F22)
     (at 138.27188 84.21942)
     (path /5A110EF5)
-    (fp_text reference W10 (at 0.17 -6.35) (layer B.SilkS) hide
+    (fp_text reference W10 (at 40.64 6.04) (layer B.SilkS) hide
       (effects (font (size 1 1) (thickness 0.15)) (justify mirror))
     )
     (fp_text value SCLK (at 0 1.8) (layer B.Fab)
@@ -1407,10 +1407,10 @@
       (net 7 /SCLK))
   )
 
-  (module pISO:SLP (layer B.Cu) (tedit 5AC923AF) (tstamp 5AC91F27)
+  (module pISO:SLP (layer B.Cu) (tedit 5AD3B240) (tstamp 5AC91F27)
     (at 123.03188 84.20942)
     (path /5A110F69)
-    (fp_text reference W11 (at 0 -6.64) (layer B.SilkS) hide
+    (fp_text reference W11 (at 55.88 8.05) (layer B.SilkS) hide
       (effects (font (size 1 1) (thickness 0.15)) (justify mirror))
     )
     (fp_text value DC (at 0 1.8) (layer B.Fab)
@@ -1420,10 +1420,10 @@
       (net 20 /DC))
   )
 
-  (module pISO:SLP (layer B.Cu) (tedit 5AC923AC) (tstamp 5AC91F2C)
+  (module pISO:SLP (layer B.Cu) (tedit 5AD3B242) (tstamp 5AC91F2C)
     (at 117.96188 84.20942)
     (path /5A111097)
-    (fp_text reference W12 (at 0.33 -6.99) (layer B.SilkS) hide
+    (fp_text reference W12 (at 60.95 9.05) (layer B.SilkS) hide
       (effects (font (size 1 1) (thickness 0.15)) (justify mirror))
     )
     (fp_text value GND (at 0 1.8) (layer B.Fab)
@@ -1433,10 +1433,10 @@
       (net 1 GND))
   )
 
-  (module pISO:SLP (layer B.Cu) (tedit 5AC923C7) (tstamp 5AC91F31)
+  (module pISO:SLP (layer B.Cu) (tedit 5AD3B224) (tstamp 5AC91F31)
     (at 166.21188 84.25942)
     (path /5A110919)
-    (fp_text reference W13 (at 0.03 -5.69) (layer B.SilkS) hide
+    (fp_text reference W13 (at 12.7 -4) (layer B.SilkS) hide
       (effects (font (size 1 1) (thickness 0.15)) (justify mirror))
     )
     (fp_text value 3V3 (at 0 1.8) (layer B.Fab)
@@ -1839,6 +1839,9 @@
   (gr_arc (start 171.5 82.5) (end 171.5 79.5) (angle 90) (layer Edge.Cuts) (width 0.15))
   (gr_arc (start 112.5 82.5) (end 109.5 82.5) (angle 90) (layer Edge.Cuts) (width 0.15))
 
+  (segment (start 147.86188 91.40942) (end 150.57188 91.40942) (width 0.254) (layer B.Cu) (net 1) (status 400000))
+  (via (at 151.88188 90.09942) (size 0.889) (drill 0.635) (layers F.Cu B.Cu) (net 1))
+  (segment (start 150.57188 91.40942) (end 151.88188 90.09942) (width 0.254) (layer B.Cu) (net 1) (tstamp 5AF4D822))
   (segment (start 126.16188 96.60942) (end 126.16188 98.70942) (width 0.254) (layer B.Cu) (net 1))
   (via (at 125.91188 98.95942) (size 0.7) (drill 0.4) (layers F.Cu B.Cu) (net 1))
   (segment (start 126.16188 98.70942) (end 125.91188 98.95942) (width 0.254) (layer B.Cu) (net 1) (tstamp 5AC921EF))
@@ -1851,8 +1854,6 @@
   (via (at 129.86188 81.30942) (size 0.889) (drill 0.635) (layers F.Cu B.Cu) (net 1))
   (segment (start 129.28688 80.73442) (end 129.86188 81.30942) (width 0.254) (layer B.Cu) (net 1) (tstamp 5AC90EEB))
   (segment (start 147.86188 91.40942) (end 148.31188 91.40942) (width 0.254) (layer B.Cu) (net 1))
-  (segment (start 148.31188 91.40942) (end 149.71188 90.00942) (width 0.254) (layer B.Cu) (net 1) (tstamp 5AB4397B))
-  (via (at 149.71188 90.00942) (size 0.889) (drill 0.635) (layers F.Cu B.Cu) (net 1))
   (segment (start 150.91188 96.70942) (end 150.91188 95.00942) (width 0.254) (layer F.Cu) (net 1))
   (via (at 151.36188 94.55942) (size 0.889) (drill 0.635) (layers F.Cu B.Cu) (net 1))
   (segment (start 150.91188 95.00942) (end 151.36188 94.55942) (width 0.254) (layer F.Cu) (net 1) (tstamp 5AB43951))
@@ -1869,7 +1870,6 @@
   (segment (start 124.21188 97.00942) (end 125.41188 97.00942) (width 0.254) (layer B.Cu) (net 1) (tstamp 5A11CCA5))
   (segment (start 121.51188 94.15942) (end 121.51188 95.43442) (width 0.254) (layer B.Cu) (net 1))
   (segment (start 121.51188 95.43442) (end 123.08688 97.00942) (width 0.254) (layer B.Cu) (net 1) (tstamp 5A11CC9B))
-  (segment (start 148.31188 91.40942) (end 149.62188 90.09942) (width 0.2) (layer B.Cu) (net 1) (tstamp 5A2C2755))
   (segment (start 121.51188 90.10942) (end 121.51188 91.90942) (width 0.254) (layer B.Cu) (net 1))
   (segment (start 121.51188 91.90942) (end 121.76188 92.15942) (width 0.254) (layer B.Cu) (net 1) (tstamp 5A11C5AE))
   (segment (start 121.51188 94.15942) (end 121.51188 92.40942) (width 0.254) (layer B.Cu) (net 1))
@@ -1989,6 +1989,9 @@
   (via (at 134.01188 94.08442) (size 0.7) (drill 0.4) (layers F.Cu B.Cu) (net 7))
   (segment (start 134.01188 94.08442) (end 133.86188 94.23442) (width 0.254) (layer B.Cu) (net 7) (tstamp 5A11C24A))
   (segment (start 133.86188 94.23442) (end 133.86188 96.60942) (width 0.254) (layer B.Cu) (net 7) (tstamp 5A11C24B))
+  (segment (start 152.21188 87.29942) (end 152.21188 87.98942) (width 0.254) (layer F.Cu) (net 8))
+  (segment (start 152.21188 87.98942) (end 147.99188 92.20942) (width 0.254) (layer F.Cu) (net 8) (tstamp 5AF4D81C))
+  (segment (start 152.21188 87.16942) (end 152.21188 87.29942) (width 0.254) (layer F.Cu) (net 8))
   (segment (start 126.58188 83.27442) (end 131.51688 83.27442) (width 0.254) (layer B.Cu) (net 8))
   (via (at 138.27188 81.65942) (size 0.7) (drill 0.4) (layers F.Cu B.Cu) (net 8))
   (segment (start 137.39188 82.53942) (end 138.27188 81.65942) (width 0.254) (layer F.Cu) (net 8) (tstamp 5AC92014))
@@ -1997,9 +2000,8 @@
   (via (at 131.75188 83.03942) (size 0.7) (drill 0.4) (layers F.Cu B.Cu) (net 8))
   (segment (start 131.51688 83.27442) (end 131.75188 83.03942) (width 0.254) (layer B.Cu) (net 8) (tstamp 5AC92010))
   (segment (start 138.26188 81.66942) (end 138.27188 81.65942) (width 0.254) (layer B.Cu) (net 8) (tstamp 5AC91FFF))
-  (segment (start 152.21188 83.15942) (end 152.21188 89.03442) (width 0.254) (layer F.Cu) (net 8))
-  (segment (start 152.21188 89.03442) (end 149.03688 92.20942) (width 0.254) (layer F.Cu) (net 8) (tstamp 5A11C20F))
-  (segment (start 149.03688 92.20942) (end 138.13688 92.20942) (width 0.254) (layer F.Cu) (net 8) (tstamp 5A11C21B))
+  (segment (start 152.21188 83.15942) (end 152.21188 87.16942) (width 0.254) (layer F.Cu) (net 8))
+  (segment (start 147.99188 92.20942) (end 138.13688 92.20942) (width 0.254) (layer F.Cu) (net 8) (tstamp 5AF4D81F))
   (segment (start 138.13688 92.20942) (end 138.03688 92.30942) (width 0.254) (layer F.Cu) (net 8) (tstamp 5A11C21F))
   (via (at 138.03688 92.30942) (size 0.7) (drill 0.4) (layers F.Cu B.Cu) (net 8))
   (segment (start 138.03688 92.30942) (end 137.36188 92.98442) (width 0.254) (layer B.Cu) (net 8) (tstamp 5A11C222))
