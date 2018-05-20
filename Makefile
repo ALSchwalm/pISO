@@ -36,4 +36,4 @@ endif
 	tar -cvzf sdcard.img.tar.gz buildroot/output/images/sdcard.img
 
 update-config:
-	cd "$(CURDIR)/buildroot" && cp "configs/raspberrypi0_defconfig" ".config"
+	cd "$(CURDIR)/buildroot" && cp "configs/piso_defconfig" ".config"
