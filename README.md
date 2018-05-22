@@ -20,7 +20,7 @@ Without docker, you will need to first ensure you have all of the appropriate
 dependencies installed (see [this list](https://buildroot.org/downloads/manual/manual.html#requirement) ).
 
     cd buildroot
-    cp configs/raspberrypi0_defconfig .config
+    cp configs/piso_defconfig .config
     make
 
 Either approach should produce a file in `buildroot/output/images/sdcard.img`. This file can

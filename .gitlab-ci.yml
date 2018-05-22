@@ -28,6 +28,7 @@ make-image:
     name: "sdimage-$CI_COMMIT_SHA"
     paths:
     - sdcard.img.tar.gz
+    - rootfs.squashfs
     - build.log
     when: always
   cache:

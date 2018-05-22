@@ -34,6 +34,7 @@ else
 endif
 	cd buildroot && git rev-parse HEAD > output/.cache-version
 	tar -cvzf sdcard.img.tar.gz buildroot/output/images/sdcard.img
+	cp buildroot/output/images/rootfs.squashfs .
 
 update-config:
 	cd "$(CURDIR)/buildroot" && cp "configs/piso_defconfig" ".config"
