@@ -120,9 +120,7 @@ impl VirtualDrive {
                     .to_string_lossy()
                     .into();
 
-                utils::run_check_output("losetup", &["-fPL", volume_path])?;
-                utils::wait_for_path(&loopback_path, Duration::from_millis(1000))?;
-                utils::run_check_output("partprobe", &[&loopback_path])?;
+                utils::run_check_output("losetup", &["-fP", volume_path])?;
 
                 let mut mounted_partitions = vec![];
                 let mut isos = vec![];
