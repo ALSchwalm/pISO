@@ -5,6 +5,7 @@ use config;
 use controller;
 use displaymanager::{DisplayManager, Position, Widget, Window, WindowId};
 use error;
+use error::ResultExt;
 use font;
 use input;
 use render;
@@ -142,6 +143,11 @@ impl WifiManager {
             }
             WifiState::Inactive | WifiState::Uninitialized => {
                 self.enable_wifi()?;
+
+                // Kill any existing WPA supplicant (this will only happen if a
+                // previous activate attempt errored)
+                let _ = utils::run_check_output("killall", &["wpa_supplicant"]);
+
                 utils::run_check_output(
                     "wpa_supplicant",
                     &["-B", "-i", "wlan0", "-c", WPA_SUPPLICANT_TMP_CONF],
@@ -150,7 +156,9 @@ impl WifiManager {
                     "/opt/piso_scripts/wifi_client.sh",
                     &[network_num.to_string()],
                 )?;
-                utils::run_check_output("udhcpc", &["-i", "wlan0"])?;
+
+                utils::run_check_output("udhcpc", &["-i", "wlan0", "-n"])
+                    .chain_err(|| "Failed to obtain dhcp lease")?;
                 self.state = WifiState::Client(network_num);
             }
         };
@@ -160,7 +168,8 @@ impl WifiManager {
     fn deactivate_client(&mut self) -> error::Result<()> {
         match self.state {
             WifiState::Client(_) => {
-                utils::run_check_output("killall", &["wpa_supplicant"])?;
+                // Suppress failure if it isn't running
+                let _ = utils::run_check_output("killall", &["wpa_supplicant"]);
                 self.state = WifiState::Inactive;
             }
             WifiState::Ap => return Err("Attempt to deactivate client while in host mode".into()),
@@ -351,6 +360,7 @@ pub struct WifiClient {
     pub windowid: WindowId,
     config: config::WifiClientNetworkConfig,
     manager: Arc<Mutex<WifiManager>>,
+    menu: Option<WifiConnectedMenu>,
     id: usize,
 }
 
@@ -365,6 +375,7 @@ impl WifiClient {
             windowid: disp.add_child(Position::Normal)?,
             config: config,
             manager: manager,
+            menu: None,
             id: id,
         })
     }
@@ -396,7 +407,38 @@ impl input::Input for WifiClient {
     ) -> error::Result<(bool, Vec<action::Action>)> {
         match *event {
             controller::Event::Select => {
-                self.manager.lock()?.toggle_client(self.id)?;
+                let message = match self.manager.lock()?.toggle_client(self.id) {
+                    Ok(()) => format!(
+                        "Connected: {}",
+                        utils::run_check_output(
+                            "/opt/piso_scripts/wifi_address.sh",
+                            &[] as &[&str],
+                        )?.trim_right()
+                    ),
+                    //TODO: this text should wrap
+                    Err(e) => format!("Failed: {}", e.description()),
+                };
+                Ok((true, vec![action::Action::OpenWifiConnectedMenu(message)]))
+            }
+            _ => Ok((false, vec![])),
+        }
+    }
+
+    fn do_action(
+        &mut self,
+        disp: &mut DisplayManager,
+        action: &action::Action,
+    ) -> error::Result<(bool, Vec<action::Action>)> {
+        match action {
+            &action::Action::OpenWifiConnectedMenu(ref msg) => {
+                let menu = WifiConnectedMenu::new(disp, msg.clone())?;
+                disp.shift_focus(&menu);
+                self.menu = Some(menu);
+                Ok((true, vec![]))
+            }
+            &action::Action::CloseWifiConnectedMenu => {
+                self.menu = None;
+                disp.shift_focus(self);
                 Ok((true, vec![]))
             }
             _ => Ok((false, vec![])),
@@ -407,6 +449,64 @@ impl input::Input for WifiClient {
 impl Widget for WifiClient {
     fn windowid(&self) -> WindowId {
         self.windowid
+    }
+
+    fn mut_children(&mut self) -> Vec<&mut Widget> {
+        match self.menu {
+            Some(ref mut menu) => vec![menu],
+            None => vec![],
+        }
+    }
+
+    fn children(&self) -> Vec<&Widget> {
+        match self.menu {
+            Some(ref menu) => vec![menu],
+            None => vec![],
+        }
+    }
+}
+
+pub struct WifiConnectedMenu {
+    pub windowid: WindowId,
+    message: String,
+}
+
+impl WifiConnectedMenu {
+    fn new(disp: &mut DisplayManager, message: String) -> error::Result<WifiConnectedMenu> {
+        Ok(WifiConnectedMenu {
+            windowid: disp.add_child(Position::Fixed(0, 0))?,
+            message: message,
+        })
+    }
+}
+
+impl Widget for WifiConnectedMenu {
+    fn windowid(&self) -> WindowId {
+        self.windowid
+    }
+}
+
+impl render::Render for WifiConnectedMenu {
+    fn render(&self, _manager: &DisplayManager, window: &Window) -> error::Result<bitmap::Bitmap> {
+        let mut base = bitmap::Bitmap::new(128, 64);
+        base.blit(&font::render_text(&self.message), (0, 0));
+        base.blit(&font::render_text("Ok"), (10, 20));
+        if window.focus {
+            base.blit(&bitmap::Bitmap::from_slice(font::ARROW), (0, 20));
+        }
+        Ok(base)
+    }
+}
+
+impl input::Input for WifiConnectedMenu {
+    fn on_event(
+        &mut self,
+        event: &controller::Event,
+    ) -> error::Result<(bool, Vec<action::Action>)> {
+        match *event {
+            controller::Event::Select => Ok((true, vec![action::Action::CloseWifiConnectedMenu])),
+            _ => Ok((false, vec![])),
+        }
     }
 }
 
@@ -463,14 +563,6 @@ impl input::Input for WifiAp {
             }
             _ => Ok((false, vec![])),
         }
-    }
-
-    fn do_action(
-        &mut self,
-        _disp: &mut DisplayManager,
-        _action: &action::Action,
-    ) -> error::Result<(bool, Vec<action::Action>)> {
-        Ok((false, vec![]))
     }
 }
 

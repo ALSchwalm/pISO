@@ -18,4 +18,7 @@ pub enum Action {
 
     OpenWifiMenu,
     CloseWifiMenu,
+
+    OpenWifiConnectedMenu(String),
+    CloseWifiConnectedMenu,
 }

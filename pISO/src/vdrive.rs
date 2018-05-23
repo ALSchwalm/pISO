@@ -13,7 +13,6 @@ use render;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
-use std::time::Duration;
 
 const VDRIVE_MOUNT_ROOT: &str = "/mnt";
 
