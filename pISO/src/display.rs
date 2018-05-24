@@ -6,6 +6,9 @@ use std::time;
 use sysfs_gpio::{Direction, Pin};
 use error;
 
+pub const DISPLAY_WIDTH: usize = 128;
+pub const DISPLAY_HEIGHT: usize = 64;
+
 #[allow(unused)]
 enum SSD1306Command {
     // Constants
@@ -91,9 +94,9 @@ impl LedDisplay {
 
         Ok(Box::new(LedDisplay {
             inverted: true,
-            width: 128,
-            height: 64,
-            contents: Bitmap::new(128, 64),
+            width: DISPLAY_WIDTH,
+            height: DISPLAY_HEIGHT,
+            contents: Bitmap::new(DISPLAY_WIDTH, DISPLAY_HEIGHT),
             dc_pin: dc_pin,
             rst_pin: rst_pin,
             bus: spi,
@@ -237,11 +240,11 @@ pub mod test {
         fn flip_display(&mut self) {}
 
         fn width(&self) -> usize {
-            0
+            DISPLAY_WIDTH
         }
 
         fn height(&self) -> usize {
-            0
+            DISPLAY_HEIGHT
         }
     }
 }

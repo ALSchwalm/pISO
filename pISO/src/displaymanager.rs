@@ -403,6 +403,7 @@ impl DisplayManager {
             root: &Widget,
             widget: &'a Widget,
             fixed_pos_windows: &mut Vec<&'a Widget>,
+            scroll_shift: i32,
         ) -> Result<()> {
             println!("Positioning windowid={}", widget.windowid());
 
@@ -412,14 +413,15 @@ impl DisplayManager {
                 .ok_or(format!("failed to find window id={}", widget.windowid()))?;
 
             println!(
-                "Blitting to ({}, {}, size=({}, {}))",
+                "Blitting to ({}, {}, size=({}, {}) scroll_shift={})",
                 pos.0,
                 pos.1,
                 window.bitmap.width(),
-                window.bitmap.height()
+                window.bitmap.height(),
+                scroll_shift
             );
 
-            base.blit(&window.bitmap, pos);
+            base.blit_clip(&window.bitmap, (pos.0 as i32, pos.1 as i32 - scroll_shift));
             for child in widget.children() {
                 let window = manager
                     .get(child.windowid())
@@ -429,7 +431,15 @@ impl DisplayManager {
                         fixed_pos_windows.push(child);
                     }
                     _ => {
-                        position_window(manager, base, real_root, root, child, fixed_pos_windows)?;
+                        position_window(
+                            manager,
+                            base,
+                            real_root,
+                            root,
+                            child,
+                            fixed_pos_windows,
+                            scroll_shift,
+                        )?;
                     }
                 };
             }
@@ -438,7 +448,16 @@ impl DisplayManager {
         };
 
         let mut fixed_pos_windows = vec![];
-        position_window(self, bitmap, real_root, root, root, &mut fixed_pos_windows)?;
+        let scroll_shift = self.find_scroll_shift(real_root, root).unwrap_or(0);
+        position_window(
+            self,
+            bitmap,
+            real_root,
+            root,
+            root,
+            &mut fixed_pos_windows,
+            scroll_shift,
+        )?;
 
         for fixed in fixed_pos_windows {
             self.do_blit(real_root, fixed, bitmap)?;
@@ -447,10 +466,35 @@ impl DisplayManager {
         Ok(())
     }
 
+    fn find_scroll_shift(&self, root: &Widget, widget: &Widget) -> Option<i32> {
+        for child in widget.children() {
+            let window = self.get(child.windowid()).unwrap();
+            match window.position {
+                Position::Fixed(_, _) => (),
+                Position::Normal => {
+                    if window.focus {
+                        let pos = self.calculate_position(root, child);
+                        let bottom = pos.1 as i32 + window.bitmap.height() as i32;
+                        if bottom > display::DISPLAY_HEIGHT as i32 {
+                            return Some(bottom - display::DISPLAY_HEIGHT as i32);
+                        } else {
+                            return None;
+                        }
+                    } else {
+                        if let Some(shift) = self.find_scroll_shift(root, child) {
+                            return Some(shift);
+                        }
+                    }
+                }
+            }
+        }
+        None
+    }
+
     pub fn render(&mut self, root: &Widget) -> Result<()> {
         self.do_render(root)?;
 
-        let mut bitmap = bitmap::Bitmap::new(0, 0);
+        let mut bitmap = bitmap::Bitmap::new(display::DISPLAY_WIDTH, display::DISPLAY_HEIGHT);
         self.do_blit(root, root, &mut bitmap)?;
         println!(
             "Update display with bitmap: {} by {}",

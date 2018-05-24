@@ -3,6 +3,7 @@ use bitmap;
 use buttons;
 use config;
 use controller;
+use display;
 use displaymanager::{DisplayManager, Position, Widget, Window, WindowId};
 use error;
 use error::ResultExt;
@@ -488,7 +489,7 @@ impl Widget for WifiConnectedMenu {
 
 impl render::Render for WifiConnectedMenu {
     fn render(&self, _manager: &DisplayManager, window: &Window) -> error::Result<bitmap::Bitmap> {
-        let mut base = bitmap::Bitmap::new(128, 64);
+        let mut base = bitmap::Bitmap::new(display::DISPLAY_WIDTH, display::DISPLAY_HEIGHT);
         base.blit(&font::render_text(&self.message), (0, 0));
         base.blit(&font::render_text("Ok"), (10, 20));
         if window.focus {

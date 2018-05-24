@@ -6,6 +6,7 @@ pub enum Direction {
     Right,
 }
 
+#[derive(Clone, PartialEq, Eq, Debug)]
 pub struct Bitmap {
     contents: Vec<Vec<u8>>,
 }
@@ -93,6 +94,57 @@ impl Bitmap {
             }
         }
     }
+
+    pub fn clip(&mut self, position: (usize, usize), size: (usize, usize)) {
+        let mut new_bitmap = Bitmap::new(size.0, size.1);
+
+        for i in position.0..position.0 + size.0 {
+            for j in position.1..position.1 + size.1 {
+                new_bitmap[j - position.1][i - position.0] = self.contents[j][i];
+            }
+        }
+
+        *self = new_bitmap;
+    }
+
+    // Blit the fraction of 'other' that is visible (x>=0 and y>=0)
+    pub fn blit_clip(&mut self, other: &Bitmap, position: (i32, i32)) {
+        let mut other = other.clone();
+        let (x, y) = position;
+        let (current_width, current_height) = (self.width(), self.height());
+        let (clip_x, new_width, new_x) = if x < 0 {
+            let new_width = other.width() as i32 + x;
+            if new_width < 0 {
+                (-x, 0, 0)
+            } else if new_width > self.width() as i32 {
+                (-x, self.width(), 0)
+            } else {
+                (-x, new_width as usize, 0)
+            }
+        } else {
+            (0, other.width(), x)
+        };
+
+        let (clip_y, new_height, new_y) = if y < 0 {
+            let new_height = other.height() as i32 + y;
+            if new_height < 0 {
+                (-y, 0, 0)
+            } else if new_height > self.height() as i32 {
+                (-x, self.height(), 0)
+            } else {
+                (-y, new_height as usize, 0)
+            }
+        } else {
+            (0, other.height(), y)
+        };
+        other.clip(
+            (clip_x as usize, clip_y as usize),
+            (new_width as usize, new_height as usize),
+        );
+        self.blit(&other, (new_x as usize, new_y as usize));
+        self.set_width(current_width);
+        self.set_height(current_height);
+    }
 }
 
 impl<Idx> Index<Idx> for Bitmap
@@ -177,5 +229,59 @@ pub fn with_border(bitmap: Bitmap, style: BorderStyle, mut padding: usize) -> Bi
             let left_added = with_border(bottom_added, BorderStyle::Left, padding);
             with_border(left_added, BorderStyle::Right, padding)
         }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_clip() {
+        let bitmap = Bitmap::from_slice(&[
+            &[1, 1, 1, 1, 1],
+            &[1, 0, 0, 0, 1],
+            &[1, 0, 0, 0, 1],
+            &[1, 0, 0, 0, 1],
+            &[1, 1, 1, 1, 1],
+        ]);
+
+        let zeros = Bitmap::from_slice(&[&[0, 0, 0], &[0, 0, 0], &[0, 0, 0]]);
+
+        let mut clipped = bitmap.clone();
+        clipped.clip((1, 1), (3, 3));
+        assert_eq!(clipped, zeros);
+
+        let mut clipped = bitmap.clone();
+        clipped.clip((0, 0), (3, 3));
+        assert_eq!(
+            clipped,
+            Bitmap::from_slice(&[&[1, 1, 1], &[1, 0, 0], &[1, 0, 0]])
+        );
+    }
+
+    #[test]
+    fn test_blit_clip() {
+        let ones = Bitmap::from_slice(&[
+            &[1, 1, 1, 1, 1],
+            &[1, 1, 1, 1, 1],
+            &[1, 1, 1, 1, 1],
+            &[1, 1, 1, 1, 1],
+            &[1, 1, 1, 1, 1],
+        ]);
+
+        let zeros =
+            Bitmap::from_slice(&[&[0, 0, 0, 0], &[0, 0, 0, 0], &[0, 0, 0, 0], &[0, 0, 0, 0]]);
+
+        let mut bitmap = zeros.clone();
+        bitmap.blit_clip(&ones, (0, -4));
+        assert_eq!(
+            bitmap,
+            Bitmap::from_slice(&[&[1, 1, 1, 1], &[0, 0, 0, 0], &[0, 0, 0, 0], &[0, 0, 0, 0],])
+        );
+
+        let mut bitmap = zeros.clone();
+        bitmap.blit_clip(&ones, (0, 10));
+        assert_eq!(bitmap, zeros);
     }
 }
