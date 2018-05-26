@@ -23,6 +23,8 @@ endif
 	cd buildroot && git rev-parse HEAD > output/.cache-version
 
 sdimage-ci: update-config
+	chmod +x buildroot/board/piso/post-build.sh
+	chmod +x buildroot/board/piso/post-image.sh
 ifeq ("$(shell cd buildroot && ./utils/should-rebuild)","rebuild")
 	docker run -v $(CURDIR):/pISO -w /pISO/buildroot \
 			--user $(CURRENT_USER):$(CURRENT_GROUP) \
