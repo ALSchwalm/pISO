@@ -276,6 +276,7 @@ impl DriveFormat {
     fn format_volume(
         volume: &mut lvm::LogicalVolume,
         format: &InitialDriveFormat,
+        name: &str,
     ) -> error::Result<()> {
         // First create the partition table
         match *format {
@@ -313,19 +314,22 @@ impl DriveFormat {
         utils::wait_for_path(&loopback_path, Duration::from_millis(1000))?;
         utils::run_check_output("partprobe", &[&loopback_path])?;
 
-        let first_part_path = (loopback_path.to_string_lossy() + "p1").into_owned();
+        let first_part_path: String = (loopback_path.to_string_lossy() + "p1").into_owned();
         utils::wait_for_path(&Path::new(&first_part_path), Duration::from_millis(1000))?;
 
         // Now do the format
         match *format {
             InitialDriveFormat::Windows => {
                 utils::run_check_output("mkfs.ntfs", &["-f", &first_part_path])?;
+                utils::run_check_output("ntfslabel", &[&first_part_path, name])?;
             }
             InitialDriveFormat::MacOs | InitialDriveFormat::Universal => {
-                utils::run_check_output("mkfs.exfat", &[&first_part_path as &str])?;
+                utils::run_check_output("mkfs.exfat", &[&first_part_path])?;
+                utils::run_check_output("exfatlabel", &[&first_part_path, name])?;
             }
             InitialDriveFormat::Linux => {
-                utils::run_check_output("mkfs.ext3", &[&first_part_path as &str])?;
+                utils::run_check_output("mkfs.ext3", &[&first_part_path])?;
+                utils::run_check_output("e2label", &[&first_part_path, name])?;
             }
         };
 
@@ -394,10 +398,10 @@ impl input::Input for DriveFormat {
                 _ => {
                     let count = self.vg.volumes()?.len();
 
-                    let mut volume = self.vg
-                        .create_volume(&format!("Drive{}", count), self.size)?;
+                    let name = format!("Drive{}", count);
+                    let mut volume = self.vg.create_volume(&name, self.size)?;
 
-                    DriveFormat::format_volume(&mut volume, &self.selected)?;
+                    DriveFormat::format_volume(&mut volume, &self.selected, &name)?;
 
                     self.state = DriveFormatState::Done;
                     return Ok((
