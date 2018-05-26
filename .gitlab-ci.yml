@@ -24,6 +24,8 @@ rust-tests:
 make-image:
   script:
   - make sdimage-ci &> build.log
+  tags:
+    - disk-image
   artifacts:
     name: "sdimage-$CI_COMMIT_SHA"
     paths:
