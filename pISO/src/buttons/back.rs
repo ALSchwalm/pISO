@@ -6,6 +6,7 @@ use error;
 use font;
 use input;
 use render;
+use state;
 
 pub struct BackButton {
     action: action::Action,
@@ -44,6 +45,8 @@ impl input::Input for BackButton {
         }
     }
 }
+
+impl state::State for BackButton {}
 
 impl Widget for BackButton {
     fn windowid(&self) -> WindowId {

@@ -10,6 +10,7 @@ use lvm;
 use usb;
 use utils;
 use render;
+use state;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
@@ -28,11 +29,17 @@ pub enum MountState {
     External(usb::StorageID),
 }
 
+#[derive(Serialize, Deserialize, Default)]
+pub struct PersistVDriveState {
+    pub external_mount: bool,
+}
+
 pub struct VirtualDrive {
     pub state: MountState,
     pub usb: Arc<Mutex<usb::UsbGadget>>,
     pub volume: lvm::LogicalVolume,
     pub window: WindowId,
+    pub persist: PersistVDriveState,
 }
 
 impl VirtualDrive {
@@ -47,6 +54,7 @@ impl VirtualDrive {
             state: MountState::Unmounted,
             usb: usb,
             volume: volume,
+            persist: PersistVDriveState::default(),
         })
     }
 
@@ -63,6 +71,7 @@ impl VirtualDrive {
                     .export_file(&self.volume.path, false)
                     .chain_err(|| "failed to mount drive external")?;
                 self.state = MountState::External(id);
+                self.persist.external_mount = true;
                 Ok(())
             }
             MountState::Internal(_) => {
@@ -85,6 +94,7 @@ impl VirtualDrive {
             }
         }
         self.state = MountState::Unmounted;
+        self.persist.external_mount = false;
         Ok(())
     }
 
@@ -233,6 +243,26 @@ impl input::Input for VirtualDrive {
                 Ok((true, vec![]))
             }
             _ => Ok((false, vec![])),
+        }
+    }
+}
+
+impl state::Stateful for VirtualDrive {
+    type State = PersistVDriveState;
+    fn state(&self) -> &Self::State {
+        &self.persist
+    }
+    fn state_mut(&mut self) -> &mut Self::State {
+        &mut self.persist
+    }
+    fn key(&self) -> String {
+        self.name().into()
+    }
+    fn on_load(&mut self, disp: &mut DisplayManager) -> Result<()> {
+        if self.persist.external_mount {
+            self.mount_external()
+        } else {
+            self.mount_internal(disp)
         }
     }
 }

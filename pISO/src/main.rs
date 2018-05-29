@@ -30,6 +30,7 @@ mod lvm;
 mod newdrive;
 mod piso;
 mod render;
+mod state;
 mod stats;
 mod usb;
 mod utils;
@@ -53,11 +54,14 @@ fn run() -> error::Result<()> {
     println!("Building display manager");
     let mut manager = displaymanager::DisplayManager::new(display)?;
 
+    println!("Building StateManager");
+    let mut state = state::StateManager::new();
+
     println!("Building USB gadget");
     let gadget = Arc::new(Mutex::new(usb::UsbGadget::new(
         "/sys/kernel/config/usb_gadget/g1",
         usb::GadgetConfig {
-            vendor_id: "0x1209", // pid.codes vendor id
+            vendor_id: "0x1209",  // pid.codes vendor id
             product_id: "0x0256", // pISO Hat product id
             device_bcd: "0x0100",
             usb_bcd: "0x0200",
@@ -77,6 +81,9 @@ fn run() -> error::Result<()> {
 
     println!("Building pISO");
     let mut piso = piso::PIso::new(&mut manager, gadget, config)?;
+
+    println!("Restoring State");
+    state.load_state(&mut piso, &mut manager)?;
 
     println!("Rendering pISO");
     manager.render(&piso)?;
@@ -102,6 +109,9 @@ fn run() -> error::Result<()> {
         } {}
 
         println!("Event loop finished");
+
+        println!("Saving state");
+        state.save_state(&mut piso)?;
     }
 
     Ok(())

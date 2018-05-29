@@ -6,6 +6,7 @@ use error::{Result, ResultExt};
 use error_chain::ChainedError;
 use input;
 use render;
+use state;
 use std::collections::BTreeMap;
 
 pub type WindowId = u32;
@@ -506,7 +507,7 @@ impl DisplayManager {
     }
 }
 
-pub trait Widget: render::Render + input::Input {
+pub trait Widget: render::Render + input::Input + state::State {
     fn mut_children(&mut self) -> Vec<&mut Widget> {
         vec![]
     }
@@ -538,6 +539,8 @@ mod test {
             Ok((false, vec![]))
         }
     }
+
+    impl state::State for TestWidget {}
 
     impl Widget for TestWidget {
         fn mut_children(&mut self) -> Vec<&mut Widget> {

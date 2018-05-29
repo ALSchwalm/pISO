@@ -10,6 +10,7 @@ use newdrive;
 use usb;
 use std::sync::{Arc, Mutex};
 use render;
+use state;
 use stats;
 use utils;
 use vdrive;
@@ -124,6 +125,8 @@ impl input::Input for PIso {
         }
     }
 }
+
+impl state::State for PIso {}
 
 impl Widget for PIso {
     fn mut_children(&mut self) -> Vec<&mut Widget> {

@@ -1,3 +1,4 @@
+use serde_json;
 use std;
 use std::io;
 use sysfs_gpio;
@@ -5,6 +6,9 @@ use toml;
 
 #[derive(Debug, ErrorChain)]
 pub enum ErrorKind {
+    #[error_chain(foreign)]
+    Json(serde_json::Error),
+
     #[error_chain(foreign)]
     Toml(toml::de::Error),
 

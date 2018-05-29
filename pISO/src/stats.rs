@@ -7,6 +7,7 @@ use font;
 use input;
 use lvm;
 use render;
+use state;
 
 pub struct Stats {
     pub vg: lvm::VolumeGroup,
@@ -49,6 +50,8 @@ impl input::Input for Stats {
         Ok((false, vec![]))
     }
 }
+
+impl state::State for Stats {}
 
 impl Widget for Stats {
     fn mut_children(&mut self) -> Vec<&mut Widget> {

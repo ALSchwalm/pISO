@@ -10,6 +10,7 @@ use error::ResultExt;
 use font;
 use input;
 use render;
+use state;
 use utils;
 
 use std::fs;
@@ -259,6 +260,8 @@ impl input::Input for WifiMenu {
     }
 }
 
+impl state::State for WifiMenu {}
+
 impl Widget for WifiMenu {
     fn mut_children(&mut self) -> Vec<&mut Widget> {
         match self.state {
@@ -330,6 +333,7 @@ impl render::Render for SelectWifiMenu {
     }
 }
 impl input::Input for SelectWifiMenu {}
+impl state::State for SelectWifiMenu {}
 
 impl Widget for SelectWifiMenu {
     fn mut_children(&mut self) -> Vec<&mut Widget> {
@@ -447,6 +451,8 @@ impl input::Input for WifiClient {
     }
 }
 
+impl state::State for WifiClient {}
+
 impl Widget for WifiClient {
     fn windowid(&self) -> WindowId {
         self.windowid
@@ -480,6 +486,8 @@ impl WifiConnectedMenu {
         })
     }
 }
+
+impl state::State for WifiConnectedMenu {}
 
 impl Widget for WifiConnectedMenu {
     fn windowid(&self) -> WindowId {
@@ -566,6 +574,8 @@ impl input::Input for WifiAp {
         }
     }
 }
+
+impl state::State for WifiAp {}
 
 impl Widget for WifiAp {
     fn windowid(&self) -> WindowId {

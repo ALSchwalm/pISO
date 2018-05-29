@@ -9,6 +9,7 @@ use lvm;
 use render;
 use usb;
 use utils;
+use state;
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use std::path::{Path, PathBuf};
@@ -87,6 +88,8 @@ impl input::Input for NewDrive {
         }
     }
 }
+
+impl state::State for NewDrive {}
 
 impl Widget for NewDrive {
     fn mut_children(&mut self) -> Vec<&mut Widget> {
@@ -197,6 +200,8 @@ impl input::Input for DriveSize {
         }
     }
 }
+
+impl state::State for DriveSize {}
 
 impl Widget for DriveSize {
     fn mut_children(&mut self) -> Vec<&mut Widget> {
@@ -417,6 +422,8 @@ impl input::Input for DriveFormat {
         }
     }
 }
+
+impl state::State for DriveFormat {}
 
 impl Widget for DriveFormat {
     fn windowid(&self) -> WindowId {

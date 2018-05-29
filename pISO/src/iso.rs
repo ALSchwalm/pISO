@@ -6,6 +6,7 @@ use error;
 use font;
 use input;
 use render;
+use state;
 use std::sync::{Arc, Mutex};
 use std::path;
 use usb;
@@ -118,6 +119,8 @@ impl input::Input for Iso {
         }
     }
 }
+
+impl state::State for Iso {}
 
 impl Widget for Iso {
     fn mut_children(&mut self) -> Vec<&mut Widget> {
