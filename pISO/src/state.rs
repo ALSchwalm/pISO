@@ -53,22 +53,26 @@ where
 
 pub struct StateManager {
     pub path: PathBuf,
+    pub state: serde_json::Value,
 }
 
 impl StateManager {
     pub fn new() -> StateManager {
         StateManager {
             path: "/boot/piso.state".into(),
+            state: json!({}),
         }
     }
 
-    fn current_state(&mut self) -> serde_json::Value {
-        let f = File::open(&self.path).unwrap();
-        serde_json::from_reader(f).unwrap()
+    fn read_state(&mut self) -> serde_json::Value {
+        match File::open(&self.path) {
+            Ok(f) => serde_json::from_reader(f).expect("Failed to load state"),
+            Err(_) => json!({}),
+        }
     }
 
     pub fn load_state(&mut self, root: &mut Widget, disp: &mut DisplayManager) -> Result<()> {
-        let state = self.current_state();
+        self.state = self.read_state();
         fn visit(
             widget: &mut Widget,
             disp: &mut DisplayManager,
@@ -85,25 +89,30 @@ impl StateManager {
             }
             Ok(())
         }
-        visit(root, disp, &state)
+        visit(root, disp, &self.state)
     }
 
     pub fn save_state(&mut self, root: &mut Widget) -> Result<()> {
-        let mut state = self.current_state();
-        let old_state = state.clone();
-        fn visit(widget: &mut Widget, state: &mut serde_json::Value) -> Result<()> {
-            if let Some(key) = widget.index() {
-                state[key] = widget.store()?;
+        let old_state = self.state.clone();
+        {
+            let mut values = self.state.as_object_mut().ok_or("State is not an object")?;
+            fn visit(
+                widget: &mut Widget,
+                state: &mut serde_json::Map<String, serde_json::Value>,
+            ) -> Result<()> {
+                if let Some(key) = widget.index() {
+                    state.insert(key, widget.store()?);
+                }
+                for child in widget.mut_children() {
+                    visit(child, state)?;
+                }
+                Ok(())
             }
-            for child in widget.mut_children() {
-                visit(child, state)?;
-            }
-            Ok(())
+            visit(root, &mut values)?;
         }
-        visit(root, &mut state)?;
-        if state != old_state {
-            let mut f = File::open(&self.path).unwrap();
-            serde_json::ser::to_writer(&mut f, &state)?;
+        if self.state != old_state {
+            let mut f = File::create(&self.path)?;
+            serde_json::ser::to_writer(&mut f, &self.state)?;
         }
         Ok(())
     }
