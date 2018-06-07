@@ -6,6 +6,7 @@ authors = ["Adam Schwalm <adamschwalm@gmail.com>"]
 [dependencies]
 derive-error-chain = "0.11.0"
 error-chain = "0.11.0"
+lazy_static = "1.0"
 mio = "0.6"
 spidev = "0.3.0"
 serde = "1.0"

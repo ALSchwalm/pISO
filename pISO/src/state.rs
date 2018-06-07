@@ -4,6 +4,7 @@ use serde;
 use serde_json;
 use std::fs::File;
 use std::path::PathBuf;
+use std::sync::Mutex;
 
 pub trait State {
     fn index(&self) -> Option<String> {
@@ -71,6 +72,15 @@ impl StateManager {
         }
     }
 
+    pub fn get<I: serde_json::value::Index, S: serde::de::DeserializeOwned>(
+        &self,
+        index: I,
+    ) -> Result<S> {
+        Ok(serde_json::from_value(
+            self.state.get(index).ok_or("Failed to get state")?.clone(),
+        )?)
+    }
+
     pub fn load_state(&mut self, root: &mut Widget, disp: &mut DisplayManager) -> Result<()> {
         self.state = self.read_state();
         fn visit(
@@ -116,4 +126,8 @@ impl StateManager {
         }
         Ok(())
     }
+}
+
+lazy_static! {
+    pub static ref PERSISTENT_STATE: Mutex<StateManager> = { Mutex::new(StateManager::new()) };
 }

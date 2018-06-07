@@ -4,6 +4,8 @@
 extern crate error_chain;
 #[macro_use]
 extern crate derive_error_chain;
+#[macro_use]
+extern crate lazy_static;
 extern crate mio;
 extern crate serde;
 #[macro_use]
@@ -55,9 +57,6 @@ fn run() -> error::Result<()> {
     println!("Building display manager");
     let mut manager = displaymanager::DisplayManager::new(display)?;
 
-    println!("Building StateManager");
-    let mut state = state::StateManager::new();
-
     println!("Building USB gadget");
     let gadget = Arc::new(Mutex::new(usb::UsbGadget::new(
         "/sys/kernel/config/usb_gadget/g1",
@@ -84,7 +83,10 @@ fn run() -> error::Result<()> {
     let mut piso = piso::PIso::new(&mut manager, gadget, config)?;
 
     println!("Restoring State");
-    state.load_state(&mut piso, &mut manager)?;
+    state::PERSISTENT_STATE
+        .lock()
+        .expect("Failed to lock state")
+        .load_state(&mut piso, &mut manager)?;
 
     println!("Rendering pISO");
     manager.render(&piso)?;
@@ -108,11 +110,18 @@ fn run() -> error::Result<()> {
             manager.render(&piso).expect("Render failed");
             actions.len() > 0
         } {}
-
         println!("Event loop finished");
 
         println!("Saving state");
-        state.save_state(&mut piso)?;
+        state::PERSISTENT_STATE
+            .lock()
+            .expect("Failed to lock state")
+            .save_state(&mut piso)?;
+
+        // Some rendering pulls saved state from other widgets, so
+        // do a final render to update those
+        println!("Final Render");
+        manager.render(&piso).expect("Render failed");
     }
 
     Ok(())

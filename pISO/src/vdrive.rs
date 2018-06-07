@@ -29,9 +29,21 @@ pub enum MountState {
     External(usb::StorageID),
 }
 
-#[derive(Serialize, Deserialize, Default)]
+#[derive(Serialize, Deserialize)]
 pub struct PersistVDriveState {
     pub external_mount: bool,
+    pub readonly: bool,
+    pub removable: bool,
+}
+
+impl Default for PersistVDriveState {
+    fn default() -> PersistVDriveState {
+        PersistVDriveState {
+            external_mount: false,
+            readonly: false,
+            removable: true,
+        }
+    }
 }
 
 pub struct VirtualDrive {
@@ -68,7 +80,12 @@ impl VirtualDrive {
             MountState::Unmounted => {
                 let id = self.usb
                     .lock()?
-                    .export_file(&self.volume.path, false)
+                    .export_file(
+                        &self.volume.path,
+                        false,
+                        self.persist.readonly,
+                        self.persist.removable,
+                    )
                     .chain_err(|| "failed to mount drive external")?;
                 self.state = MountState::External(id);
                 self.persist.external_mount = true;
@@ -240,6 +257,10 @@ impl input::Input for VirtualDrive {
         match *action {
             action::Action::ToggleVDriveMount(id) if id == self.window => {
                 self.toggle_mount(disp)?;
+                Ok((true, vec![]))
+            }
+            action::Action::ToggleDriveReadOnly(ref name) if name == self.name() => {
+                self.persist.readonly = !self.persist.readonly;
                 Ok((true, vec![]))
             }
             _ => Ok((false, vec![])),

@@ -201,7 +201,7 @@ impl VolumeGroup {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct LogicalVolume {
     pub name: String,
     pub path: PathBuf,

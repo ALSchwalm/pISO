@@ -1,4 +1,5 @@
 use action;
+use buttons;
 use bitmap;
 use config;
 use controller;
@@ -23,6 +24,7 @@ pub struct PIso {
     stats: stats::Stats,
     usb: Arc<Mutex<usb::UsbGadget>>,
     _vg: lvm::VolumeGroup,
+    readonly: buttons::vdrivelist::DriveList,
     window: WindowId,
     wifi: wifi::WifiMenu,
 }
@@ -40,6 +42,14 @@ impl PIso {
         let ndrive = newdrive::NewDrive::new(disp, usb.clone(), vg.clone())?;
         let stats = stats::Stats::new(disp, vg.clone())?;
         let wifi = wifi::WifiMenu::new(disp, &config)?;
+
+        let readonly = buttons::vdrivelist::DriveList::new(
+            disp,
+            "Make Read-Only",
+            vg.clone(),
+            |drive| action::Action::ToggleDriveReadOnly(drive.to_string()),
+            |state| state.readonly,
+        )?;
 
         if drives.len() > 0 {
             // Focus the first drive
@@ -63,6 +73,7 @@ impl PIso {
             window: window,
             stats: stats,
             wifi: wifi,
+            readonly: readonly,
         })
     }
 
@@ -137,6 +148,7 @@ impl Widget for PIso {
         children.push(&mut self.newdrive as &mut Widget);
         children.push(&mut self.wifi as &mut Widget);
         children.push(&mut self.stats as &mut Widget);
+        children.push(&mut self.readonly as &mut Widget);
         children
     }
 
@@ -148,6 +160,7 @@ impl Widget for PIso {
         children.push(&self.newdrive as &Widget);
         children.push(&self.wifi as &Widget);
         children.push(&self.stats as &Widget);
+        children.push(&self.readonly as &Widget);
         children
     }
 

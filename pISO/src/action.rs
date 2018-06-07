@@ -1,7 +1,7 @@
 use lvm;
 
 #[allow(unused)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Action {
     CreateDrive(lvm::LogicalVolume),
     ToggleVDriveMount(u32),
@@ -21,4 +21,9 @@ pub enum Action {
 
     OpenWifiConnectedMenu(String),
     CloseWifiConnectedMenu,
+
+    OpenVDriveList(u32),
+    CloseVDriveList(u32),
+
+    ToggleDriveReadOnly(String),
 }

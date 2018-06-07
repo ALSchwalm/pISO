@@ -134,7 +134,13 @@ impl UsbGadget {
         new_id
     }
 
-    pub fn export_file<P>(&mut self, path: P, cdrom: bool) -> Result<StorageID>
+    pub fn export_file<P>(
+        &mut self,
+        path: P,
+        cdrom: bool,
+        readonly: bool,
+        removable: bool,
+    ) -> Result<StorageID>
     where
         P: AsRef<Path>,
     {
@@ -156,7 +162,10 @@ impl UsbGadget {
         // This seems like a bug. If 'ro' has already been set, you cannot
         // change it (resource busy) even if UDC is inactive and the
         // config is removed. For now just suppress the error.
-        File::create(storage_root.join("ro"))?.write_all((cdrom as i32).to_string().as_bytes())?;
+        File::create(storage_root.join("ro"))?.write_all((readonly as i32).to_string().as_bytes())?;
+
+        File::create(storage_root.join("removable"))?
+            .write_all((removable as i32).to_string().as_bytes())?;
 
         File::create(storage_root.join("file"))?
             .write_all(path.as_ref().to_string_lossy().as_bytes())?;

@@ -41,7 +41,12 @@ impl Iso {
     pub fn mount(&mut self) -> error::Result<()> {
         match self.state {
             MountState::Unmounted => {
-                self.state = MountState::Mounted(self.usb.lock()?.export_file(&self.path, true)?);
+                self.state = MountState::Mounted(self.usb.lock()?.export_file(
+                    &self.path,
+                    true,
+                    true,
+                    true,
+                )?);
                 Ok(())
             }
             MountState::Mounted(_) => Err("Attempt to mount iso while already mounted".into()),
@@ -123,14 +128,6 @@ impl input::Input for Iso {
 impl state::State for Iso {}
 
 impl Widget for Iso {
-    fn mut_children(&mut self) -> Vec<&mut Widget> {
-        vec![]
-    }
-
-    fn children(&self) -> Vec<&Widget> {
-        vec![]
-    }
-
     fn windowid(&self) -> WindowId {
         self.window
     }
