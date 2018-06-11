@@ -263,6 +263,10 @@ impl input::Input for VirtualDrive {
                 self.persist.readonly = !self.persist.readonly;
                 Ok((true, vec![]))
             }
+            action::Action::ToggleDriveNonRemovable(ref name) if name == self.name() => {
+                self.persist.removable = !self.persist.removable;
+                Ok((true, vec![]))
+            }
             _ => Ok((false, vec![])),
         }
     }

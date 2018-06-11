@@ -25,6 +25,7 @@ pub struct PIso {
     usb: Arc<Mutex<usb::UsbGadget>>,
     _vg: lvm::VolumeGroup,
     readonly: buttons::vdrivelist::DriveList,
+    removable: buttons::vdrivelist::DriveList,
     window: WindowId,
     wifi: wifi::WifiMenu,
 }
@@ -51,6 +52,14 @@ impl PIso {
             |state| state.readonly,
         )?;
 
+        let removable = buttons::vdrivelist::DriveList::new(
+            disp,
+            "Make Nonremovable",
+            vg.clone(),
+            |drive| action::Action::ToggleDriveNonRemovable(drive.to_string()),
+            |state| !state.removable,
+        )?;
+
         if drives.len() > 0 {
             // Focus the first drive
             drives.iter().next().map(|drive| {
@@ -74,6 +83,7 @@ impl PIso {
             stats: stats,
             wifi: wifi,
             readonly: readonly,
+            removable: removable,
         })
     }
 
@@ -149,6 +159,7 @@ impl Widget for PIso {
         children.push(&mut self.wifi as &mut Widget);
         children.push(&mut self.stats as &mut Widget);
         children.push(&mut self.readonly as &mut Widget);
+        children.push(&mut self.removable as &mut Widget);
         children
     }
 
@@ -161,6 +172,7 @@ impl Widget for PIso {
         children.push(&self.wifi as &Widget);
         children.push(&self.stats as &Widget);
         children.push(&self.readonly as &Widget);
+        children.push(&self.removable as &Widget);
         children
     }
 

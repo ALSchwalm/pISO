@@ -26,4 +26,5 @@ pub enum Action {
     CloseVDriveList(u32),
 
     ToggleDriveReadOnly(String),
+    ToggleDriveNonRemovable(String),
 }
