@@ -16,6 +16,7 @@ use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
 
 const VDRIVE_MOUNT_ROOT: &str = "/mnt";
+const ISO_FOLDER: &str = "ISOS";
 
 pub struct MountInfo {
     pub loopback_path: PathBuf,
@@ -162,7 +163,7 @@ impl VirtualDrive {
                         if self.mount_partition(&entry.path(), &mount_point).is_ok() {
                             mounted_partitions.push(mount_point.to_path_buf());
 
-                            let isopath = mount_point.join("ISOS");
+                            let isopath = mount_point.join(ISO_FOLDER);
                             if isopath.exists() {
                                 for iso in fs::read_dir(isopath)? {
                                     let iso = iso?;
