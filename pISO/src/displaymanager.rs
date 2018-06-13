@@ -125,6 +125,7 @@ impl DisplayManager {
                     Position::Fixed(_, _) => 0,
                     Position::Normal => window.bitmap.height(),
                 };
+                pos = (pos.0, pos.1 + height);
                 for child in current.children() {
                     // Skip other fixed position windows
                     let window = disp.get(child.windowid()).expect("widget has no window");
@@ -140,7 +141,6 @@ impl DisplayManager {
                         pos = (res.1, res.2);
                     }
                 }
-                pos = (pos.0, pos.1 + height);
                 (false, pos.0, pos.1)
             }
         }
@@ -185,53 +185,39 @@ impl DisplayManager {
         target: &'b Widget,
         next: bool,
     ) -> Option<&'b Widget> {
-        fn visit<'a, 'b>(
+        fn build_list<'a, 'b>(
             disp: &'a DisplayManager,
             current: &'b Widget,
-            target: &'b Widget,
-            next: bool,
-        ) -> (bool, Option<&'b Widget>) {
-            if current.windowid() == target.windowid() {
-                return (true, current.children().first().map(|n| *n));
-            } else {
-                let children = if next {
-                    current.children()
-                } else {
-                    current
-                        .children()
-                        .iter()
-                        .rev()
-                        .map(|c| *c)
-                        .collect::<Vec<_>>()
-                };
-                for (idx, child) in children.iter().enumerate() {
-                    if disp.is_fixed_position(*child) {
-                        continue;
-                    }
-                    let res = visit(disp, *child, target, next);
-                    if res.0 {
-                        if res.1.is_none() {
-                            return (
-                                true,
-                                children
-                                    .iter()
-                                    .skip(idx + 1)
-                                    .filter(|child| !disp.is_fixed_position(**child))
-                                    .next()
-                                    .map(|n| *n),
-                            );
-                        } else {
-                            return res;
-                        }
-                    }
+            items: &mut Vec<&'b Widget>,
+        ) {
+            items.push(current);
+            for child in current.children() {
+                if disp.is_fixed_position(child) {
+                    continue;
                 }
-                return (false, None);
+                build_list(disp, child, items);
             }
         }
 
         let parent = self.nearest_fixed_position_ancestor(root, target)
             .expect("Widget has no fixed position parent");
-        visit(self, parent, target, next).1
+
+        let mut items = vec![];
+        build_list(self, parent, &mut items);
+
+        for (idx, item) in items.iter().enumerate() {
+            if item.windowid() == target.windowid() {
+                if next {
+                    return items.get(idx + 1).map(|i| *i);
+                } else {
+                    if idx == 0 {
+                        return None;
+                    }
+                    return items.get(idx - 1).map(|i| *i);
+                }
+            }
+        }
+        None
     }
 
     fn next_widget<'a, 'b>(&'a self, root: &'b Widget, target: &'b Widget) -> Option<&'b Widget> {
@@ -583,8 +569,14 @@ mod test {
 
         let child1 = TestWidget::new(&mut manager, Position::Normal, (0, 10), vec![])
             .expect("Failed to create test widget");
-        let child2 = TestWidget::new(&mut manager, Position::Normal, (0, 10), vec![])
+        let child2_1 = TestWidget::new(&mut manager, Position::Normal, (0, 10), vec![])
             .expect("Failed to create test widget");
+        let child2 = TestWidget::new(
+            &mut manager,
+            Position::Normal,
+            (0, 10),
+            vec![child2_1.clone()],
+        ).expect("Failed to create test widget");
         let root = TestWidget::new(
             &mut manager,
             Position::Fixed(0, 0),
@@ -596,6 +588,7 @@ mod test {
         assert_eq!(manager.calculate_position(&root, &root), (0, 0));
         assert_eq!(manager.calculate_position(&root, &child1), (0, 0));
         assert_eq!(manager.calculate_position(&root, &child2), (0, 10));
+        assert_eq!(manager.calculate_position(&root, &child2_1), (0, 20));
     }
 
     #[test]
@@ -606,8 +599,14 @@ mod test {
 
         let child1 = TestWidget::new(&mut manager, Position::Normal, (0, 0), vec![])
             .expect("Failed to create test widget");
-        let child2 = TestWidget::new(&mut manager, Position::Normal, (0, 0), vec![])
+        let child2_1 = TestWidget::new(&mut manager, Position::Normal, (0, 10), vec![])
             .expect("Failed to create test widget");
+        let child2 = TestWidget::new(
+            &mut manager,
+            Position::Normal,
+            (0, 0),
+            vec![child2_1.clone()],
+        ).expect("Failed to create test widget");
         let mut root = TestWidget::new(
             &mut manager,
             Position::Fixed(0, 0),
@@ -628,6 +627,18 @@ mod test {
         manager
             .on_event(&mut root, &controller::Event::Down)
             .unwrap();
+        assert_eq!(
+            manager.find_focused_widget(&mut root).unwrap().windowid(),
+            child2.windowid()
+        );
+        manager
+            .on_event(&mut root, &controller::Event::Down)
+            .unwrap();
+        assert_eq!(
+            manager.find_focused_widget(&mut root).unwrap().windowid(),
+            child2_1.windowid()
+        );
+        manager.on_event(&mut root, &controller::Event::Up).unwrap();
         assert_eq!(
             manager.find_focused_widget(&mut root).unwrap().windowid(),
             child2.windowid()
