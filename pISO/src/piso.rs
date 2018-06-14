@@ -23,9 +23,10 @@ pub struct PIso {
     newdrive: newdrive::NewDrive,
     stats: stats::Stats,
     usb: Arc<Mutex<usb::UsbGadget>>,
-    _vg: lvm::VolumeGroup,
+    vg: lvm::VolumeGroup,
     readonly: buttons::vdrivelist::DriveList,
     removable: buttons::vdrivelist::DriveList,
+    delete: buttons::vdrivelist::DriveList,
     window: WindowId,
     wifi: wifi::WifiMenu,
 }
@@ -50,6 +51,7 @@ impl PIso {
             vg.clone(),
             |drive| action::Action::ToggleDriveReadOnly(drive.to_string()),
             |state| state.readonly,
+            false,
         )?;
 
         let removable = buttons::vdrivelist::DriveList::new(
@@ -58,6 +60,16 @@ impl PIso {
             vg.clone(),
             |drive| action::Action::ToggleDriveNonRemovable(drive.to_string()),
             |state| !state.removable,
+            false,
+        )?;
+
+        let delete = buttons::vdrivelist::DriveList::new(
+            disp,
+            "Delete Drive",
+            vg.clone(),
+            |drive| action::Action::DeleteDrive(drive.to_string()),
+            |_| false,
+            true,
         )?;
 
         if drives.len() > 0 {
@@ -78,12 +90,13 @@ impl PIso {
             drives: drives,
             newdrive: ndrive,
             usb: usb,
-            _vg: vg,
+            vg: vg,
             window: window,
             stats: stats,
             wifi: wifi,
             readonly: readonly,
             removable: removable,
+            delete: delete,
         })
     }
 
@@ -142,6 +155,16 @@ impl input::Input for PIso {
                 self.add_drive(disp, volume.clone())?;
                 Ok((true, vec![]))
             }
+            action::Action::DeleteDrive(ref name) => {
+                if let Some(ref mut drive) =
+                    self.drives.iter_mut().find(|drive| drive.name() == name)
+                {
+                    drive.unmount()?;
+                }
+                self.drives.retain(|drive| drive.name() != name);
+                self.vg.delete_volume(&name)?;
+                Ok((true, vec![]))
+            }
             _ => Ok((false, vec![])),
         }
     }
@@ -160,6 +183,7 @@ impl Widget for PIso {
         children.push(&mut self.stats as &mut Widget);
         children.push(&mut self.readonly as &mut Widget);
         children.push(&mut self.removable as &mut Widget);
+        children.push(&mut self.delete as &mut Widget);
         children
     }
 
@@ -173,6 +197,7 @@ impl Widget for PIso {
         children.push(&self.stats as &Widget);
         children.push(&self.readonly as &Widget);
         children.push(&self.removable as &Widget);
+        children.push(&self.delete as &Widget);
         children
     }
 

@@ -338,7 +338,7 @@ impl DriveFormat {
             }
         };
 
-        //TODO: undo the loopback mount
+        utils::run_check_output("losetup", &["-d", &loopback_path.to_string_lossy()])?;
         Ok(())
     }
 }

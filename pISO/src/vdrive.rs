@@ -116,6 +116,14 @@ impl VirtualDrive {
         Ok(())
     }
 
+    pub fn unmount(&mut self) -> Result<()> {
+        match self.state {
+            MountState::Unmounted => Ok(()),
+            MountState::Internal(_) => self.unmount_internal(),
+            MountState::External(_) => self.unmount_external(),
+        }
+    }
+
     fn mount_partition<P1, P2>(&self, device: P1, target: P2) -> Result<()>
     where
         P1: AsRef<Path>,

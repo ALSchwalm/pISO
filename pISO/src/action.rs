@@ -4,6 +4,7 @@ use lvm;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Action {
     CreateDrive(lvm::LogicalVolume),
+    DeleteDrive(String),
     ToggleVDriveMount(u32),
     ToggleIsoMount(u32),
 

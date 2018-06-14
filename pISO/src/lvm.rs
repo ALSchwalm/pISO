@@ -1,4 +1,5 @@
 use error::{ErrorKind, Result, ResultExt};
+use utils;
 use std::fmt::Display;
 use std::str::FromStr;
 use serde::de::{self, Deserialize, Deserializer};
@@ -176,28 +177,31 @@ impl VolumeGroup {
     }
 
     pub fn create_volume(&mut self, name: &str, size: u64) -> Result<LogicalVolume> {
-        let output = Command::new("lvcreate")
-            .args(&[
+        utils::run_check_output(
+            "lvcreate",
+            &[
                 "-V",
                 &(size.to_string() + "B"),
                 "-T",
                 &format!("{}/thinpool", &self.name),
                 "-n",
                 &name,
-            ])
-            .output()
-            .chain_err(|| "lvcreate could not start")?;
-        if !output.status.success() {
-            return Err(format!(
-                "lvcreate failed: {}",
-                String::from_utf8_lossy(&output.stderr)
-            ).into());
-        }
+            ],
+        )?;
+
         self.volumes()?
             .into_iter()
             .filter(|lv| lv.name == name)
             .next()
             .ok_or("Unable to find new volume".into())
+    }
+
+    pub fn delete_volume(&mut self, name: &str) -> Result<()> {
+        // Note, the drive must not be currently mounted
+        let drivename = format!("{}/{}", &self.name, name);
+        utils::run_check_output("lvchange", &["-a", "n", &drivename])?;
+        utils::run_check_output("lvremove", &[&format!("{}/{}", &self.name, name), "-y"])?;
+        Ok(())
     }
 }
 
