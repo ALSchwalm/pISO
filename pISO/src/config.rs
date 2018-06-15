@@ -1,4 +1,10 @@
 #[derive(Clone, Debug, Deserialize)]
+pub struct UiConfig {
+    pub size_step: u32,
+    pub default_size: u32,
+}
+
+#[derive(Clone, Debug, Deserialize)]
 pub struct UserConfig {
     pub name: String,
     pub password: String,
@@ -26,6 +32,7 @@ pub struct WifiConfig {
 pub struct Config {
     pub user: UserConfig,
     pub wifi: WifiConfig,
+    pub ui: UiConfig,
 }
 
 #[cfg(test)]
@@ -35,6 +42,10 @@ mod tests {
     #[test]
     fn load_test() {
         let toml_str = r#"
+          [ui]
+          size_step=5
+          default_size=50
+
           [user]
           name="piso"
           password="password"

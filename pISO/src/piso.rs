@@ -42,7 +42,7 @@ impl PIso {
 
         let vg = lvm::VolumeGroup::from_path("/dev/VolGroup00")?;
         let drives = Self::build_drives_from_vg(disp, &vg, &usb)?;
-        let ndrive = newdrive::NewDrive::new(disp, usb.clone(), vg.clone())?;
+        let ndrive = newdrive::NewDrive::new(disp, usb.clone(), vg.clone(), config.clone())?;
         let stats = stats::Stats::new(disp, vg.clone())?;
         let wifi = wifi::WifiMenu::new(disp, &config)?;
 

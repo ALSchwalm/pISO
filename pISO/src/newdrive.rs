@@ -1,5 +1,6 @@
 use action;
 use bitmap;
+use config;
 use controller;
 use displaymanager::{DisplayManager, Position, Widget, Window, WindowId};
 use error;
@@ -24,6 +25,7 @@ pub struct NewDrive {
     pub usb: Arc<Mutex<usb::UsbGadget>>,
     vg: lvm::VolumeGroup,
     state: NewDriveState,
+    config: config::Config,
 }
 
 impl NewDrive {
@@ -31,6 +33,7 @@ impl NewDrive {
         disp: &mut DisplayManager,
         usb: Arc<Mutex<usb::UsbGadget>>,
         vg: lvm::VolumeGroup,
+        config: config::Config,
     ) -> error::Result<NewDrive> {
         let our_window = disp.add_child(Position::Normal)?;
         Ok(NewDrive {
@@ -38,6 +41,7 @@ impl NewDrive {
             state: NewDriveState::Unselected,
             usb: usb,
             vg: vg,
+            config: config,
         })
     }
 }
@@ -74,7 +78,8 @@ impl input::Input for NewDrive {
     ) -> error::Result<(bool, Vec<action::Action>)> {
         match *action {
             action::Action::OpenSizeMenu => {
-                let menu = DriveSize::new(disp, self.usb.clone(), self.vg.clone())?;
+                let menu =
+                    DriveSize::new(disp, self.usb.clone(), self.vg.clone(), self.config.clone())?;
                 disp.shift_focus(&menu);
                 self.state = NewDriveState::PickingSize(menu);
                 Ok((true, vec![]))
@@ -122,6 +127,7 @@ struct DriveSize {
     pub usb: Arc<Mutex<usb::UsbGadget>>,
     vg: lvm::VolumeGroup,
     state: DriveSizeState,
+    config: config::Config,
 }
 
 impl DriveSize {
@@ -129,13 +135,15 @@ impl DriveSize {
         disp: &mut DisplayManager,
         usb: Arc<Mutex<usb::UsbGadget>>,
         vg: lvm::VolumeGroup,
+        config: config::Config,
     ) -> error::Result<DriveSize> {
         Ok(DriveSize {
             window: disp.add_child(Position::Fixed(0, 0))?,
-            current_percent: 50,
+            current_percent: config.ui.default_size,
             usb: usb,
             vg: vg,
             state: DriveSizeState::Unselected,
+            config: config,
         })
     }
 
@@ -179,11 +187,11 @@ impl input::Input for DriveSize {
     ) -> error::Result<(bool, Vec<action::Action>)> {
         match *action {
             action::Action::IncDriveSize => {
-                self.current_percent += 5;
+                self.current_percent += self.config.ui.size_step;
                 Ok((true, vec![]))
             }
             action::Action::DecDriveSize => {
-                self.current_percent -= 5;
+                self.current_percent -= self.config.ui.size_step;
                 Ok((true, vec![]))
             }
             action::Action::OpenFormatMenu => {
