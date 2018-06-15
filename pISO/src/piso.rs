@@ -27,6 +27,7 @@ pub struct PIso {
     readonly: buttons::vdrivelist::DriveList,
     removable: buttons::vdrivelist::DriveList,
     delete: buttons::vdrivelist::DriveList,
+    snapshot: buttons::vdrivelist::DriveList,
     window: WindowId,
     wifi: wifi::WifiMenu,
 }
@@ -72,6 +73,15 @@ impl PIso {
             true,
         )?;
 
+        let snapshot = buttons::vdrivelist::DriveList::new(
+            disp,
+            "Snapshot Drive",
+            vg.clone(),
+            |drive| action::Action::SnapshotDrive(drive.to_string()),
+            |_| false,
+            true,
+        )?;
+
         if drives.len() > 0 {
             // Focus the first drive
             drives.iter().next().map(|drive| {
@@ -97,6 +107,7 @@ impl PIso {
             readonly: readonly,
             removable: removable,
             delete: delete,
+            snapshot: snapshot,
         })
     }
 
@@ -155,6 +166,11 @@ impl input::Input for PIso {
                 self.add_drive(disp, volume.clone())?;
                 Ok((true, vec![]))
             }
+            action::Action::SnapshotDrive(ref name) => {
+                let report = self.vg.snapshot_volume(name)?;
+                self.add_drive(disp, report)?;
+                Ok((true, vec![]))
+            }
             action::Action::DeleteDrive(ref name) => {
                 if let Some(ref mut drive) =
                     self.drives.iter_mut().find(|drive| drive.name() == name)
@@ -183,6 +199,7 @@ impl Widget for PIso {
         children.push(&mut self.stats as &mut Widget);
         children.push(&mut self.readonly as &mut Widget);
         children.push(&mut self.removable as &mut Widget);
+        children.push(&mut self.snapshot as &mut Widget);
         children.push(&mut self.delete as &mut Widget);
         children
     }
@@ -197,6 +214,7 @@ impl Widget for PIso {
         children.push(&self.stats as &Widget);
         children.push(&self.readonly as &Widget);
         children.push(&self.removable as &Widget);
+        children.push(&self.snapshot as &Widget);
         children.push(&self.delete as &Widget);
         children
     }

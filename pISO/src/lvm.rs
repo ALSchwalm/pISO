@@ -196,6 +196,31 @@ impl VolumeGroup {
             .ok_or("Unable to find new volume".into())
     }
 
+    pub fn snapshot_volume(&mut self, name: &str) -> Result<LogicalVolume> {
+        let snapshot_name = format!("{}-backup", name);
+        utils::run_check_output(
+            "lvcreate",
+            &[
+                &format!("{}/{}", &self.name, name),
+                "-n",
+                &snapshot_name,
+                "-s",
+            ],
+        )?;
+
+        // Activate the snapshot and set off the skip-activation bit
+        utils::run_check_output(
+            "lvchange",
+            &["-kn", "-ay", &format!("{}/{}", &self.name, &snapshot_name)],
+        )?;
+
+        self.volumes()?
+            .into_iter()
+            .filter(|lv| lv.name == snapshot_name)
+            .next()
+            .ok_or("Unable to find new volume".into())
+    }
+
     pub fn delete_volume(&mut self, name: &str) -> Result<()> {
         // Note, the drive must not be currently mounted
         let drivename = format!("{}/{}", &self.name, name);
