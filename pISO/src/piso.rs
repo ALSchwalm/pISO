@@ -1,5 +1,4 @@
 use action;
-use buttons;
 use bitmap;
 use config;
 use controller;
@@ -8,6 +7,7 @@ use error::Result;
 use input;
 use lvm;
 use newdrive;
+use options;
 use usb;
 use std::sync::{Arc, Mutex};
 use render;
@@ -24,12 +24,9 @@ pub struct PIso {
     stats: stats::Stats,
     usb: Arc<Mutex<usb::UsbGadget>>,
     vg: lvm::VolumeGroup,
-    readonly: buttons::vdrivelist::DriveList,
-    removable: buttons::vdrivelist::DriveList,
-    delete: buttons::vdrivelist::DriveList,
-    snapshot: buttons::vdrivelist::DriveList,
     window: WindowId,
     wifi: wifi::WifiMenu,
+    options: options::Options,
 }
 
 impl PIso {
@@ -45,42 +42,7 @@ impl PIso {
         let ndrive = newdrive::NewDrive::new(disp, usb.clone(), vg.clone(), config.clone())?;
         let stats = stats::Stats::new(disp, vg.clone())?;
         let wifi = wifi::WifiMenu::new(disp, &config)?;
-
-        let readonly = buttons::vdrivelist::DriveList::new(
-            disp,
-            "Make Read-Only",
-            vg.clone(),
-            |drive| action::Action::ToggleDriveReadOnly(drive.to_string()),
-            |state| state.readonly,
-            false,
-        )?;
-
-        let removable = buttons::vdrivelist::DriveList::new(
-            disp,
-            "Make Nonremovable",
-            vg.clone(),
-            |drive| action::Action::ToggleDriveNonRemovable(drive.to_string()),
-            |state| !state.removable,
-            false,
-        )?;
-
-        let delete = buttons::vdrivelist::DriveList::new(
-            disp,
-            "Delete Drive",
-            vg.clone(),
-            |drive| action::Action::DeleteDrive(drive.to_string()),
-            |_| false,
-            true,
-        )?;
-
-        let snapshot = buttons::vdrivelist::DriveList::new(
-            disp,
-            "Snapshot Drive",
-            vg.clone(),
-            |drive| action::Action::SnapshotDrive(drive.to_string()),
-            |_| false,
-            true,
-        )?;
+        let options = options::Options::new(disp, &vg)?;
 
         if drives.len() > 0 {
             // Focus the first drive
@@ -104,10 +66,7 @@ impl PIso {
             window: window,
             stats: stats,
             wifi: wifi,
-            readonly: readonly,
-            removable: removable,
-            delete: delete,
-            snapshot: snapshot,
+            options: options,
         })
     }
 
@@ -196,11 +155,8 @@ impl Widget for PIso {
             .collect::<Vec<&mut Widget>>();
         children.push(&mut self.newdrive as &mut Widget);
         children.push(&mut self.wifi as &mut Widget);
+        children.push(&mut self.options as &mut Widget);
         children.push(&mut self.stats as &mut Widget);
-        children.push(&mut self.readonly as &mut Widget);
-        children.push(&mut self.removable as &mut Widget);
-        children.push(&mut self.snapshot as &mut Widget);
-        children.push(&mut self.delete as &mut Widget);
         children
     }
 
@@ -211,11 +167,8 @@ impl Widget for PIso {
             .collect::<Vec<&Widget>>();
         children.push(&self.newdrive as &Widget);
         children.push(&self.wifi as &Widget);
+        children.push(&self.options as &Widget);
         children.push(&self.stats as &Widget);
-        children.push(&self.readonly as &Widget);
-        children.push(&self.removable as &Widget);
-        children.push(&self.snapshot as &Widget);
-        children.push(&self.delete as &Widget);
         children
     }
 

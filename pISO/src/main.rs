@@ -31,6 +31,7 @@ mod input;
 mod iso;
 mod lvm;
 mod newdrive;
+mod options;
 mod piso;
 mod render;
 mod state;

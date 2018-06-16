@@ -208,7 +208,7 @@ impl DriveList {
 impl render::Render for DriveList {
     fn render(&self, _manager: &DisplayManager, window: &Window) -> error::Result<bitmap::Bitmap> {
         let mut base = bitmap::Bitmap::new(10, 1);
-        base.blit(&font::render_text(self.name), (12, 0));
+        base.blit(&font::render_text(self.name), (16, 0));
         if window.focus {
             base.blit(&bitmap::Bitmap::from_slice(font::ARROW), (0, 0));
         }
