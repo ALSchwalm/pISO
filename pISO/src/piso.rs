@@ -15,6 +15,7 @@ use state;
 use stats;
 use utils;
 use vdrive;
+use version;
 use wifi;
 
 pub struct PIso {
@@ -27,6 +28,7 @@ pub struct PIso {
     window: WindowId,
     wifi: wifi::WifiMenu,
     options: options::Options,
+    version: version::PiVersion,
 }
 
 impl PIso {
@@ -67,6 +69,7 @@ impl PIso {
             stats: stats,
             wifi: wifi,
             options: options,
+            version: version::read_version()?,
         })
     }
 
@@ -154,7 +157,9 @@ impl Widget for PIso {
             .map(|vdrive| vdrive as &mut Widget)
             .collect::<Vec<&mut Widget>>();
         children.push(&mut self.newdrive as &mut Widget);
-        children.push(&mut self.wifi as &mut Widget);
+        if self.version.has_wifi() {
+            children.push(&mut self.wifi as &mut Widget);
+        }
         children.push(&mut self.options as &mut Widget);
         children.push(&mut self.stats as &mut Widget);
         children
@@ -166,7 +171,9 @@ impl Widget for PIso {
             .map(|vdrive| vdrive as &Widget)
             .collect::<Vec<&Widget>>();
         children.push(&self.newdrive as &Widget);
-        children.push(&self.wifi as &Widget);
+        if self.version.has_wifi() {
+            children.push(&self.wifi as &Widget);
+        }
         children.push(&self.options as &Widget);
         children.push(&self.stats as &Widget);
         children

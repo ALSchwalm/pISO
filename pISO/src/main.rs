@@ -39,6 +39,7 @@ mod stats;
 mod usb;
 mod utils;
 mod vdrive;
+mod version;
 mod wifi;
 
 use std::sync::{Arc, Mutex};
