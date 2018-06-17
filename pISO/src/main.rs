@@ -14,6 +14,7 @@ extern crate serde_derive;
 extern crate serde_json;
 extern crate spidev;
 extern crate sysfs_gpio;
+extern crate tar;
 extern crate toml;
 
 use std::fs;
@@ -42,22 +43,58 @@ mod vdrive;
 mod version;
 mod wifi;
 
-use std::sync::{Arc, Mutex};
+use error::ResultExt;
+use error_chain::ChainedError;
 use std::io::Read;
+use std::path::Path;
+use std::sync::{Arc, Mutex};
 
-quick_main!(run);
+quick_main!(trap_error);
 
-fn run() -> error::Result<()> {
-    let mut f = fs::File::open("/boot/piso.config").expect("config file not found");
-    let mut config_contents = String::new();
-    f.read_to_string(&mut config_contents)
-        .expect("unable to read config");
-    let config: config::Config = toml::from_str(&config_contents)?;
-
+fn trap_error() -> error::Result<()> {
     let display = display::LedDisplay::new()?;
 
     println!("Building display manager");
     let mut manager = displaymanager::DisplayManager::new(display)?;
+
+    let err = run(&mut manager);
+
+    // Write the error to stdout and update the screen
+    match err {
+        Err(ref e) => {
+            println!("{}", e.display_chain());
+
+            let mut msg = bitmap::Bitmap::new(display::DISPLAY_WIDTH, display::DISPLAY_HEIGHT);
+            msg.blit(&font::render_text("An error occurred"), (0, 0));
+            manager.display.update(msg)?;
+        }
+        _ => (),
+    };
+
+    // Build the error tarball
+    let tarfile = fs::File::create("/boot/piso_debug.tar")?;
+    let mut tarbuilder = tar::Builder::new(tarfile);
+
+    // Don't add the config by default, because it will contain wifi passwords
+    let files = vec!["/tmp/piso.log", "/boot/piso.state", "/tmp/messages"];
+    for file in files {
+        let p = Path::new(file);
+        if p.exists() {
+            tarbuilder.append_file(p.file_name().unwrap(), &mut fs::File::open(file)?)?;
+        }
+    }
+    tarbuilder.finish()?;
+
+    panic!("pISO terminated")
+}
+
+fn run(manager: &mut displaymanager::DisplayManager) -> error::Result<()> {
+    let mut f = fs::File::open("/boot/piso.config").chain_err(|| "config file not found")?;
+    let mut config_contents = String::new();
+    f.read_to_string(&mut config_contents)
+        .expect("unable to read config");
+    let config: config::Config =
+        toml::from_str(&config_contents).chain_err(|| "failed to parse config file")?;
 
     println!("Building USB gadget");
     let gadget = Arc::new(Mutex::new(usb::UsbGadget::new(
@@ -82,13 +119,13 @@ fn run() -> error::Result<()> {
     )?));
 
     println!("Building pISO");
-    let mut piso = piso::PIso::new(&mut manager, gadget, config)?;
+    let mut piso = piso::PIso::new(manager, gadget, config)?;
 
     println!("Restoring State");
     state::PERSISTENT_STATE
         .lock()
         .expect("Failed to lock state")
-        .load_state(&mut piso, &mut manager)?;
+        .load_state(&mut piso, manager)?;
 
     println!("Rendering pISO");
     manager.render(&piso)?;
@@ -99,17 +136,17 @@ fn run() -> error::Result<()> {
         println!("Handling event: {:?}", event);
         let mut actions = manager
             .on_event(&mut piso, &event)
-            .expect("Event handling failed");
+            .chain_err(|| "Event handling failed")?;
 
         // Keep processing until all actions are finished
         while {
             println!("Doing actions: {:?}", actions);
             manager
                 .do_actions(&mut piso, &mut actions)
-                .expect("Doing actions failed");
+                .chain_err(|| "Doing actions failed")?;
 
             println!("Rendering");
-            manager.render(&piso).expect("Render failed");
+            manager.render(&piso).chain_err(|| "Render failed")?;
             actions.len() > 0
         } {}
         println!("Event loop finished");
@@ -123,7 +160,7 @@ fn run() -> error::Result<()> {
         // Some rendering pulls saved state from other widgets, so
         // do a final render to update those
         println!("Final Render");
-        manager.render(&piso).expect("Render failed");
+        manager.render(&piso).chain_err(|| "Final render failed")?;
     }
 
     Ok(())
