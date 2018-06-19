@@ -6,7 +6,11 @@ CACHE_FILE=$BASEDIR/../buildroot/output/.cache-version
 if [ ! -f $CACHE_FILE ]; then
     echo "rebuild"
     exit 0
-elif [[ $(< $CACHE_FILE) != $(git submodule) ]]; then
+fi
+
+CACHE_CONTENTS="$(cat $CACHE_FILE)"
+SUBMODULES="$(git submodule)"
+if [[ "$CACHE_CONTENTS" != "$SUBMODULES" ]]; then
     echo "rebuild"
     exit 0
 fi
