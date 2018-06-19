@@ -1,0 +1,15 @@
+#!/bin/sh
+
+BASEDIR=$(dirname "$0")
+CACHE_FILE=$BASEDIR/../buildroot/output/.cache-version
+
+if [ ! -f $CACHE_FILE ]; then
+    echo "rebuild"
+    exit 0
+elif [[ $(< $CACHE_FILE) != $(git submodule) ]]; then
+    echo "rebuild"
+    exit 0
+fi
+
+echo "keep"
+exit 0
