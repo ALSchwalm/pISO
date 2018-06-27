@@ -166,7 +166,19 @@ impl VirtualDrive {
                         .to_string_lossy()
                         .starts_with(&loopback_name)
                     {
-                        let mount_point = Path::new(VDRIVE_MOUNT_ROOT).join(entry.file_name());
+                        let dev_name = entry.file_name().to_string_lossy().into_owned();
+                        // Skip the base loopback device
+                        if dev_name == loopback_name {
+                            continue;
+                        }
+
+                        let part_num = dev_name.split("p").last().ok_or(ErrorKind::Msg(
+                            "Failed to determine partition number".into(),
+                        ))?;
+
+                        let mount_folder_name = format!("{}p{}", self.volume.name, part_num);
+
+                        let mount_point = Path::new(VDRIVE_MOUNT_ROOT).join(mount_folder_name);
                         fs::create_dir_all(&mount_point)?;
                         if self.mount_partition(&entry.path(), &mount_point).is_ok() {
                             mounted_partitions.push(mount_point.to_path_buf());
