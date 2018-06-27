@@ -78,6 +78,7 @@ impl PIso {
             "/opt/piso_scripts/add_user.sh",
             &[&config.user.name, &config.user.password],
         )?;
+        utils::run_check_output("bindfs", &["-u", &config.user.name, "/mnt", "/user-mnt"])?;
         Ok(())
     }
 
