@@ -24,7 +24,7 @@ pub struct WifiClientNetworkConfig {
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct WifiConfig {
-    pub client: Vec<WifiClientNetworkConfig>,
+    pub client: Option<Vec<WifiClientNetworkConfig>>,
     pub ap: WifiApConfig,
 }
 
@@ -63,6 +63,25 @@ mod tests {
           password="piso"
         "#;
 
-        let decoded: Config = toml::from_str(toml_str).unwrap();
+        let _: Config = toml::from_str(toml_str).unwrap();
+    }
+
+    #[test]
+    fn load_with_no_wifi_client() {
+        let toml_str = r#"
+          [ui]
+          size_step=5
+          default_size=50
+
+          [user]
+          name="piso"
+          password="password"
+
+          [wifi.ap]
+          ssid="piso"
+          password="piso"
+        "#;
+
+        let _: Config = toml::from_str(toml_str).unwrap();
     }
 }

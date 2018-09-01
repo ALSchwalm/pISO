@@ -69,7 +69,7 @@ impl WifiManager {
             .append(true)
             .open(WPA_SUPPLICANT_TMP_CONF)?;
 
-        for client in self.config.wifi.client.iter() {
+        for client in self.config.wifi.client.as_ref().unwrap_or(&vec![]).iter() {
             let mut output =
                 utils::run_check_output("wpa_passphrase", &[&client.ssid, &client.password])?;
             // Remove the trailing newline and '}'
@@ -299,6 +299,8 @@ impl SelectWifiMenu {
         let clients = config
             .wifi
             .client
+            .as_ref()
+            .unwrap_or(&vec![])
             .iter()
             .enumerate()
             .map(|(id, config)| {
