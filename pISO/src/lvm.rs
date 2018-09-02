@@ -234,6 +234,7 @@ impl VolumeGroup {
 pub struct LogicalVolume {
     pub name: String,
     pub path: PathBuf,
+    pub size: u64
 }
 
 impl LogicalVolume {
@@ -241,6 +242,7 @@ impl LogicalVolume {
         LogicalVolume {
             path: vg.path.join(&report.lv_name).to_path_buf(),
             name: report.lv_name,
+            size: report.lv_size
         }
     }
 }

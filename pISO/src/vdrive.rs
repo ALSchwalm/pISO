@@ -75,6 +75,10 @@ impl VirtualDrive {
         &self.volume.name
     }
 
+    pub fn size(&self) -> u64 {
+        self.volume.size
+    }
+
     pub fn mount_external(&mut self) -> Result<()> {
         match self.state {
             MountState::External(_) => Ok(()),
@@ -246,7 +250,9 @@ impl VirtualDrive {
 impl render::Render for VirtualDrive {
     fn render(&self, _manager: &DisplayManager, window: &Window) -> Result<bitmap::Bitmap> {
         let mut base = bitmap::Bitmap::new(10, 1);
-        base.blit(&font::render_text(self.name()), (12, 0));
+        let short_size = self.size() as f64 / (1024 * 1024 * 1024) as f64;
+        let label = format!("{} ({:.1}GB)", self.name(), short_size);
+        base.blit(&font::render_text(label), (12, 0));
         match self.state {
             MountState::External(_) => {
                 base.blit(&bitmap::Bitmap::from_slice(font::SQUARE), (6, 0));
