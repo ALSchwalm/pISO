@@ -29,7 +29,7 @@ const PURE_FTPD_CONF: &'static str = "/etc/pure-ftpd.conf";
 #[derive(PartialEq)]
 enum WifiState {
     Ap,
-    Client(usize),
+    Client(usize, String),
     Inactive,
     Uninitialized,
 }
@@ -98,7 +98,7 @@ impl WifiManager {
     fn activate_host(&mut self) -> error::Result<()> {
         match self.state {
             WifiState::Ap => (),
-            WifiState::Client(_) => {
+            WifiState::Client(_, _) => {
                 self.deactivate_client()?;
                 self.activate_host()?;
             }
@@ -118,7 +118,7 @@ impl WifiManager {
                 utils::run_check_output("killall", &["hostapd"])?;
                 self.state = WifiState::Inactive;
             }
-            WifiState::Client(_) => {
+            WifiState::Client(_, _) => {
                 return Err("Attempt to deactivate host while in client mode".into())
             }
             _ => (),
@@ -135,7 +135,7 @@ impl WifiManager {
 
     fn activate_client(&mut self, network_num: usize) -> error::Result<()> {
         match self.state {
-            WifiState::Client(_) => {
+            WifiState::Client(_, _) => {
                 self.deactivate_client()?;
                 self.activate_client(network_num)?;
             }
@@ -161,7 +161,12 @@ impl WifiManager {
 
                 utils::run_check_output("udhcpc", &["-i", "wlan0", "-n"])
                     .chain_err(|| "Failed to obtain dhcp lease")?;
-                self.state = WifiState::Client(network_num);
+
+                let ip =
+                    utils::run_check_output("/opt/piso_scripts/wifi_address.sh", &[] as &[&str])?
+                        .trim_right()
+                        .into();
+                self.state = WifiState::Client(network_num, ip);
             }
         };
         Ok(())
@@ -169,7 +174,7 @@ impl WifiManager {
 
     fn deactivate_client(&mut self) -> error::Result<()> {
         match self.state {
-            WifiState::Client(_) => {
+            WifiState::Client(_, _) => {
                 // Suppress failure if it isn't running
                 let _ = utils::run_check_output("killall", &["wpa_supplicant"]);
                 self.state = WifiState::Inactive;
@@ -182,7 +187,7 @@ impl WifiManager {
 
     fn toggle_client(&mut self, network_num: usize) -> error::Result<()> {
         match self.state {
-            WifiState::Client(num) => {
+            WifiState::Client(num, _) => {
                 if num == network_num {
                     self.deactivate_client()
                 } else {
@@ -391,14 +396,20 @@ impl WifiClient {
 impl render::Render for WifiClient {
     fn render(&self, _manager: &DisplayManager, window: &Window) -> error::Result<bitmap::Bitmap> {
         let mut base = bitmap::Bitmap::new(10, 1);
-        base.blit(&font::render_text(&self.config.ssid), (12, 0));
+
         match self.manager.lock()?.state {
-            WifiState::Client(id) => {
+            WifiState::Client(id, ref ip) => {
+                base.blit(
+                    &font::render_text(format!("{} ({})", &self.config.ssid, ip)),
+                    (12, 0),
+                );
                 if id == self.id {
                     base.blit(&bitmap::Bitmap::from_slice(font::SQUARE), (6, 0));
                 }
             }
-            _ => (),
+            _ => {
+                base.blit(&font::render_text(&self.config.ssid), (12, 0));
+            }
         }
         if window.focus {
             base.blit(&bitmap::Bitmap::from_slice(font::ARROW), (0, 0));
