@@ -4,6 +4,7 @@ use config;
 use controller;
 use displaymanager::{DisplayManager, Position, Widget, Window, WindowId};
 use error::Result;
+use fs;
 use input;
 use lvm;
 use newdrive;
@@ -78,7 +79,17 @@ impl PIso {
             "/opt/piso_scripts/add_user.sh",
             &[&config.user.name, &config.user.password],
         )?;
-        utils::run_check_output("bindfs", &["-u", &config.user.name, "/mnt", "/user-mnt"])?;
+        fs::create_dir("/user-mnt")?;
+        utils::run_check_output(
+            "bindfs",
+            &[
+                "--multithreaded",
+                "-u",
+                &config.user.name,
+                "/mnt",
+                "/user-mnt",
+            ],
+        )?;
         Ok(())
     }
 
