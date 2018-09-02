@@ -39,7 +39,7 @@ else
 			--rm  adamschwalm/piso:latest /bin/bash -c "make piso-reconfigure && make"
 endif
 	git submodule > buildroot/output/.cache-version
-	tar -cvzf sdcard.img.tar.gz buildroot/output/images/sdcard.img
+	zip -j sdcard.img.zip buildroot/output/images/sdcard.img
 	cp buildroot/output/images/rootfs.squashfs .
 
 .PHONY: update-config

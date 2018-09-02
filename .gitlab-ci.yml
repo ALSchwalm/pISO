@@ -10,7 +10,7 @@ services:
 
 before_script:
   - apk update
-  - apk add make tar git
+  - apk add make tar git zip
 
 rust-tests:
   script:
@@ -29,7 +29,7 @@ make-image:
   artifacts:
     name: "sdimage-$CI_COMMIT_SHA"
     paths:
-    - sdcard.img.tar.gz
+    - sdcard.img.zip
     - rootfs.squashfs
     - build.log
     when: always
