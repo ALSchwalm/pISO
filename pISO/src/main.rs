@@ -65,7 +65,9 @@ fn trap_error() -> error::Result<()> {
             println!("{}", e.display_chain());
 
             let mut msg = bitmap::Bitmap::new(display::DISPLAY_WIDTH, display::DISPLAY_HEIGHT);
-            msg.blit(&font::render_text("An error occurred"), (0, 0));
+            msg.blit(&font::render_text("An error occurred."), (0, 0));
+            msg.blit(&font::render_text("Please visit:"), (0, 14));
+            msg.blit(&font::render_text("http://piso.support"), (0, 28));
             manager.display.update(msg)?;
         }
         _ => (),
