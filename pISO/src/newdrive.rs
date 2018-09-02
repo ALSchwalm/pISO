@@ -409,7 +409,7 @@ impl input::Input for DriveFormat {
                     return Ok((false, vec![]));
                 }
                 _ => {
-                    let count = self.vg.volumes()?.len();
+                    let count = self.vg.volumes()?.len() + 1;
 
                     let name = format!("Drive{}", count);
                     let mut volume = self.vg.create_volume(&name, self.size)?;
