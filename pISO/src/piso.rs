@@ -36,7 +36,7 @@ impl PIso {
     pub fn new(
         disp: &mut DisplayManager,
         usb: Arc<Mutex<usb::UsbGadget>>,
-        config: config::Config,
+        config: &config::Config,
     ) -> Result<PIso> {
         let window = disp.add_child(Position::Fixed(0, 0))?;
 
@@ -58,10 +58,10 @@ impl PIso {
 
         // Add the user account if it doesn't exit and ensure the password
         // is what is expected.
-        PIso::configure_user(&config)?;
+        PIso::configure_user(config)?;
 
         Ok(PIso {
-            _config: config,
+            _config: config.clone(),
             drives: drives,
             newdrive: ndrive,
             usb: usb,

@@ -1,3 +1,4 @@
+use config;
 use error;
 use mio::*;
 use std::thread;
@@ -13,6 +14,8 @@ pub enum Event {
 
 #[allow(unused)]
 pub struct Controller {
+    config: config::Config,
+
     poll: Poll,
     events: <Events as IntoIterator>::IntoIter,
     up_input: Pin,
@@ -21,13 +24,11 @@ pub struct Controller {
     up_poller: AsyncPinPoller,
     down_poller: AsyncPinPoller,
     select_poller: AsyncPinPoller,
-    debounce_delay: time::Duration,
-    debounce_min_hold: time::Duration,
     last_event: time::SystemTime,
 }
 
 impl Controller {
-    pub fn new() -> error::Result<Controller> {
+    pub fn new(config: &config::Config) -> error::Result<Controller> {
         let up_input = Pin::new(27);
         up_input.export()?;
         up_input.set_direction(Direction::In)?;
@@ -54,6 +55,7 @@ impl Controller {
         poll.register(&select_poller, Token(3), Ready::readable(), PollOpt::edge())?;
 
         Ok(Controller {
+            config: config.clone(),
             poll: poll,
             events: events.into_iter(),
             up_input: up_input,
@@ -62,8 +64,6 @@ impl Controller {
             up_poller: up_poller,
             down_poller: down_poller,
             select_poller: select_poller,
-            debounce_delay: time::Duration::from_millis(100),
-            debounce_min_hold: time::Duration::from_millis(40),
             last_event: time::SystemTime::now(),
         })
     }
@@ -89,10 +89,10 @@ impl Iterator for Controller {
                 }
             };
 
-            if self.last_event.elapsed().unwrap() > self.debounce_delay
+            if self.last_event.elapsed().unwrap() > self.config.ui.debounce_delay
                 && event.readiness().is_readable()
             {
-                thread::sleep(self.debounce_min_hold);
+                thread::sleep(self.config.ui.debounce_min_hold);
 
                 let res = match event.token() {
                     Token(1) => {

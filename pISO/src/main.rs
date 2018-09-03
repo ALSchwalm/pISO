@@ -121,7 +121,7 @@ fn run(manager: &mut displaymanager::DisplayManager) -> error::Result<()> {
     )?));
 
     println!("Building pISO");
-    let mut piso = piso::PIso::new(manager, gadget, config)?;
+    let mut piso = piso::PIso::new(manager, gadget, &config)?;
 
     println!("Restoring State");
     state::PERSISTENT_STATE
@@ -133,7 +133,7 @@ fn run(manager: &mut displaymanager::DisplayManager) -> error::Result<()> {
     manager.render(&piso)?;
 
     println!("Building controller");
-    let controller = controller::Controller::new()?;
+    let controller = controller::Controller::new(&config)?;
     for event in controller {
         println!("Handling event: {:?}", event);
         let mut actions = manager

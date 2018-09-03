@@ -1,7 +1,24 @@
+use serde::de::{Deserialize, Deserializer};
+use std::time;
+
+fn from_millis<'de, D>(deserializer: D) -> ::std::result::Result<time::Duration, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let val = u64::deserialize(deserializer)?;
+    Ok(time::Duration::from_millis(val))
+}
+
 #[derive(Clone, Debug, Deserialize)]
 pub struct UiConfig {
     pub size_step: u32,
     pub default_size: u32,
+
+    #[serde(deserialize_with = "from_millis")]
+    pub debounce_delay: time::Duration,
+
+    #[serde(deserialize_with = "from_millis")]
+    pub debounce_min_hold: time::Duration,
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -45,6 +62,8 @@ mod tests {
           [ui]
           size_step=5
           default_size=50
+          debounce_delay=100
+          debounce_min_hold=40
 
           [user]
           name="piso"
@@ -72,6 +91,8 @@ mod tests {
           [ui]
           size_step=5
           default_size=50
+          debounce_delay=100
+          debounce_min_hold=40
 
           [user]
           name="piso"
