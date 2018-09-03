@@ -155,8 +155,8 @@ impl DriveSize {
 }
 
 impl render::Render for DriveSize {
-    fn render(&self, _manager: &DisplayManager, _window: &Window) -> error::Result<bitmap::Bitmap> {
-        let mut base = bitmap::Bitmap::new(0, 0);
+    fn render(&self, manager: &DisplayManager, _window: &Window) -> error::Result<bitmap::Bitmap> {
+        let mut base = bitmap::Bitmap::new(manager.display.width(), manager.display.height());
         base.blit(&font::render_text("New drive capacity:"), (0, 0));
 
         let short_size = self.current_size() as f64 / (1024 * 1024 * 1024) as f64;
