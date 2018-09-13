@@ -11,6 +11,7 @@ use newdrive;
 use options;
 use usb;
 use std::sync::{Arc, Mutex};
+use std::thread;
 use render;
 use state;
 use stats;
@@ -57,8 +58,10 @@ impl PIso {
         }
 
         // Add the user account if it doesn't exit and ensure the password
-        // is what is expected.
-        PIso::configure_user(config)?;
+        // is what is expected. This can take a little while, so do this
+        // async.
+        let user_config = config.clone();
+        thread::spawn(move || PIso::configure_user(user_config));
 
         Ok(PIso {
             _config: config.clone(),
@@ -74,7 +77,7 @@ impl PIso {
         })
     }
 
-    fn configure_user(config: &config::Config) -> Result<()> {
+    fn configure_user(config: config::Config) -> Result<()> {
         utils::run_check_output(
             "/opt/piso_scripts/add_user.sh",
             &[&config.user.name, &config.user.password],
