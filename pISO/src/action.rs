@@ -21,8 +21,13 @@ pub enum Action {
     OpenWifiMenu,
     CloseWifiMenu,
 
-    OpenWifiConnectedMenu(String),
-    CloseWifiConnectedMenu,
+    OpenWifiClientConnectionMenu,
+    CloseWifiClientConnectionMenu,
+    WifiClientConnect,
+
+    OpenWifiApStartupMenu,
+    CloseWifiApStartupMenu,
+    WifiApStartup,
 
     OpenVDriveList(u32),
     CloseVDriveList(u32),
