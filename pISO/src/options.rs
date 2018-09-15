@@ -73,7 +73,7 @@ impl Options {
 impl render::Render for Options {
     fn render(&self, _manager: &DisplayManager, window: &Window) -> error::Result<bitmap::Bitmap> {
         let mut base = bitmap::Bitmap::new(10, 1);
-        base.blit(&font::render_text("Optons"), (12, 0));
+        base.blit(&font::render_text("Options"), (12, 0));
         if window.focus {
             base.blit(&bitmap::Bitmap::from_slice(font::ARROW), (0, 0));
         }
