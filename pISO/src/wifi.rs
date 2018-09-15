@@ -16,7 +16,6 @@ use utils;
 use std::fs;
 use std::io::Write;
 use std::sync::{Arc, Mutex};
-use std::{thread, time};
 
 const HOSTAPD_CONF: &'static str = "/etc/hostapd.conf";
 const HOSTAPD_TMP_CONF: &'static str = "/tmp/hostapd.conf";
@@ -82,8 +81,11 @@ impl WifiManager {
             wpa_supplicant.write_all(output.as_bytes())?;
         }
 
-        // TODO: determine why we need to sleep here
-        thread::sleep(time::Duration::from_secs(1));
+        // Add the user to the samba db
+        utils::run_check_output(
+            "/opt/piso_scripts/smb_user.sh",
+            &[&self.config.user.name, &self.config.user.password]
+        )?;
 
         fs::copy(SMB_CONF, SMB_TMP_CONF)?;
         utils::run_check_output("smbd", &["-D", "-s", SMB_TMP_CONF])?;
