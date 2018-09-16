@@ -20,7 +20,7 @@ use version;
 use wifi;
 
 pub struct PIso {
-    _config: config::Config,
+    config: config::Config,
     pub drives: Vec<vdrive::VirtualDrive>,
     newdrive: newdrive::NewDrive,
     stats: stats::Stats,
@@ -41,10 +41,10 @@ impl PIso {
         let window = disp.add_child(Position::Fixed(0, 0))?;
 
         let vg = lvm::VolumeGroup::from_path("/dev/VolGroup00")?;
-        let drives = Self::build_drives_from_vg(disp, &vg, &usb)?;
+        let drives = Self::build_drives_from_vg(disp, &vg, &usb, config)?;
         let ndrive = newdrive::NewDrive::new(disp, usb.clone(), vg.clone(), config.clone())?;
         let stats = stats::Stats::new(disp, vg.clone())?;
-        let wifi = wifi::WifiMenu::new(disp, &config)?;
+        let wifi = wifi::WifiMenu::new(disp, config)?;
         let options = options::Options::new(disp, &vg)?;
 
         if drives.len() > 0 {
@@ -62,7 +62,7 @@ impl PIso {
         PIso::configure_user(config)?;
 
         Ok(PIso {
-            _config: config.clone(),
+            config: config.clone(),
             drives: drives,
             newdrive: ndrive,
             usb: usb,
@@ -98,10 +98,11 @@ impl PIso {
         disp: &mut DisplayManager,
         vg: &lvm::VolumeGroup,
         usb: &Arc<Mutex<usb::UsbGadget>>,
+        config: &config::Config,
     ) -> Result<Vec<vdrive::VirtualDrive>> {
         let mut drives: Vec<vdrive::VirtualDrive> = vec![];
         for vol in vg.volumes()?.into_iter() {
-            drives.push(vdrive::VirtualDrive::new(disp, usb.clone(), vol)?)
+            drives.push(vdrive::VirtualDrive::new(disp, usb.clone(), vol, config)?)
         }
         Ok(drives)
     }
@@ -111,7 +112,7 @@ impl PIso {
         disp: &mut DisplayManager,
         volume: lvm::LogicalVolume,
     ) -> Result<&vdrive::VirtualDrive> {
-        let vdrive = vdrive::VirtualDrive::new(disp, self.usb.clone(), volume)?;
+        let vdrive = vdrive::VirtualDrive::new(disp, self.usb.clone(), volume, &self.config)?;
         self.drives.push(vdrive);
 
         Ok(self.drives
