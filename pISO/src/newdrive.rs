@@ -177,6 +177,7 @@ impl input::Input for DriveSize {
             controller::Event::Select => Ok((true, vec![action::Action::OpenFormatMenu])),
             controller::Event::Up => Ok((true, vec![action::Action::IncDriveSize])),
             controller::Event::Down => Ok((true, vec![action::Action::DecDriveSize])),
+            _ => Ok((false, vec![])),
         }
     }
 
@@ -394,6 +395,7 @@ impl input::Input for DriveFormat {
                 self.selected = self.next_format();
                 Ok((true, vec![]))
             }
+            _ => (Ok((false, vec![]))),
         }
     }
 

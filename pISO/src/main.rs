@@ -133,9 +133,15 @@ fn run(manager: &mut displaymanager::DisplayManager) -> error::Result<()> {
     manager.render(&piso)?;
 
     println!("Building controller");
-    let controller = controller::Controller::new(&config)?;
-    for event in controller {
+    let mut controller = controller::Controller::new(&config)?;
+    loop {
+        let event = controller.next().unwrap();
         println!("Handling event: {:?}", event);
+        if event == controller::Event::DownLong {
+            manager.display.flip_display();
+            controller.flip_controls();
+        }
+
         let mut actions = manager
             .on_event(&mut piso, &event)
             .chain_err(|| "Event handling failed")?;
@@ -164,6 +170,4 @@ fn run(manager: &mut displaymanager::DisplayManager) -> error::Result<()> {
         println!("Final Render");
         manager.render(&piso).chain_err(|| "Final render failed")?;
     }
-
-    Ok(())
 }

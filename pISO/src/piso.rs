@@ -128,8 +128,10 @@ impl render::Render for PIso {
 }
 
 impl input::Input for PIso {
-    fn on_event(&mut self, _: &controller::Event) -> Result<(bool, Vec<action::Action>)> {
-        Ok((false, vec![]))
+    fn on_event(&mut self, event: &controller::Event) -> Result<(bool, Vec<action::Action>)> {
+        match event {
+            _ => Ok((false, vec![])),
+        }
     }
 
     fn do_action(
@@ -138,6 +140,10 @@ impl input::Input for PIso {
         action: &action::Action,
     ) -> Result<(bool, Vec<action::Action>)> {
         match *action {
+            action::Action::FlipDisplay => {
+                disp.display.flip_display();
+                Ok((true, vec![]))
+            }
             action::Action::CreateDrive(ref volume) => {
                 self.add_drive(disp, volume.clone())?;
                 Ok((true, vec![]))

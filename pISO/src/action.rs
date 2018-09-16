@@ -34,4 +34,6 @@ pub enum Action {
 
     ToggleDriveReadOnly(String),
     ToggleDriveNonRemovable(String),
+
+    FlipDisplay,
 }

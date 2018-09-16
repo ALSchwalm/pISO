@@ -15,10 +15,10 @@ pub struct UiConfig {
     pub default_size: u32,
 
     #[serde(deserialize_with = "from_millis")]
-    pub debounce_delay: time::Duration,
+    pub min_button_press: time::Duration,
 
     #[serde(deserialize_with = "from_millis")]
-    pub debounce_min_hold: time::Duration,
+    pub button_long_press: time::Duration,
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -68,8 +68,8 @@ mod tests {
           [ui]
           size_step=5
           default_size=50
-          debounce_delay=100
-          debounce_min_hold=40
+          min_button_press=300
+          button_long_press=2000
 
           [system]
           auto_fstrim=true
@@ -100,8 +100,8 @@ mod tests {
           [ui]
           size_step=5
           default_size=50
-          debounce_delay=100
-          debounce_min_hold=40
+          min_button_press=300
+          button_long_press=2000
 
           [user]
           name="piso"

@@ -8,6 +8,8 @@ PISO_VERSION = 0.20
 PISO_SITE = $(HOST_DIR)/../../../pISO
 PISO_SITE_METHOD:=local
 
+PISO_DEPENDENCIES = host-cargo
+
 HOST_CARGO_HOME = $(HOST_DIR)/share/cargo
 HOST_CARGO_ENV = \
 	RUSTFLAGS="-Clink-arg=-Wl,-rpath,$(HOST_DIR)/lib" \
