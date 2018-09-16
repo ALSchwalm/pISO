@@ -197,11 +197,15 @@ impl VirtualDrive {
                                 if isopath.exists() {
                                     for iso in fs::read_dir(isopath)? {
                                         let iso = iso?;
-                                        isos.push(iso::Iso::new(disp, self.usb.clone(), iso.path())?);
+                                        isos.push(iso::Iso::new(
+                                            disp,
+                                            self.usb.clone(),
+                                            iso.path(),
+                                        )?);
                                     }
                                 }
-                            },
-                            Err(e) => println!("An error occured while mounting: {}", e)
+                            }
+                            Err(e) => println!("An error occured while mounting: {}", e),
                         }
                     }
                 }

@@ -84,7 +84,7 @@ impl WifiManager {
         // Add the user to the samba db
         utils::run_check_output(
             "/opt/piso_scripts/smb_user.sh",
-            &[&self.config.user.name, &self.config.user.password]
+            &[&self.config.user.name, &self.config.user.password],
         )?;
 
         fs::copy(SMB_CONF, SMB_TMP_CONF)?;
@@ -479,7 +479,7 @@ impl Widget for WifiClient {
 
 enum WifiClientConnectionState {
     Ready,
-    Connected
+    Connected,
 }
 
 pub struct WifiClientConnectionMenu {
@@ -487,18 +487,21 @@ pub struct WifiClientConnectionMenu {
     message: String,
     state: WifiClientConnectionState,
     id: usize,
-    manager: Arc<Mutex<WifiManager>>
+    manager: Arc<Mutex<WifiManager>>,
 }
 
 impl WifiClientConnectionMenu {
-    fn new(disp: &mut DisplayManager, manager: Arc<Mutex<WifiManager>>,
-           id: usize) -> error::Result<WifiClientConnectionMenu> {
+    fn new(
+        disp: &mut DisplayManager,
+        manager: Arc<Mutex<WifiManager>>,
+        id: usize,
+    ) -> error::Result<WifiClientConnectionMenu> {
         Ok(WifiClientConnectionMenu {
             windowid: disp.add_child(Position::Fixed(0, 0))?,
             message: "".into(),
             state: WifiClientConnectionState::Ready,
             id: id,
-            manager: manager
+            manager: manager,
         })
     }
 }
@@ -517,7 +520,7 @@ impl render::Render for WifiClientConnectionMenu {
         match self.state {
             WifiClientConnectionState::Ready => {
                 base.blit(&font::render_text("Connecting"), (0, 0));
-            },
+            }
             WifiClientConnectionState::Connected => {
                 base.blit(&font::render_text(&self.message), (0, 0));
                 base.blit(&font::render_text("Ok"), (10, 20));
@@ -536,14 +539,10 @@ impl input::Input for WifiClientConnectionMenu {
         event: &controller::Event,
     ) -> error::Result<(bool, Vec<action::Action>)> {
         match *event {
-            controller::Event::Select => {
-                match self.state {
-                    WifiClientConnectionState::Ready => {
-                        Ok((false, vec![]))
-                    }
-                    WifiClientConnectionState::Connected => {
-                        Ok((true, vec![action::Action::CloseWifiClientConnectionMenu]))
-                    }
+            controller::Event::Select => match self.state {
+                WifiClientConnectionState::Ready => Ok((false, vec![])),
+                WifiClientConnectionState::Connected => {
+                    Ok((true, vec![action::Action::CloseWifiClientConnectionMenu]))
                 }
             },
             _ => Ok((false, vec![])),
@@ -571,13 +570,12 @@ impl input::Input for WifiClientConnectionMenu {
                             Err(e) => format!("Failed: {}", e.description()),
                         };
                         self.state = WifiClientConnectionState::Connected;
-
-                    },
-                    _ => ()
+                    }
+                    _ => (),
                 }
                 Ok((true, vec![]))
-            },
-            _ => Ok((false, vec![]))
+            }
+            _ => Ok((false, vec![])),
         }
     }
 }
@@ -599,7 +597,7 @@ impl WifiAp {
             windowid: disp.add_child(Position::Normal)?,
             _config: config,
             manager: manager,
-            menu: None
+            menu: None,
         })
     }
 }
@@ -631,9 +629,7 @@ impl input::Input for WifiAp {
         event: &controller::Event,
     ) -> error::Result<(bool, Vec<action::Action>)> {
         match *event {
-            controller::Event::Select => {
-                Ok((true, vec![action::Action::OpenWifiApStartupMenu]))
-            }
+            controller::Event::Select => Ok((true, vec![action::Action::OpenWifiApStartupMenu])),
             _ => Ok((false, vec![])),
         }
     }
@@ -649,13 +645,13 @@ impl input::Input for WifiAp {
                 disp.shift_focus(&menu);
                 self.menu = Some(menu);
                 Ok((true, vec![action::Action::WifiApStartup]))
-            },
+            }
             &action::Action::CloseWifiApStartupMenu => {
                 self.menu = None;
                 disp.shift_focus(self);
                 Ok((true, vec![]))
             }
-            _ => Ok((false, vec![]))
+            _ => Ok((false, vec![])),
         }
     }
 }
@@ -684,15 +680,17 @@ impl Widget for WifiAp {
 
 pub struct WifiApStartupMenu {
     pub windowid: WindowId,
-    manager: Arc<Mutex<WifiManager>>
+    manager: Arc<Mutex<WifiManager>>,
 }
 
 impl WifiApStartupMenu {
-    fn new(disp: &mut DisplayManager, manager: Arc<Mutex<WifiManager>>)
-           -> error::Result<WifiApStartupMenu> {
+    fn new(
+        disp: &mut DisplayManager,
+        manager: Arc<Mutex<WifiManager>>,
+    ) -> error::Result<WifiApStartupMenu> {
         Ok(WifiApStartupMenu {
             windowid: disp.add_child(Position::Fixed(0, 0))?,
-            manager: manager
+            manager: manager,
         })
     }
 }
@@ -717,8 +715,8 @@ impl input::Input for WifiApStartupMenu {
             &action::Action::WifiApStartup => {
                 self.manager.lock()?.toggle_host()?;
                 Ok((true, vec![action::Action::CloseWifiApStartupMenu]))
-            },
-            _ => Ok((false, vec![]))
+            }
+            _ => Ok((false, vec![])),
         }
     }
 }
