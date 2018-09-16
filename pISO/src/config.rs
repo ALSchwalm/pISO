@@ -46,10 +46,16 @@ pub struct WifiConfig {
 }
 
 #[derive(Clone, Debug, Deserialize)]
+pub struct SystemConfig {
+    pub auto_fstrim: Option<bool>,
+}
+
+#[derive(Clone, Debug, Deserialize)]
 pub struct Config {
     pub user: UserConfig,
     pub wifi: WifiConfig,
     pub ui: UiConfig,
+    pub system: Option<SystemConfig>,
 }
 
 #[cfg(test)]
@@ -64,6 +70,9 @@ mod tests {
           default_size=50
           debounce_delay=100
           debounce_min_hold=40
+
+          [system]
+          auto_fstrim=true
 
           [user]
           name="piso"

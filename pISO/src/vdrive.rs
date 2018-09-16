@@ -1,5 +1,6 @@
 use action;
 use bitmap;
+use config;
 use controller;
 use displaymanager::{DisplayManager, Position, Widget, Window, WindowId};
 use error::{ErrorKind, Result, ResultExt};
@@ -14,6 +15,7 @@ use state;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
+use std::thread;
 
 const VDRIVE_MOUNT_ROOT: &str = "/mnt";
 const ISO_FOLDER: &str = "ISOS";
@@ -53,6 +55,7 @@ pub struct VirtualDrive {
     pub volume: lvm::LogicalVolume,
     pub window: WindowId,
     pub persist: PersistVDriveState,
+    pub config: config::Config,
 }
 
 impl VirtualDrive {
@@ -60,6 +63,7 @@ impl VirtualDrive {
         disp: &mut DisplayManager,
         usb: Arc<Mutex<usb::UsbGadget>>,
         volume: lvm::LogicalVolume,
+        config: &config::Config,
     ) -> Result<VirtualDrive> {
         let our_window = disp.add_child(Position::Normal)?;
         Ok(VirtualDrive {
@@ -68,6 +72,7 @@ impl VirtualDrive {
             usb: usb,
             volume: volume,
             persist: PersistVDriveState::default(),
+            config: config.clone(),
         })
     }
 
@@ -314,7 +319,25 @@ impl state::Stateful for VirtualDrive {
         if self.persist.external_mount {
             self.mount_external()
         } else {
-            self.mount_internal(disp)
+            self.mount_internal(disp)?;
+            if *self.config
+                .system
+                .as_ref()
+                .map(|s| s.auto_fstrim.as_ref().unwrap_or(&false))
+                .unwrap_or(&false)
+            {
+                match self.state {
+                    MountState::Internal(ref mount) => {
+                        for path in mount.part_mount_paths.iter().cloned() {
+                            thread::spawn(move || {
+                                let _ = utils::run_check_output("fstrim", &[path]);
+                            });
+                        }
+                    }
+                    _ => (),
+                }
+            }
+            Ok(())
         }
     }
 }
