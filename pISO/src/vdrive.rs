@@ -138,7 +138,7 @@ impl VirtualDrive {
         P1: AsRef<Path>,
         P2: AsRef<Path>,
     {
-        let mounters = &["mount", "mount.exfat"];
+        let mounters = &["mount", "mount.exfat", "mount.ntfs-3g"];
         for mounter in mounters {
             let fsmount = utils::run_check_output(mounter, &[device.as_ref(), target.as_ref()]);
             if fsmount.is_ok() {
@@ -189,16 +189,19 @@ impl VirtualDrive {
 
                         let mount_point = Path::new(VDRIVE_MOUNT_ROOT).join(mount_folder_name);
                         fs::create_dir_all(&mount_point)?;
-                        if self.mount_partition(&entry.path(), &mount_point).is_ok() {
-                            mounted_partitions.push(mount_point.to_path_buf());
+                        match self.mount_partition(&entry.path(), &mount_point) {
+                            Ok(_) => {
+                                mounted_partitions.push(mount_point.to_path_buf());
 
-                            let isopath = mount_point.join(ISO_FOLDER);
-                            if isopath.exists() {
-                                for iso in fs::read_dir(isopath)? {
-                                    let iso = iso?;
-                                    isos.push(iso::Iso::new(disp, self.usb.clone(), iso.path())?);
+                                let isopath = mount_point.join(ISO_FOLDER);
+                                if isopath.exists() {
+                                    for iso in fs::read_dir(isopath)? {
+                                        let iso = iso?;
+                                        isos.push(iso::Iso::new(disp, self.usb.clone(), iso.path())?);
+                                    }
                                 }
-                            }
+                            },
+                            Err(e) => println!("An error occured while mounting: {}", e)
                         }
                     }
                 }
