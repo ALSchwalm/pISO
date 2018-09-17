@@ -337,13 +337,17 @@ impl DriveFormat {
                 utils::run_check_output("mkfs.ntfs", &["-f", &first_part_path])?;
                 utils::run_check_output("ntfslabel", &[&first_part_path, name])?;
             }
-            InitialDriveFormat::MacOs | InitialDriveFormat::Universal => {
+            InitialDriveFormat::MacOs => {
                 utils::run_check_output("mkfs.exfat", &[&first_part_path])?;
                 utils::run_check_output("exfatlabel", &[&first_part_path, name])?;
             }
             InitialDriveFormat::Linux => {
                 utils::run_check_output("mkfs.ext3", &[&first_part_path])?;
                 utils::run_check_output("e2label", &[&first_part_path, name])?;
+            }
+            InitialDriveFormat::Universal => {
+                utils::run_check_output("mkfs.msdos", &["-F", "32", "-I", &first_part_path])?;
+                utils::run_check_output("dosfslabel", &[&first_part_path, name])?;
             }
         };
 
