@@ -295,8 +295,7 @@ impl DriveFormat {
         // First create the partition table
         match *format {
             InitialDriveFormat::Windows
-            | InitialDriveFormat::MacOs
-            | InitialDriveFormat::Universal => {
+            | InitialDriveFormat::MacOs => {
                 utils::run_check_output(
                     "parted",
                     &[
@@ -315,6 +314,17 @@ impl DriveFormat {
                         &volume.path.to_string_lossy(),
                         "mklabel msdos",
                         "mkpart primary ext3 0% 100%",
+                    ],
+                )?;
+            }
+            InitialDriveFormat::Universal => {
+                utils::run_check_output(
+                    "parted",
+                    &[
+                        "--script",
+                        &volume.path.to_string_lossy(),
+                        "mklabel msdos",
+                        "mkpart primary fat32 0% 100%",
                     ],
                 )?;
             }
