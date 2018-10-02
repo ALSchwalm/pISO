@@ -1,4 +1,5 @@
-use error::{Result, ResultExt};
+use lvm;
+use error::{ErrorKind, Result, ResultExt};
 use std::ffi::OsStr;
 use std::fmt::Debug;
 use std::process::Command;
@@ -43,4 +44,14 @@ where
         thread::sleep(wait);
     }
     Err(format!("timeout while waiting for {}", path.as_ref().display()).into())
+}
+
+pub fn next_available_drive_name(vg: &lvm::VolumeGroup) -> Result<String> {
+    let volumes = vg.volumes()?;
+    for num in 1.. {
+        if volumes.iter().all(|vol| vol.name != format!("Drive{}", num)) {
+            return Ok(format!("Drive{}", num))
+        }
+    }
+    Err(ErrorKind::Msg("Failed to find valid drive number".into()).into())
 }
