@@ -1,5 +1,6 @@
-use lvm;
+use config;
 use error::{ErrorKind, Result, ResultExt};
+use lvm;
 use std::ffi::OsStr;
 use std::fmt::Debug;
 use std::process::Command;
@@ -49,9 +50,23 @@ where
 pub fn next_available_drive_name(vg: &lvm::VolumeGroup) -> Result<String> {
     let volumes = vg.volumes()?;
     for num in 1.. {
-        if volumes.iter().all(|vol| vol.name != format!("Drive{}", num)) {
-            return Ok(format!("Drive{}", num))
+        if volumes
+            .iter()
+            .all(|vol| vol.name != format!("Drive{}", num))
+        {
+            return Ok(format!("Drive{}", num));
         }
     }
     Err(ErrorKind::Msg("Failed to find valid drive number".into()).into())
+}
+
+pub fn translate_drive_name(name: &str, config: &config::Config) -> String {
+    for drive in config.drive.as_ref().unwrap_or(&vec![]).iter() {
+        if drive.name == name {
+            return drive.newname.clone();
+        } else if format!("{}-backup", drive.name) == name {
+            return format!("{}-backup", drive.newname.clone());
+        }
+    }
+    name.into()
 }

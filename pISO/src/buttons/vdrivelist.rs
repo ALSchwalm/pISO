@@ -1,6 +1,7 @@
 use action;
 use bitmap;
 use buttons::back;
+use config;
 use controller;
 use display;
 use displaymanager::{DisplayManager, Position, Widget, Window, WindowId};
@@ -10,6 +11,7 @@ use input;
 use lvm;
 use render;
 use state;
+use utils;
 use vdrive;
 
 struct DriveListItem {
@@ -19,6 +21,7 @@ struct DriveListItem {
     name: String,
     autoclose: bool,
     listwindow: WindowId,
+    config: config::Config,
 }
 
 impl DriveListItem {
@@ -29,6 +32,7 @@ impl DriveListItem {
         ismarked: fn(vdrive::PersistVDriveState) -> bool,
         listwindow: WindowId,
         autoclose: bool,
+        config: config::Config,
     ) -> error::Result<DriveListItem> {
         let our_window = disp.add_child(Position::Normal)?;
         Ok(DriveListItem {
@@ -38,6 +42,7 @@ impl DriveListItem {
             name: name,
             listwindow: listwindow,
             autoclose: autoclose,
+            config: config,
         })
     }
 }
@@ -45,7 +50,8 @@ impl DriveListItem {
 impl render::Render for DriveListItem {
     fn render(&self, _manager: &DisplayManager, window: &Window) -> error::Result<bitmap::Bitmap> {
         let mut base = bitmap::Bitmap::new(10, 1);
-        base.blit(&font::render_text(&self.name), (12, 0));
+        let name = utils::translate_drive_name(&self.name, &self.config);
+        base.blit(&font::render_text(name), (12, 0));
         if window.focus {
             base.blit(&bitmap::Bitmap::from_slice(font::ARROW), (0, 0));
         }
@@ -101,6 +107,7 @@ impl DriveListSelector {
         onselect: fn(&str) -> action::Action,
         ismarked: fn(vdrive::PersistVDriveState) -> bool,
         autoclose: bool,
+        config: &config::Config,
     ) -> error::Result<DriveListSelector> {
         let our_window = disp.add_child(Position::Fixed(0, 0))?;
         let mut drives = vec![];
@@ -112,6 +119,7 @@ impl DriveListSelector {
                 ismarked.clone(),
                 parent,
                 autoclose,
+                config.clone(),
             )?)
         }
         let back = back::BackButton::new(disp, action::Action::CloseVDriveList(parent))?;
@@ -181,6 +189,7 @@ pub struct DriveList {
     onselect: fn(&str) -> action::Action,
     ismarked: fn(vdrive::PersistVDriveState) -> bool,
     autoclose: bool,
+    config: config::Config,
 }
 
 impl DriveList {
@@ -191,6 +200,7 @@ impl DriveList {
         onselect: fn(&str) -> action::Action,
         ismarked: fn(vdrive::PersistVDriveState) -> bool,
         autoclose: bool,
+        config: config::Config,
     ) -> error::Result<DriveList> {
         let our_window = disp.add_child(Position::Normal)?;
         Ok(DriveList {
@@ -201,6 +211,7 @@ impl DriveList {
             onselect: onselect,
             ismarked: ismarked,
             autoclose: autoclose,
+            config: config,
         })
     }
 }
@@ -243,6 +254,7 @@ impl input::Input for DriveList {
                     self.onselect.clone(),
                     self.ismarked.clone(),
                     self.autoclose,
+                    &self.config,
                 )?);
                 Ok((true, vec![]))
             }

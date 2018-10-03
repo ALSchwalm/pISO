@@ -270,7 +270,11 @@ impl render::Render for VirtualDrive {
     fn render(&self, _manager: &DisplayManager, window: &Window) -> Result<bitmap::Bitmap> {
         let mut base = bitmap::Bitmap::new(10, 1);
         let short_size = self.size() as f64 / (1024 * 1024 * 1024) as f64;
-        let label = format!("{} ({:.1}GB)", self.name(), short_size);
+
+        // Render the 'newname' from the config
+        let render_name = utils::translate_drive_name(&self.name(), &self.config);
+
+        let label = format!("{} ({:.1}GB)", render_name, short_size);
         base.blit(&font::render_text(label), (12, 0));
         match self.state {
             MountState::External(_) => {

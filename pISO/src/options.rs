@@ -1,6 +1,7 @@
 use action;
 use buttons;
 use bitmap;
+use config;
 use controller;
 use displaymanager::{DisplayManager, Position, Widget, Window, WindowId};
 use error;
@@ -20,7 +21,11 @@ pub struct Options {
 }
 
 impl Options {
-    pub fn new(disp: &mut DisplayManager, vg: &lvm::VolumeGroup) -> error::Result<Options> {
+    pub fn new(
+        disp: &mut DisplayManager,
+        vg: &lvm::VolumeGroup,
+        config: &config::Config,
+    ) -> error::Result<Options> {
         let our_window = disp.add_child(Position::Normal)?;
 
         let readonly = buttons::vdrivelist::DriveList::new(
@@ -30,6 +35,7 @@ impl Options {
             |drive| action::Action::ToggleDriveReadOnly(drive.to_string()),
             |state| state.readonly,
             false,
+            config.clone(),
         )?;
 
         let removable = buttons::vdrivelist::DriveList::new(
@@ -39,6 +45,7 @@ impl Options {
             |drive| action::Action::ToggleDriveNonRemovable(drive.to_string()),
             |state| !state.removable,
             false,
+            config.clone(),
         )?;
 
         let delete = buttons::vdrivelist::DriveList::new(
@@ -48,6 +55,7 @@ impl Options {
             |drive| action::Action::DeleteDrive(drive.to_string()),
             |_| false,
             true,
+            config.clone(),
         )?;
 
         let snapshot = buttons::vdrivelist::DriveList::new(
@@ -57,6 +65,7 @@ impl Options {
             |drive| action::Action::SnapshotDrive(drive.to_string()),
             |_| false,
             true,
+            config.clone(),
         )?;
 
         Ok(Options {

@@ -28,6 +28,12 @@ pub struct UserConfig {
 }
 
 #[derive(Clone, Debug, Deserialize)]
+pub struct DriveConfig {
+    pub name: String,
+    pub newname: String,
+}
+
+#[derive(Clone, Debug, Deserialize)]
 pub struct WifiApConfig {
     pub ssid: String,
     pub password: String,
@@ -55,6 +61,7 @@ pub struct Config {
     pub user: UserConfig,
     pub wifi: WifiConfig,
     pub ui: UiConfig,
+    pub drive: Option<Vec<DriveConfig>>,
     pub system: Option<SystemConfig>,
 }
 
@@ -77,6 +84,14 @@ mod tests {
           [user]
           name="piso"
           password="password"
+
+          [[drive]]
+          name="Drive1"
+          newname="My Name"
+
+          [[drive]]
+          name="Drive2"
+          newname="Other Drive"
 
           [[wifi.client]]
           ssid="home-ap"

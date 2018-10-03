@@ -45,7 +45,7 @@ impl PIso {
         let ndrive = newdrive::NewDrive::new(disp, usb.clone(), vg.clone(), config.clone())?;
         let stats = stats::Stats::new(disp, vg.clone())?;
         let wifi = wifi::WifiMenu::new(disp, config)?;
-        let options = options::Options::new(disp, &vg)?;
+        let options = options::Options::new(disp, &vg, config)?;
 
         if drives.len() > 0 {
             // Focus the first drive

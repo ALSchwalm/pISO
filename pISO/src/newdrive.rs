@@ -196,7 +196,12 @@ impl input::Input for DriveSize {
                 Ok((true, vec![]))
             }
             action::Action::OpenFormatMenu => {
-                let menu = DriveFormat::new(disp, self.vg.clone(), self.current_size())?;
+                let menu = DriveFormat::new(
+                    disp,
+                    self.vg.clone(),
+                    self.current_size(),
+                    self.config.clone(),
+                )?;
                 disp.shift_focus(&menu);
                 self.state = DriveSizeState::Selected(menu);
                 Ok((true, vec![]))
@@ -252,6 +257,7 @@ struct DriveFormat {
     size: u64,
     selected: InitialDriveFormat,
     state: DriveFormatState,
+    config: config::Config,
 }
 
 impl DriveFormat {
@@ -259,6 +265,7 @@ impl DriveFormat {
         disp: &mut DisplayManager,
         vg: lvm::VolumeGroup,
         size: u64,
+        config: config::Config,
     ) -> error::Result<DriveFormat> {
         Ok(DriveFormat {
             windowid: disp.add_child(Position::Fixed(0, 0))?,
@@ -266,6 +273,7 @@ impl DriveFormat {
             size: size,
             selected: InitialDriveFormat::Windows,
             state: DriveFormatState::Selecting,
+            config: config,
         })
     }
 
@@ -294,8 +302,7 @@ impl DriveFormat {
     ) -> error::Result<()> {
         // First create the partition table
         match *format {
-            InitialDriveFormat::Windows
-            | InitialDriveFormat::MacOs => {
+            InitialDriveFormat::Windows | InitialDriveFormat::MacOs => {
                 utils::run_check_output(
                     "parted",
                     &[
@@ -428,7 +435,9 @@ impl input::Input for DriveFormat {
                     let name = utils::next_available_drive_name(&self.vg)?;
                     let mut volume = self.vg.create_volume(&name, self.size)?;
 
-                    DriveFormat::format_volume(&mut volume, &self.selected, &name)?;
+                    let part_name = utils::translate_drive_name(&name, &self.config);
+
+                    DriveFormat::format_volume(&mut volume, &self.selected, &part_name)?;
 
                     self.state = DriveFormatState::Done;
                     return Ok((
