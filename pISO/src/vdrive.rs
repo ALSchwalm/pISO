@@ -197,6 +197,13 @@ impl VirtualDrive {
                                 if isopath.exists() {
                                     for iso in fs::read_dir(isopath)? {
                                         let iso = iso?;
+                                        if iso.file_name()
+                                            .into_string()
+                                            .map_err(|_| ErrorKind::Msg("Invalid file name".into()))?
+                                            .starts_with(".")
+                                        {
+                                            continue;
+                                        }
                                         isos.push(iso::Iso::new(
                                             disp,
                                             self.usb.clone(),
