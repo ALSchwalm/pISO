@@ -40,8 +40,9 @@ else
 endif
 	git submodule > buildroot/output/.cache-version
 	zip -j sdcard.img.zip buildroot/output/images/sdcard.img
-	cp buildroot/output/images/rootfs.squashfs .
-
+	zip -j update.zip buildroot/output/images/zImage \
+	                  buildroot/output/images/rootfs.squashfs \
+	                  buildroot/output/images/initramfs.cpio.lzo
 .PHONY: update-config
 update-config:
 	cd "$(CURDIR)/buildroot" && cp "configs/piso_defconfig" ".config"
