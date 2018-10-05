@@ -185,7 +185,8 @@ impl VirtualDrive {
                             "Failed to determine partition number".into(),
                         ))?;
 
-                        let mount_folder_name = format!("{}p{}", self.volume.name, part_num);
+                        let part_name = utils::translate_drive_name(&self.name(), &self.config);
+                        let mount_folder_name = format!("{} (partition {})", part_name, part_num);
 
                         let mount_point = Path::new(VDRIVE_MOUNT_ROOT).join(mount_folder_name);
                         fs::create_dir_all(&mount_point)?;
