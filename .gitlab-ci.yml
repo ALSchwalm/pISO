@@ -30,7 +30,7 @@ make-image:
     name: "sdimage-$CI_COMMIT_SHA"
     paths:
     - sdcard.img.zip
-    - rootfs.squashfs
+    - update.zip
     - build.log
     when: always
   cache:
