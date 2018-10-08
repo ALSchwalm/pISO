@@ -33,7 +33,3 @@ make-image:
     - update.zip
     - build.log
     when: always
-  cache:
-    key: "$CI_JOB_NAME-$CI_COMMIT_REF_SLUG"
-    paths:
-      - buildroot/output/
