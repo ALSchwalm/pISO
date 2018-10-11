@@ -115,7 +115,7 @@ fn run(manager: &mut displaymanager::DisplayManager) -> error::Result<()> {
             manufacturer: "Adam Schwalm & James Tate",
             product: "pISO",
 
-            max_power: "250",
+            max_power: "500",
             configuration: "Config 1",
         },
     )?));
