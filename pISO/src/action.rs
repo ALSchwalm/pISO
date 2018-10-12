@@ -36,4 +36,7 @@ pub enum Action {
     ToggleDriveNonRemovable(String),
 
     FlipDisplay,
+
+    OpenVersion,
+    CloseVersion
 }

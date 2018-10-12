@@ -10,6 +10,7 @@ use input;
 use lvm;
 use render;
 use state;
+use version;
 
 pub struct Options {
     window: WindowId,
@@ -18,6 +19,7 @@ pub struct Options {
     removable: buttons::vdrivelist::DriveList,
     delete: buttons::vdrivelist::DriveList,
     snapshot: buttons::vdrivelist::DriveList,
+    version: version::VersionMenu
 }
 
 impl Options {
@@ -68,6 +70,8 @@ impl Options {
             config.clone(),
         )?;
 
+        let version = version::VersionMenu::new(disp)?;
+
         Ok(Options {
             window: our_window,
             open: false,
@@ -75,6 +79,7 @@ impl Options {
             removable: removable,
             delete: delete,
             snapshot: snapshot,
+            version: version
         })
     }
 }
@@ -115,6 +120,7 @@ impl Widget for Options {
                 &mut self.removable as &mut Widget,
                 &mut self.snapshot as &mut Widget,
                 &mut self.delete as &mut Widget,
+                &mut self.version as &mut Widget
             ]
         } else {
             vec![]
@@ -128,6 +134,7 @@ impl Widget for Options {
                 &self.removable as &Widget,
                 &self.snapshot as &Widget,
                 &self.delete as &Widget,
+                &self.version as &Widget
             ]
         } else {
             vec![]
