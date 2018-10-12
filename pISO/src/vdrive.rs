@@ -240,6 +240,7 @@ impl VirtualDrive {
                 }
                 for part in info.part_mount_paths.iter() {
                     utils::run_check_output("umount", &[&part])?;
+                    fs::remove_dir_all(&part)?;
                 }
                 utils::run_check_output("losetup", &["-d", &info.loopback_path.to_string_lossy()])?;
             }
