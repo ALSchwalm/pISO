@@ -107,17 +107,44 @@ impl PIso {
         Ok(drives)
     }
 
-    fn add_drive(
-        &mut self,
-        disp: &mut DisplayManager,
+    fn add_drive<'a, 'b>(
+        &'a mut self,
+        disp: &'b mut DisplayManager,
         volume: lvm::LogicalVolume,
-    ) -> Result<&vdrive::VirtualDrive> {
-        let vdrive = vdrive::VirtualDrive::new(disp, self.usb.clone(), volume, &self.config)?;
+    ) -> Result<&'a mut vdrive::VirtualDrive> {
+        let mut vdrive = vdrive::VirtualDrive::new(disp, self.usb.clone(), volume, &self.config)?;
+        vdrive.mount_internal(disp)?;
         self.drives.push(vdrive);
 
         Ok(self.drives
-            .last()
+            .last_mut()
             .expect("vdrive was somehow empty after push"))
+    }
+
+    fn share_drive(drive: &mut vdrive::VirtualDrive, remove: bool) -> Result<Vec<action::Action>> {
+        match drive.state {
+            vdrive::MountState::Unmounted | vdrive::MountState::External(_) => {
+                if remove {
+                    Ok(vec![])
+                } else {
+                    Err("Cannot share drive when not mounted internal".into())
+                }
+            }
+            vdrive::MountState::Internal(ref info) => Ok(info.part_mount_paths
+                .iter()
+                .map(|path| {
+                    let name = path.file_name()
+                        .expect("Partition has no name")
+                        .to_string_lossy()
+                        .into_owned();
+                    if remove {
+                        action::Action::SmbRemoveShare(name)
+                    } else {
+                        action::Action::SmbSharePartition(name)
+                    }
+                })
+                .collect()),
+        }
     }
 }
 
@@ -145,23 +172,27 @@ impl input::Input for PIso {
                 Ok((true, vec![]))
             }
             action::Action::CreateDrive(ref volume) => {
-                self.add_drive(disp, volume.clone())?;
-                Ok((true, vec![]))
+                let drive = self.add_drive(disp, volume.clone())?;
+                let actions = PIso::share_drive(drive, false)?;
+                Ok((true, actions))
             }
             action::Action::SnapshotDrive(ref name) => {
                 let report = self.vg.snapshot_volume(name)?;
-                self.add_drive(disp, report)?;
-                Ok((true, vec![]))
+                let drive = self.add_drive(disp, report)?;
+                let actions = PIso::share_drive(drive, false)?;
+                Ok((true, actions))
             }
             action::Action::DeleteDrive(ref name) => {
+                let mut actions = vec![];
                 if let Some(ref mut drive) =
                     self.drives.iter_mut().find(|drive| drive.name() == name)
                 {
+                    actions = PIso::share_drive(drive, true)?;
                     drive.unmount()?;
                 }
                 self.drives.retain(|drive| drive.name() != name);
                 self.vg.delete_volume(&name)?;
-                Ok((true, vec![]))
+                Ok((true, actions))
             }
             _ => Ok((false, vec![])),
         }

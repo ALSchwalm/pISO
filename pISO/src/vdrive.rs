@@ -152,7 +152,10 @@ impl VirtualDrive {
         ).into())
     }
 
-    pub fn mount_internal(&mut self, disp: &mut DisplayManager) -> Result<()> {
+    pub fn mount_internal<'a, 'b>(
+        &'a mut self,
+        disp: &'b mut DisplayManager,
+    ) -> Result<&'a MountInfo> {
         match self.state {
             MountState::Unmounted => {
                 let volume_path = &self.volume.path.to_string_lossy();
@@ -222,9 +225,12 @@ impl VirtualDrive {
                     isos: isos,
                     loopback_path: loopback_path.to_path_buf(),
                 });
-                Ok(())
+                match &self.state {
+                    &MountState::Internal(ref info) => Ok(info),
+                    _ => unreachable!(),
+                }
             }
-            MountState::Internal(_) => Ok(()),
+            MountState::Internal(ref state) => Ok(state),
             MountState::External(_) => {
                 Err("Attempt to mount_internal while mounted external".into())
             }
@@ -262,7 +268,8 @@ impl VirtualDrive {
             }
             MountState::External(_) => {
                 self.unmount_external()?;
-                self.mount_internal(disp)
+                self.mount_internal(disp)?;
+                Ok(())
             }
         }
     }

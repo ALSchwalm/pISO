@@ -22,7 +22,6 @@ const HOSTAPD_TMP_CONF: &'static str = "/tmp/hostapd.conf";
 const WPA_SUPPLICANT_CONF: &'static str = "/etc/wpa_supplicant.conf";
 const WPA_SUPPLICANT_TMP_CONF: &'static str = "/tmp/wpa_supplicant.conf";
 const SMB_CONF: &'static str = "/etc/samba/smb.conf";
-const SMB_TMP_CONF: &'static str = "/tmp/smb.conf";
 const PURE_FTPD_CONF: &'static str = "/etc/pure-ftpd.conf";
 
 #[derive(PartialEq)]
@@ -44,6 +43,10 @@ impl WifiManager {
             config: config,
             state: WifiState::Uninitialized,
         }))
+    }
+
+    fn is_enabled(&self) -> bool {
+        self.state != WifiState::Uninitialized
     }
 
     fn enable_wifi(&mut self) -> error::Result<()> {
@@ -87,13 +90,55 @@ impl WifiManager {
             &[&self.config.user.name, &self.config.user.password],
         )?;
 
-        fs::copy(SMB_CONF, SMB_TMP_CONF)?;
-        utils::run_check_output("smbd", &["-D", "-s", SMB_TMP_CONF])?;
-        utils::run_check_output("nmbd", &["-D", "-s", SMB_TMP_CONF])?;
+        // Setup usershare folder
+        fs::create_dir_all("/var/lib/samba/usershares")?;
+        utils::run_check_output("chmod", &["1770", "/var/lib/samba/usershares"])?;
+
+        utils::run_check_output("smbd", &["-D", "-s", SMB_CONF])?;
+        utils::run_check_output("nmbd", &["-D", "-s", SMB_CONF])?;
 
         utils::run_check_output("pure-ftpd", &[PURE_FTPD_CONF])?;
 
         self.state = WifiState::Inactive;
+
+        for entry in fs::read_dir("/mnt")? {
+            let entry = entry?;
+            let path = entry.path();
+            let name = path.file_name()
+                .expect("Partition has no name")
+                .to_string_lossy()
+                .into_owned();
+            self.share_mounted_partition(&name)?;
+        }
+
+        Ok(())
+    }
+
+    fn share_mounted_partition(&mut self, name: &str) -> error::Result<()> {
+        if !self.is_enabled() {
+            return Ok(());
+        }
+
+        let path = "/user-mnt/".to_owned() + name;
+        utils::run_check_output(
+            "net",
+            &[
+                "usershare",
+                "add",
+                name,
+                &path,
+                "",
+                &format!("piso\\{}:F", &self.config.user.name),
+            ],
+        )?;
+        Ok(())
+    }
+
+    fn remove_shared_partition(&mut self, name: &str) -> error::Result<()> {
+        if !self.is_enabled() {
+            return Ok(());
+        }
+        utils::run_check_output("net", &["usershare", "delete", &name])?;
         Ok(())
     }
 
@@ -260,6 +305,14 @@ impl input::Input for WifiMenu {
             action::Action::CloseWifiMenu => {
                 self.state = WifiMenuState::Closed;
                 disp.shift_focus(self);
+                Ok((true, vec![]))
+            }
+            action::Action::SmbSharePartition(ref name) => {
+                self.manager.lock()?.share_mounted_partition(name)?;
+                Ok((true, vec![]))
+            }
+            action::Action::SmbRemoveShare(ref name) => {
+                self.manager.lock()?.remove_shared_partition(name)?;
                 Ok((true, vec![]))
             }
             _ => Ok((false, vec![])),

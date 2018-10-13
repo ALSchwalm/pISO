@@ -1,6 +1,7 @@
 use action;
 use bitmap;
 use controller;
+use display;
 use displaymanager::{DisplayManager, Position, Widget, Window, WindowId};
 use error;
 use font;
@@ -56,14 +57,14 @@ enum VersionState {
 
 pub struct VersionMenu {
     pub window: WindowId,
-    state: VersionState
+    state: VersionState,
 }
 
 impl VersionMenu {
     pub fn new(disp: &mut DisplayManager) -> error::Result<VersionMenu> {
         Ok(VersionMenu {
             window: disp.add_child(Position::Normal)?,
-            state: VersionState::Unselected
+            state: VersionState::Unselected,
         })
     }
 }
@@ -97,8 +98,7 @@ impl input::Input for VersionMenu {
     ) -> error::Result<(bool, Vec<action::Action>)> {
         match *action {
             action::Action::OpenVersion => {
-                let menu =
-                    OpenVersionMenu::new(disp)?;
+                let menu = OpenVersionMenu::new(disp)?;
                 disp.shift_focus(&menu);
                 self.state = VersionState::Selected(menu);
                 Ok((true, vec![]))
@@ -135,10 +135,8 @@ impl Widget for VersionMenu {
     }
 }
 
-
-
 struct OpenVersionMenu {
-    pub window: WindowId
+    pub window: WindowId,
 }
 
 impl OpenVersionMenu {

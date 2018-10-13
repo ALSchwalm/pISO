@@ -38,5 +38,8 @@ pub enum Action {
     FlipDisplay,
 
     OpenVersion,
-    CloseVersion
+    CloseVersion,
+
+    SmbSharePartition(String),
+    SmbRemoveShare(String),
 }
