@@ -123,7 +123,7 @@ enum DriveSizeState {
 
 struct DriveSize {
     pub window: WindowId,
-    pub current_percent: u32,
+    pub current_percent: f32,
     pub usb: Arc<Mutex<usb::UsbGadget>>,
     vg: lvm::VolumeGroup,
     state: DriveSizeState,
@@ -149,7 +149,7 @@ impl DriveSize {
 
     fn current_size(&self) -> u64 {
         let bytes = self.vg.report().expect("Failed to get vg report").vg_size as f32
-            * (self.current_percent as f32 / 100.0);
+            * (self.current_percent / 100.0);
         ((bytes as u64 + 512 - 1) / 512) * 512
     }
 }
