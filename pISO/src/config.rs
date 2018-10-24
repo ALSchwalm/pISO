@@ -19,6 +19,8 @@ pub struct UiConfig {
 
     #[serde(deserialize_with = "from_millis")]
     pub button_long_press: time::Duration,
+
+    pub sort_drives: Option<bool>,
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -77,6 +79,7 @@ mod tests {
           default_size=50
           min_button_press=300
           button_long_press=2000
+          sort_drives=true
 
           [system]
           auto_fstrim=true
