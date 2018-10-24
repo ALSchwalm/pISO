@@ -203,10 +203,22 @@ impl state::State for PIso {}
 
 impl Widget for PIso {
     fn mut_children(&mut self) -> Vec<&mut Widget> {
-        let mut children = self.drives
-            .iter_mut()
+        let mut ordered_children = self.drives
+                .iter_mut()
+                .collect::<Vec<&mut vdrive::VirtualDrive>>();
+
+        match self.config.ui.sort_drives {
+            Some(true) => ordered_children.sort_by(|drive1, drive2| {
+                drive1.volume.name.cmp(&drive2.volume.name)
+            }),
+            _ => ()
+        }
+
+        let mut children = ordered_children
+            .into_iter()
             .map(|vdrive| vdrive as &mut Widget)
             .collect::<Vec<&mut Widget>>();
+
         children.push(&mut self.newdrive as &mut Widget);
         if self.version.has_wifi() {
             children.push(&mut self.wifi as &mut Widget);
@@ -217,10 +229,23 @@ impl Widget for PIso {
     }
 
     fn children(&self) -> Vec<&Widget> {
-        let mut children = self.drives
+        let mut ordered_children = self.drives
             .iter()
+            .collect::<Vec<&vdrive::VirtualDrive>>();
+
+        match self.config.ui.sort_drives {
+            Some(true) => ordered_children.sort_by(|drive1, drive2| {
+                utils::translate_drive_name(&drive1.volume.name, &self.config).cmp(
+                    &utils::translate_drive_name(&drive2.volume.name, &self.config))
+            }),
+            _ => ()
+        }
+
+        let mut children = ordered_children
+            .into_iter()
             .map(|vdrive| vdrive as &Widget)
             .collect::<Vec<&Widget>>();
+
         children.push(&self.newdrive as &Widget);
         if self.version.has_wifi() {
             children.push(&self.wifi as &Widget);
