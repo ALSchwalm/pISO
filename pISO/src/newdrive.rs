@@ -192,7 +192,9 @@ impl input::Input for DriveSize {
                 Ok((true, vec![]))
             }
             action::Action::DecDriveSize => {
-                self.current_percent -= self.config.ui.size_step;
+                if self.current_percent - self.config.ui.size_step > 0.0 {
+                    self.current_percent -= self.config.ui.size_step;
+                }
                 Ok((true, vec![]))
             }
             action::Action::OpenFormatMenu => {
