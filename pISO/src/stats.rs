@@ -28,7 +28,7 @@ impl render::Render for Stats {
     fn render(&self, _manager: &DisplayManager, _window: &Window) -> error::Result<bitmap::Bitmap> {
         let mut base = bitmap::Bitmap::new(0, 0);
         let percent_free = 100.0 - self.vg.pool()?.data_percent;
-        let contents = font::render_text(format!("{}% Free", percent_free));
+        let contents = font::render_text(format!("{}% Free", percent_free as u64));
         base.blit(&contents, (0, 0));
         Ok(base.rotate(bitmap::Direction::Left))
     }
