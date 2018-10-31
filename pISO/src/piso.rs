@@ -122,6 +122,9 @@ impl PIso {
     }
 
     fn share_drive(drive: &mut vdrive::VirtualDrive, remove: bool) -> Result<Vec<action::Action>> {
+        if !version::read_version()?.has_wifi() {
+            return Ok(vec![]);
+        }
         match drive.state {
             vdrive::MountState::Unmounted | vdrive::MountState::External(_) => {
                 if remove {
