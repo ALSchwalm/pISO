@@ -193,6 +193,18 @@ impl VirtualDrive {
 
                         let mount_point = Path::new(VDRIVE_MOUNT_ROOT).join(mount_folder_name);
                         fs::create_dir_all(&mount_point)?;
+
+                        utils::run_check_output(
+                            "bindfs",
+                            &[
+                                "--multithreaded",
+                                "-u",
+                                &self.config.user.name,
+                                &mount_point.to_string_lossy(),
+                                &mount_point.to_string_lossy()
+                            ],
+                        )?;
+
                         match self.mount_partition(&entry.path(), &mount_point) {
                             Ok(_) => {
                                 mounted_partitions.push(mount_point.to_path_buf());
@@ -245,7 +257,10 @@ impl VirtualDrive {
                     iso.unmount()?;
                 }
                 for part in info.part_mount_paths.iter() {
+                    // Once for the bindfs, then for the normal mount
                     utils::run_check_output("umount", &[&part])?;
+                    utils::run_check_output("umount", &[&part])?;
+
                     fs::remove_dir_all(&part)?;
                 }
                 utils::run_check_output("losetup", &["-d", &info.loopback_path.to_string_lossy()])?;

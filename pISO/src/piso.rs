@@ -81,16 +81,6 @@ impl PIso {
             &[&config.user.name, &config.user.password],
         )?;
         fs::create_dir("/user-mnt")?;
-        utils::run_check_output(
-            "bindfs",
-            &[
-                "--multithreaded",
-                "-u",
-                &config.user.name,
-                "/mnt",
-                "/user-mnt",
-            ],
-        )?;
         Ok(())
     }
 
