@@ -40,13 +40,25 @@ impl PIso {
     ) -> Result<PIso> {
         let window = disp.add_child(Position::Fixed(0, 0))?;
 
+        println!("Constructing VolumeGroup");
         let vg = lvm::VolumeGroup::from_path("/dev/VolGroup00")?;
+
+        println!("Building drives from VolumeGroup");
         let drives = Self::build_drives_from_vg(disp, &vg, &usb, config)?;
+
+        println!("Building NewDrive menu item");
         let ndrive = newdrive::NewDrive::new(disp, usb.clone(), vg.clone(), config.clone())?;
+
+        println!("Building Stats menu item");
         let stats = stats::Stats::new(disp, vg.clone())?;
+
+        println!("Building WiFi menu item");
         let wifi = wifi::WifiMenu::new(disp, config)?;
+
+        println!("Building Options menu item");
         let options = options::Options::new(disp, &vg, config)?;
 
+        println!("Focusing");
         if drives.len() > 0 {
             // Focus the first drive
             drives.iter().next().map(|drive| {
@@ -59,8 +71,10 @@ impl PIso {
         // Add the user account if it doesn't exit and ensure the password
         // is what is expected. This can take a little while, so do this
         // async.
+        println!("Configuring user");
         PIso::configure_user(config)?;
 
+        println!("Finishing pISO construction");
         Ok(PIso {
             config: config.clone(),
             drives: drives,
@@ -76,11 +90,14 @@ impl PIso {
     }
 
     fn configure_user(config: &config::Config) -> Result<()> {
+        println!("  Adding user");
         utils::run_check_output(
             "/opt/piso_scripts/add_user.sh",
             &[&config.user.name, &config.user.password],
         )?;
         fs::create_dir("/user-mnt")?;
+
+        println!("  Doing bindfs");
         utils::run_check_output(
             "bindfs",
             &[
